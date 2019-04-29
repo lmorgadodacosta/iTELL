@@ -159,6 +159,12 @@ def file2db():
 def index():
     return render_template('welcome.html')
 
+@app.route('/team', methods=['GET', 'POST'])
+def team():
+    return render_template('team.html')
+
+
+
 @app.route("/useradmin",methods=["GET"])
 @login_required(role=99, group='admin')
 def useradmin():

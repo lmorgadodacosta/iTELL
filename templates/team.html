@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<h4>Team</h4>
+
+<p>Joanna Ut-Seong Sio is a linguist and a comedian (stand-up and improvisation). She received her PhD in Leiden University Centre for Linguistics (LUCL) in the Netherlands. She has worked in Hong Kong and Singapore and is currently working at Palacký University, Olomouc, Czech Republic. She is interested in verbal arts and the use of improvisation for communication training.</p>
+
+
+<p>Luis ... </p>
+
+
+
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}
