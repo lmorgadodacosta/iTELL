@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<h4> Welcome to CALLIG!</h4>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris imperdiet, libero eget efficitur dictum, erat felis vehicula erat, quis viverra neque est sed metus. Suspendisse tincidunt dapibus augue. Etiam volutpat at urna a cursus. Fusce ut tellus feugiat, auctor nibh pretium, venenatis quam. Aliquam porttitor feugiat molestie. Donec rutrum vulputate mauris tempor gravida. Nulla feugiat, nunc sed laoreet ullamcorper, ipsum est consectetur tortor, imperdiet dignissim tortor diam ut elit. Proin vitae fermentum nisl.</p>
+
+<p>Aenean commodo enim sagittis sapien gravida mollis. Suspendisse posuere mauris vel dolor commodo, sit amet blandit velit ornare. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tincidunt interdum velit at porttitor. Vestibulum rutrum imperdiet dolor, ut egestas ante finibus non. Vivamus mauris lectus, varius in ante blandit, blandit varius magna. Nullam auctor magna sollicitudin aliquam ultricies.</p>
+
+<p>Aliquam at nulla sit amet odio elementum rutrum eleifend eu est. Vestibulum tempus commodo nunc in condimentum. Etiam rutrum et enim et vestibulum. Pellentesque eu diam bibendum, volutpat odio eget, maximus urna. Nunc ut venenatis ante, et suscipit massa. Vivamus interdum massa non mauris auctor, sed tempor augue consectetur. Integer suscipit ut nunc id ultrices. Sed sollicitudin libero leo, vitae fermentum dui ullamcorper ut.</p>
+
+<p>Pellentesque volutpat massa libero. Nullam ac euismod eros. Donec fringilla vitae ante eget lacinia. Sed aliquam metus eget nisl luctus vehicula. Phasellus sem turpis, rutrum id lorem at, facilisis tempor turpis. Ut laoreet purus purus, vitae placerat tellus vestibulum a. Vestibulum ultrices sapien vitae libero rhoncus pharetra. Proin faucibus, dolor elementum dictum ultricies, dui augue convallis nisl, vel porta erat nibh vitae eros.</p>
+
+<p>Nam ut dui sodales, consequat nisl quis, feugiat eros. Morbi id nulla velit. Aenean at posuere tortor. Vestibulum eget justo in enim porttitor molestie. Nam tincidunt erat sed elit fringilla, ac faucibus est placerat. Duis neque lacus, vehicula ut viverra et, aliquam ac nunc. Etiam elit quam, aliquet quis leo nec, viverra fringilla turpis. In sollicitudin augue eget dui faucibus, id dignissim nulla accumsan. Aenean pellentesque mauris ut venenatis euismod. Proin tortor ex, varius tincidunt ligula sit amet, condimentum vehicula diam.</p>
+
+<br><br>
+<h6>Games in the making</h6>
+<ul>
+  <li>Haiku (5-7-5 syllables requirement, random title, must-use word)</li>
+  <li>Proverb (give Noun+Verb/Noun+Noun/Noun+Adjective, they write a proverb, grammatical), then explain the usage </li>
+  <li>Sex with me </li>
+  <li>Association: 2 nouns... link them (levels: Adj+Noun, Adj+Noun?, time, X number of links)</li>
+  <li>Storytelling, random title, 1 word per sentence </li>
+</ul>
+
+<h6>We need a timer. (either to cut people off, or to store how long they took)</h6>
+
+<br>
+<h6>FOR THE FUTURE:</h6>
+<ul>
+  <li>game levels</li>
+  <li>voting systems</li>
+  <li></li>
+  <li></li>
+</ul>
+<hr>
+
+
+
+{% if current_user.id %}
+
+<div id="UserPanel">
+<h5>Common User Panel</h5>
+Here all users that have logged in can see what is happening. This is good to have games here (as well as on the top menu). Quick click and play.
+</div>
+
+<!-- <div class="btn-group"> -->
+  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Haiku on Demand</button>
+  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Sex With Me</button>
+  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Wicked Proverbs</button>
+  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Forced Links</button>
+<!-- </div> -->
+
+<hr>
+{% endif %}
+
+
+
+{% if current_user.group == 'admin' %}
+<div id="AdminPanel">
+  <h5>Admin User Panel</h5>
+
+  Here only admin users can see what is happening. This is useful for checking the databse, see our users, etc.
+</div>
+<hr>
+{% endif %}
+
+
+
+
+
+
+
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

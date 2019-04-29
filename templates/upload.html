@@ -1,0 +1,45 @@
+{% extends "index.html" %}
+{% block body %}
+
+<input type="hidden" name="current_user" value={{ current_user.id }}>
+
+<h4>Upload Assignments</h4>
+
+
+<p>Welcome to the upload section. Before we proceed, we would like to remind you that upload only files
+  with the extension '.docx'. <br>These files can be produced from a variety of word processors including
+  Microsoft Word, Google Documents, and Pages.</p>
+
+
+<h6>License</h6>
+<p>Before you upload your assignment, we would like to request your permission to use your assignment
+  for research purposes. Systems like this are only possible to be improved if there is relevant data
+  available. As NTU students, your privacy is very important to us, and any data you agree to release
+  will be hand-checked and anonymised before being used for research. Anonymised data will be released
+  under a <a href="https://creativecommons.org/share-your-work/public-domain/cc0/"> Creative Commons
+    CC0 Licence</a> and used to improve this system. This choice will not affect your grade in any way,
+  and lecturers won't know your choice before they grade your assignment.</p>
+
+<form enctype="multipart/form-data" action="{{url_for('report')}}" method="post">
+<br>
+<select id="license" name="license" required>
+<option value="">-- Choose --</option>
+<option value="1">I <b>ACCEPT</b> to share my assignment so that it can be used for further research</option>
+<option value="0">I <b>DO NOT ACCEPT</b> to share my assignment so that it can be used for further research</option>
+</select>
+
+
+
+
+<br>
+<br>
+<br>
+<h6>Chose your file to upload:</h6>
+<p><input type="file" name="file" required> <input type="submit" value="Validate"></p>
+</form>
+
+
+
+</body></html>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+{% block body %}
+
+
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+<input type="hidden" name="current_user" value="{{ current_user.id }}">
+<input type="hidden" name="fn" value="{{ filename }}">
+
+<div id="validation_div">
+
+  <div id="msg" style="text-align:center">
+    {% if passed %}
+    <h6>The file "{{ filename }}" was uploaded successfully.</h6>
+    <p>Your file will now be examined by the our Assignment Checker.
+      This process can take a little while (up to 5 mins). Please leave this window open.</p>
+    {% else %}
+    <p><i class="fa fa-times" aria-hidden="true"></i>
+      The file failed to upload. Please make sure you are using a
+      supported file extension (.docx). <br>Try again and report if the error persists.</p>
+    {% endif %}
+  </div>
+
+  <div id="val2"> </div><br>
+
+</div>
+
+<div style="clear: both;"></div>
+
+{% endblock %}
