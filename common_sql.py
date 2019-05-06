@@ -13,8 +13,7 @@ app = Flask(__name__)
 with app.app_context():
 
     ADMINDB = 'db/admin.db'
-    CORPUSDB = 'db/corpus.db'
-    GOLDDB = 'db/goldcorpus.db'
+    CALLIGDB = 'db/callig.db'
 
 
     ############################################################################
@@ -23,12 +22,8 @@ with app.app_context():
     def connect_admin():
         return sqlite3.connect(ADMINDB)
 
-    def connect_corpus():
-        return sqlite3.connect(CORPUSDB)
-
-    def connect_gold():
-        return sqlite3.connect(GOLDDB)
-
+    def connect_callig():
+        return sqlite3.connect(CALLIGDB)
     
     def query_admin(query, args=(), one=False):
         cur = g.admin.execute(query, args)
@@ -36,14 +31,8 @@ with app.app_context():
                    for idx, value in enumerate(row)) for row in cur.fetchall()]
         return (rv[0] if rv else None) if one else rv
 
-    def query_corpus(query, args=(), one=False):
-        cur = g.corpus.execute(query, args)
-        rv = [dict((cur.description[idx][0], value)
-                   for idx, value in enumerate(row)) for row in cur.fetchall()]
-        return (rv[0] if rv else None) if one else rv
-
-    def query_gold(query, args=(), one=False):
-        cur = g.gold.execute(query, args)
+    def query_callig(query, args=(), one=False):
+        cur = g.callig.execute(query, args)
         rv = [dict((cur.description[idx][0], value)
                    for idx, value in enumerate(row)) for row in cur.fetchall()]
         return (rv[0] if rv else None) if one else rv
@@ -55,18 +44,11 @@ with app.app_context():
         g.admin.commit()
         return lastid
 
-    def write_corpus(query, args=(), one=False):
-        cur = g.corpus.cursor()
+    def write_callig(query, args=(), one=False):
+        cur = g.callig.cursor()
         cur.execute(query, args)
         lastid = cur.lastrowid
-        g.corpus.commit()
-        return lastid
-
-    def write_gold(query, args=(), one=False):
-        cur = g.gold.cursor()
-        cur.execute(query, args)
-        lastid = cur.lastrowid
-        g.gold.commit()
+        g.callig.commit()
         return lastid
 
 
@@ -77,12 +59,12 @@ with app.app_context():
     def fetch_userid(userID):
         user = None
         for r in query_admin("""SELECT userID, password, 
-                                       access_level, access_group 
+                                       access_level, access_group, full_name
                                 FROM users
                                 WHERE userID = ?""", [userID]):
             if r['userID']:
                 user = (r['userID'], r['password'], 
-                        r['access_level'], r['access_group'])
+                        r['access_level'], r['access_group'], r['full_name'])
         return user
 
 
@@ -99,3 +81,24 @@ with app.app_context():
             users[r['id']] = r
 
         return users
+
+
+    ############################################################################
+    # CALLIG SQL
+    ############################################################################
+
+    def write_sexwithme(prompt, answer, seconds, language, username, timestamp):
+        return write_callig("""INSERT INTO sexwithme (prompt, answer, 
+                                                      seconds, language, 
+                                                      username, timestamp)
+                               VALUES (?,?,?,?,?,?)""",
+                            [prompt, answer, seconds,
+                             language, username, timestamp])
+    
+    def fetch_sexwithme_30():
+        result = dd()
+        for r in query_callig("""SELECT * FROM sexwithme WHERE answer IS NOT NULL 
+                                 ORDER BY RANDOM() LIMIT 30"""):
+            result[r['id']] = [r['prompt'], r['answer'],r['seconds'],r['language'],
+                               r['username'], r['timestamp']]
+        return result

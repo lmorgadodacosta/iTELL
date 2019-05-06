@@ -5,13 +5,37 @@
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris imperdiet, libero eget efficitur dictum, erat felis vehicula erat, quis viverra neque est sed metus. Suspendisse tincidunt dapibus augue. Etiam volutpat at urna a cursus. Fusce ut tellus feugiat, auctor nibh pretium, venenatis quam. Aliquam porttitor feugiat molestie. Donec rutrum vulputate mauris tempor gravida. Nulla feugiat, nunc sed laoreet ullamcorper, ipsum est consectetur tortor, imperdiet dignissim tortor diam ut elit. Proin vitae fermentum nisl.</p>
 
-<p>Aenean commodo enim sagittis sapien gravida mollis. Suspendisse posuere mauris vel dolor commodo, sit amet blandit velit ornare. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tincidunt interdum velit at porttitor. Vestibulum rutrum imperdiet dolor, ut egestas ante finibus non. Vivamus mauris lectus, varius in ante blandit, blandit varius magna. Nullam auctor magna sollicitudin aliquam ultricies.</p>
 
-<p>Aliquam at nulla sit amet odio elementum rutrum eleifend eu est. Vestibulum tempus commodo nunc in condimentum. Etiam rutrum et enim et vestibulum. Pellentesque eu diam bibendum, volutpat odio eget, maximus urna. Nunc ut venenatis ante, et suscipit massa. Vivamus interdum massa non mauris auctor, sed tempor augue consectetur. Integer suscipit ut nunc id ultrices. Sed sollicitudin libero leo, vitae fermentum dui ullamcorper ut.</p>
 
-<p>Pellentesque volutpat massa libero. Nullam ac euismod eros. Donec fringilla vitae ante eget lacinia. Sed aliquam metus eget nisl luctus vehicula. Phasellus sem turpis, rutrum id lorem at, facilisis tempor turpis. Ut laoreet purus purus, vitae placerat tellus vestibulum a. Vestibulum ultrices sapien vitae libero rhoncus pharetra. Proin faucibus, dolor elementum dictum ultricies, dui augue convallis nisl, vel porta erat nibh vitae eros.</p>
 
-<p>Nam ut dui sodales, consequat nisl quis, feugiat eros. Morbi id nulla velit. Aenean at posuere tortor. Vestibulum eget justo in enim porttitor molestie. Nam tincidunt erat sed elit fringilla, ac faucibus est placerat. Duis neque lacus, vehicula ut viverra et, aliquam ac nunc. Etiam elit quam, aliquet quis leo nec, viverra fringilla turpis. In sollicitudin augue eget dui faucibus, id dignissim nulla accumsan. Aenean pellentesque mauris ut venenatis euismod. Proin tortor ex, varius tincidunt ligula sit amet, condimentum vehicula diam.</p>
+<hr>
+{% if current_user.id %}
+
+<div id="UserPanel">
+<h5>Common User Panel</h5>
+Here all users that have logged in can see what is happening. This is good to have games here (as well as on the top menu). Quick click and play.
+</div>
+
+<!-- <div class="btn-group"> -->
+<button type="button" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Haiku on <br>Demand</b></button>
+<form action="{{ url_for('sexwithme_info') }}" style="display:inline;">
+  <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Sex with <br>Me</b></button>
+</form>
+  <button type="button" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Wicked<br>Proverbs</b></button>
+  <button type="button" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Forced <br>Links</b></button>
+<!-- </div> -->
+
+<hr>
+{% endif %}
+
+
+
+{% if current_user.group == 'admin' %}
+<div id="AdminPanel">
+  <h5>Admin User Panel</h5>
+
+  Here only admin users can see what is happening. This is useful for checking the databse, see our users, etc.
+
 
 <br><br>
 <h6>Games in the making</h6>
@@ -33,34 +57,25 @@
   <li></li>
   <li></li>
 </ul>
-<hr>
+
+
+<h6>FOR THE DISPLAY:</h6>
+ we are thinking of displaying only 1 random result at a time...
+
+<br>
+<br>
+"Sex with me is like..."  by Anonymous 
+<br>
+<br>
+
+
+<h6>FOR THE GRAMMAR CORRECTION:</h6>
+I'm thinking that I would like to not break the flow of the game unless there is something wrong with the sentence. Maybe on submission I can try to have the grammar loaded and just get a parse from it... if the grammar finds anything wrong, then we show an intermediate page about that sentence. (maybe even allowing them to correct their sentence?) 
 
 
 
-{% if current_user.id %}
-
-<div id="UserPanel">
-<h5>Common User Panel</h5>
-Here all users that have logged in can see what is happening. This is good to have games here (as well as on the top menu). Quick click and play.
-</div>
-
-<!-- <div class="btn-group"> -->
-  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Haiku on Demand</button>
-  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Sex With Me</button>
-  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Wicked Proverbs</button>
-  <button type="button" class="btn btn-dark btn-sq-lg">Play<br>Forced Links</button>
-<!-- </div> -->
-
-<hr>
-{% endif %}
-
-
-
-{% if current_user.group == 'admin' %}
-<div id="AdminPanel">
-  <h5>Admin User Panel</h5>
-
-  Here only admin users can see what is happening. This is useful for checking the databse, see our users, etc.
+There is some bug on resubmitting things when the clock automatically cycles through.
+After countdown, make input and submit disappear. 
 </div>
 <hr>
 {% endif %}

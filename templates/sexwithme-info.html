@@ -1,0 +1,113 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<style>
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23CCC' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+}
+
+.carousel-control-next-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23CCC' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
+}
+</style>
+
+<br><br>
+
+
+
+
+<div id="carouselExampleControls" class="carousel slide" data-ride="carousel" >
+  <div class="carousel-inner">
+
+    <div class="carousel-item active">
+      <blockquote>
+        <div class="row">
+          <div class="col-sm-12 text-center">
+            <p><i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+	      <span class="h5">{{ example_list[0][0] }}</span>&nbsp;&nbsp;
+	      <i class="fa fa-quote-right"></i></p>
+            <div class="col-sm-12">
+              <small><em>{{ example_list[0][1] }}</em> ({{ example_list[0][2] }}), {{ example_list[0][3] }}</small>
+            </div>
+          </div>
+        </div>
+      </blockquote>  
+    </div>
+    
+    {% for ex in example_list[1:] %}
+    <div class="carousel-item">
+      <blockquote>
+        <div class="row">
+          <div class="col-sm-12 text-center">
+            <p><i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+	      <span class="h5">{{ ex[0] }}</span>&nbsp;&nbsp;
+	      <i class="fa fa-quote-right"></i></p>
+            <div class="col-sm-12">
+              <small><em>{{ ex[1] }}</em> ({{ ex[2] }}), {{ ex[3] }}</small>
+            </div>
+          </div>
+        </div>
+      </blockquote>  
+    </div>
+    {% endfor %}
+
+  </div>
+  <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+    <span class="carousel-control-next-icon"  aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>  
+</div>
+
+
+
+<br><br><br><br>
+<h5>Sex with me...</h5>
+<br>
+Goals:
+<br>
+<br>
+
+How to play:
+
+
+<!-- <script> -->
+<!-- // this initializes all tooltips -->
+<!-- $(function () { -->
+<!--   $('[data-toggle="tooltip"]').tooltip() -->
+<!-- }) -->
+<!-- </script> -->
+
+
+<div class="col-sm-12 text-center">
+  <br><br>
+  <form action="{{ url_for('sexwithme_game') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;"><b>Play Now</b></button>
+  </form>
+</div>
+
+
+<script>
+// When the DOM is ready, run this function
+$(document).ready(function() {
+  //Set the carousel options
+  $('#quote-carousel').carousel({
+    pause: true,
+    interval: 3000,
+  });
+});
+</script>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

@@ -51,11 +51,12 @@ with app.app_context():
 
 
     class User(UserMixin):
-        def __init__(self, userID, password, role, group):
+        def __init__(self, userID, password, role, group, name):
             self.id = userID
             self.password = password
             self.role = role
             self.group = group
+            self.name = name
 
         def get_auth_token(self):
             """ Encode a secure token for cookie """
@@ -76,7 +77,7 @@ with app.app_context():
             user = fetch_userid(userid)
 
             if user:
-                return User(user[0], user[1], user[2], user[3])
+                return User(user[0], user[1], user[2], user[3], user[4])
             else:
                 return None
 

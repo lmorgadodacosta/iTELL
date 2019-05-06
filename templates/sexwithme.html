@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<h4>Sex with me is like {{ article }} <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ definition }}</em>"><u>{{ noun }}</u></span>...</h4>
+
+
+<br>
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+  <div class="input-group">
+    <input type="text" class="form-control" placeholder="Answer" size="35">
+  </div>
+  <div class="btn-group" role="group" aria-label="First group">
+    <button type="submit" class="btn btn-dark">submit</button>
+  </div>
+</div>
+
+<br>Time left: <span id="countdown"></span>
+
+
+
+
+
+<script>
+// COUNTDOWN   && COUNTUP
+function countdown(seconds, tenths, elemID) {
+  var e = document.getElementById(elemID);
+  e.innerHTML =  seconds + "." + tenths + " seconds";
+
+  if (seconds < 1 && tenths < 1) {
+			      location.reload();
+			      //clearTimeout(timer);
+			      // check();
+			      // do stuff here
+  } else {
+    if (tenths < 1) {
+      seconds--;
+      tenths = 9;
+    } else {
+      tenths--;
+    }
+    var timer = setTimeout('countdown('+seconds+', '+tenths+',"'+elemID+'")',100);
+  }
+		 }
+		 
+countdown({{ seconds }}, 0, "countdown");
+</script>
+
+
+<script>
+// this initializes all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

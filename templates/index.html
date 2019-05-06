@@ -12,6 +12,9 @@
     <link href="{{ url_for('static', filename='sticky-footer-navbar.css') }}" rel="stylesheet">
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='common.js') }}"></script>
+
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
  
@@ -37,7 +40,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdown-cv">
               <a class="dropdown-item" href="{{ url_for('index') }}">Creativity</a>
               <a class="dropdown-item" href="{{ url_for('team') }}">Team</a>
-              <a class="dropdown-item" href="{{ url_for('index') }}">Improvisation</a>
+              <a class="dropdown-item" href="{{ url_for('improvisation') }}">Improvisation</a>
               <a class="dropdown-item" href="{{ url_for('index') }}">Games</a>
             </div>
           </li>
@@ -61,7 +64,7 @@
             <a class="nav-link" href="{{ url_for('login') }}" title="Sign-in"><i class="fa fa-user" aria-hidden="true"></i> Sign in </a>
 	    {% else %}
 	    <a class="nav-link" href="{{ url_for('logout') }}" title="Logout">
-	      You are logged in, <b>{{current_user.id}} </b>(Log off)</a>
+	      You are logged in, <b>{{ current_user.name }} </b>(Log off)</a>
 	    {% endif %}
           </li>
 
