@@ -23,11 +23,12 @@ def randomword(pos, lang):
     lengthoflist = len(ssl)
     rannum = random.randint(0,lengthoflist-1)
     ranss = ssl[rannum] #random synset object
+    ss_def = ranss.definition() # definition
     leml = ranss.lemma_names(lang) # lemma list
     lemllen = len(leml) #number of lemmas inside the lemma list
     ranlemnum = random.randint(0,lemllen-1)# random position in the lemma list
     leml[ranlemnum] = leml[ranlemnum].replace("_", " ")
-    return leml[ranlemnum]
+    return (leml[ranlemnum], ss_def)
 
 
 def random_countable_noun(lang):

@@ -1,18 +1,21 @@
 {% extends "index.html" %}
 {% block welcome %}
 
+
+
 <span class="h4">Sex with me is like {{ article }} <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ definition }}</em>"><u>{{ noun }}</u></span>...</span>
 
 &nbsp;&nbsp;&nbsp;
 <form action="{{ url_for('save_sexwithme') }}" style="display:inline;" method = "POST">
-  <button type="submit" class="btn btn-sm" style="font-size:20px; background-color: transparent; border-color: transparent;"><i class="fa fa-refresh"></i></button>
- 
+  <button type="button" onClick="window.location.reload();" class="btn btn-sm" style="font-size:20px; background-color: transparent; border-color: transparent;"><i class="fa fa-refresh"></i></button>
+
+  
 <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
 <input type="hidden" id="prompt" name="prompt" value="Sex with me is like {{ article }} {{ noun }}">
 <br>
 <div id="game-input" class="btn-toolbar" role="toolbar">
   <div class="input-group">
-    <input id="answer" name="answer" type="text" class="form-control" placeholder="Answer" size="35">
+    <input id="answer" name="answer" type="text" class="form-control" placeholder="Answer" size="35" required>
   </div>
   <div class="btn-group" role="group" aria-label="First group">
     <button type="submit" class="btn btn-dark">submit</button>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os, sys, sqlite3, datetime, urllib, gzip, requests, codecs
+import os, sys, sqlite3, datetime, urllib, gzip, requests, codecs, random
 from time import sleep
 from flask import Flask, render_template, g, request, redirect, url_for, send_from_directory, session, flash, jsonify, make_response, Markup
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
@@ -17,6 +17,7 @@ from common_login import *
 from common_sql import *
 
 import wn
+import game_data
 
 app = Flask(__name__)
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
@@ -116,6 +117,35 @@ def improvisation():
 # GAMES VIEWS
 ################################################################################
 
+@app.route('/info/sex-with-me', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def sexwithme_info():
+
+    base_ex = [("Sex with me is like a mountain... it will make you want to get on top.", "The CALLIG System", "Unknown date", "0 seconds")]
+
+    example_list = []
+    exs = fetch_sexwithme_30()
+    for ex_id in exs.keys():
+        r = exs[ex_id]
+        prompt = r[0]
+        answer = r[1]
+        seconds = str(r[2]) + ' '  + 'seconds'
+        language = r[3]
+        username = r[4]
+        timestamp = r[5].split()[0]
+
+        example_list.append((prompt + '... ' + answer,
+                             username, timestamp, seconds))
+
+    if example_list:
+        return render_template('sexwithme-info.html',
+                               example_list=example_list)
+
+    else: # for brand-new dbs, show a system's example
+        return render_template('sexwithme-info.html',
+                               example_list=base_ex)
+
+    
 @app.route('/games/sex-with-me', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def sexwithme_game():
@@ -164,34 +194,107 @@ def save_sexwithme():
     return sexwithme_game()
 
 
-@app.route('/info/sex-with-me', methods=['GET', 'POST'])
+
+
+
+### WICKED PROVERBS
+
+@app.route('/info/wicked-proverbs', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
-def sexwithme_info():
+def wickedproverbs_info():
 
-    base_ex = [("Sex with me is like a mountain... it will make you want to get on top.", "The CALLIG System", "Unknown date", "0 seconds")]
+    base_ex = [("My mother always said:", "A high school cheerleader's love is like an old bicycle in a remote village.", "Everyone is welcome to take a ride, but it's squeaks in wrong ways,  and as soon as you are going down you will start to regret it.", "The CALLIG System", "Unknown date", "0 seconds")]
 
-    example_list = []
-    exs = fetch_sexwithme_30()
-    for ex_id in exs.keys():
-        r = exs[ex_id]
-        prompt = r[0]
-        answer = r[1]
-        seconds = str(r[2]) + ' '  + 'seconds'
-        language = r[3]
-        username = r[4]
-        timestamp = r[5].split()[0]
+    return render_template('wickedproverbs-info.html',
+                           example_list=base_ex)
 
-        example_list.append((prompt + '... ' + answer,
-                             username, timestamp, seconds))
+    
+    # example_list = []
+    # exs = fetch_sexwithme_30()
+    # for ex_id in exs.keys():
+    #     r = exs[ex_id]
+    #     prompt = r[0]
+    #     answer = r[1]
+    #     seconds = str(r[2]) + ' '  + 'seconds'
+    #     language = r[3]
+    #     username = r[4]
+    #     timestamp = r[5].split()[0]
 
-    if example_list:
-        return render_template('sexwithme-info.html',
-                               example_list=example_list)
+    #     example_list.append((prompt + '... ' + answer,
+    #                          username, timestamp, seconds))
 
-    else: # for brand-new dbs, show a system's example
-        return render_template('sexwithme-info.html',
-                               example_list=base_ex)
+    # if example_list:
+    #     return render_template('wickedproverbs-info.html',
+    #                            example_list=example_list)
+
+    # else: # for brand-new dbs, show a system's example
+    #     return render_template('wickedproverbs-info.html',
+    #                            example_list=base_ex)
+
+
+
+@app.route('/games/wicked-proverbs', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def wickedproverbs_game():
+    """
+    For now this only decides between Noun-Noun and Noun-Verb.
+    Definitions should exist come for each word.
+    It gets a random frame from game_data.
+    """
+    game_option = random.randrange(2)  # 0 or 1
+    
+    if game_option == 0:
+        w1 = wn.randomword('n', 'eng')
+        w2 = wn.randomword('n', 'eng')
+
+        while w1[0][0].isupper() or\
+              w1[0].startswith(('family ', 'genus ')):
+            w1 = wn.randomword('n', 'eng')
+
+        while w2[0][0].isupper() or\
+              w2[0].startswith(('family ', 'genus ')):
+            w2 = wn.randomword('n', 'eng')
         
+    else:
+        w1 = wn.randomword('v', 'eng')
+        w2 = wn.randomword('n', 'eng')
+        
+        while w2[0][0].isupper() or\
+              w2[0].startswith(('family ', 'genus ')):
+            w2 = wn.randomword('n', 'eng')
+
+    frame = random.choice(game_data.proverb_frames)            
+
+    seconds = 60 # this is the max amount of time to play
+
+    return render_template('wickedproverbs-game.html',
+                           seconds=seconds,
+                           w1=w1,
+                           w2=w2,
+                           frame=frame)
+
+
+@app.route('/_save_wicked-proverbs', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def save_wickedproverbs():
+    # if request.method == 'POST':
+    #     result = request.form
+
+    #     prompt = result['prompt'].strip()
+    #     answer = result['answer'].strip()
+    #     seconds = result['seconds']
+
+    #     if answer:
+    #         write_sexwithme(prompt, answer, seconds, 'eng',
+    #                         result['username'], current_time())
+    #     else:
+    #         write_sexwithme(prompt, None, seconds, 'eng',
+    #                         result['username'], current_time())
+    
+    return wickedproverbs_game()
+    
+
+
     
 
 ################################################################################
