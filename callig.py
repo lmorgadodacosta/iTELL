@@ -20,6 +20,7 @@ import wn
 import game_data
 
 app = Flask(__name__)
+app.debug = True
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 ROBUSTEXCEPT = False
