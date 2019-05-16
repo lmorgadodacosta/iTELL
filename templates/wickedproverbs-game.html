@@ -2,23 +2,22 @@
 {% block welcome %}
 
 
+<form action="{{ url_for('save_wickedproverbs') }}" style="display:inline;" method = "POST">
 
-<span class="h4"> Must use: <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ w1[1] }}</em>"><u>{{ w1[0] }}</u></span>,  <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ w2[1] }}</em>"><u>{{ w2[0] }}</u></span> </span>   <button type="button" onClick="window.location.reload();" class="btn btn-sm" style="font-size:20px; background-color: transparent; border-color: transparent;"><i class="fa fa-refresh"></i></button><br><br>
+<span class="h4"> Must use: <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ w1[1] }}</em>"><u>{{ w1[0] }}</u></span>,  <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ w2[1] }}</em>"><u>{{ w2[0] }}</u></span> </span>   <button type="submit" class="btn btn-sm" style="font-size:20px; background-color: transparent; border-color: transparent;"><i class="fa fa-refresh"></i></button><br><br>
 
 <span class="h4"> {{ frame }}</span>
 
 &nbsp;&nbsp;&nbsp;
-<form action="{{ url_for('save_wickedproverbs') }}" style="display:inline;" method = "POST">
 
- 
 <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
 <input type="hidden" id="frame" name="frame" value="{{ frame }}">
+<input type="hidden" id="w1" name="w1" value="{{ w1[0] }}">
+<input type="hidden" id="w2" name="w2" value="{{ w2[0] }}">
 <br>
 <div id="game-input" class="btn-toolbar" role="toolbar">
-  <!-- <div class="input-group"> -->
-    <input id="proverb" name="proverb" type="textarea" class="form-control" placeholder="Proverb" required><br>
-  <!-- </div> -->
-    <input id="explanation" name="explanation" type="textarea" class="form-control" placeholder="Explanation" required>
+    <input id="proverb" name="proverb" type="textarea" class="form-control" placeholder="Proverb"><br>
+    <input id="explanation" name="explanation" type="textarea" class="form-control" placeholder="Explanation">
   <div class="btn-group" role="group" aria-label="First group">
     <br><br><button type="submit" class="btn btn-dark">submit</button>
   </div>

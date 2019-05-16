@@ -43,11 +43,15 @@
       <blockquote>
         <div class="row">
           <div class="col-sm-12 text-center">
-            <p><i class="fa fa-quote-left"></i>&nbsp;&nbsp;
-	      <span class="h5">{{ ex[0] }}</span>&nbsp;&nbsp;
-	      <i class="fa fa-quote-right"></i></p>
+            <p>
+	      <span class="h5">{{ ex[0] }}</span><br><br> <!-- the frame -->
+	      <i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+	      <span class="h5">{{ ex[1] }}</span>&nbsp;&nbsp; <!-- the proverb -->
+	      <i class="fa fa-quote-right"></i><br><br>
+	      <span class="h5">{{ ex[2] }}</span> <!-- the explanation -->
+	    </p>
             <div class="col-sm-12">
-              <small><em>{{ ex[1] }}</em> ({{ ex[2] }}), {{ ex[3] }}</small>
+              <small><em>{{ ex[3] }}</em> ({{ ex[4] }}), {{ ex[5] }}</small>
             </div>
           </div>
         </div>
@@ -65,11 +69,14 @@
     <span class="sr-only">Next</span>
   </a>  
 </div>
+<br><br><hr>
 
 
 
-<br><br><br><br>
-<h5>Wicked Proverbs</h5>
+<div class="col-sm-12 text-center">
+<h4>Wicked Proverbs</h4>
+</div>
+
 <br>
 <b>Instructions:</b>
 <p>The player will be given two separate words, and will have to come up with a
@@ -80,13 +87,6 @@ example is given below:</p>
 <p><b>Proverb</b>: Cotton candy on a moustache attracts bees from afar.</p>
 <p><b>Explanation</b>: If you have a good idea, however weird, makes it as visible as
 possible and it will attracts investors.</p>
-
-<!-- <script> -->
-<!-- // this initializes all tooltips -->
-<!-- $(function () { -->
-<!--   $('[data-toggle="tooltip"]').tooltip() -->
-<!-- }) -->
-<!-- </script> -->
 
 
 <div class="col-sm-12 text-center">
