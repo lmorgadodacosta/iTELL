@@ -122,11 +122,11 @@ def improvisation():
 @login_required(role=0, group='open')
 def sexwithme_info():
 
-    base_ex = [("Sex with me is like a mountain... it will make you want to get on top.", "The CALLIG System", "Unknown date", "0 seconds")]
+    base_ex = [(0, "Sex with me is like a mountain... it will make you want to get on top.", "The CALLIG System", "Unknown date", "0 seconds")]
 
     example_list = []
     exs = fetch_sexwithme_30()
-    for ex_id in exs.keys():
+    for i, ex_id in enumerate(exs.keys()):
         r = exs[ex_id]
         prompt = r[0]
         answer = r[1]
@@ -135,7 +135,7 @@ def sexwithme_info():
         username = r[4]
         timestamp = r[5].split()[0]
 
-        example_list.append((prompt + '... ' + answer,
+        example_list.append((i, prompt + '... ' + answer,
                              username, timestamp, seconds))
 
     if example_list:
@@ -206,7 +206,7 @@ def save_sexwithme():
 @login_required(role=0, group='open')
 def wickedproverbs_info():
 
-    base_ex = [("My mother always said:",
+    base_ex = [(0, "My mother always said:",
                 "A high school cheerleader's love is like an old bicycle in a remote village.",
                 "Everyone is welcome to take a ride, but it's squeaks in wrong ways,  and as soon as you are going down you will start to regret it.",
                 "The CALLIG System",
@@ -216,7 +216,7 @@ def wickedproverbs_info():
     
     example_list = []
     exs = fetch_wickedproverbs_30()
-    for ex_id in exs.keys():
+    for i, ex_id in enumerate(exs.keys()):
         r = exs[ex_id]
 
         frame = r[0]
@@ -227,7 +227,7 @@ def wickedproverbs_info():
         username = r[5]
         timestamp = r[6].split()[0]
 
-        example_list.append((frame, proverb, explanation, username, timestamp, seconds))
+        example_list.append((i, frame, proverb, explanation, username, timestamp, seconds))
 
     if example_list:
         return render_template('wickedproverbs-info.html',

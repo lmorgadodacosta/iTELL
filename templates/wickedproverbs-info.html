@@ -11,54 +11,36 @@
 }
 </style>
 
-<br><br>
 
 
 
+<span class="h5">Here are some recent contributions:</span>
+<hr><br><br>
 
 <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" >
   <div class="carousel-inner">
 
-    <div class="carousel-item active">
+    {% for ex in example_list %}
+    <div class="carousel-item {% if ex[0] == 0 %} active {% endif %}">
       <blockquote>
         <div class="row">
           <div class="col-sm-12 text-center">
             <p>
-	      <span class="h5">{{ example_list[0][0] }}</span><br><br> <!-- the frame -->
+	      <span class="h5">{{ ex[1] }}</span><br><br> <!-- the frame -->
 	      <i class="fa fa-quote-left"></i>&nbsp;&nbsp;
-	      <span class="h5">{{ example_list[0][1] }}</span>&nbsp;&nbsp; <!-- the proverb -->
+	      <span class="h5">{{ ex[2] }}</span>&nbsp;&nbsp; <!-- the proverb -->
 	      <i class="fa fa-quote-right"></i><br><br>
-	      <span class="h5">{{ example_list[0][2] }}</span> <!-- the explanation -->
+	      <span class="h5">{{ ex[3] }}</span> <!-- the explanation -->
 	    </p>
             <div class="col-sm-12">
-              <small><em>{{ example_list[0][3] }}</em> ({{ example_list[0][4] }}), {{ example_list[0][5] }}</small>
-            </div>
-          </div>
-        </div>
-      </blockquote>  
-    </div>
-    
-    {% for ex in example_list[1:] %}
-    <div class="carousel-item">
-      <blockquote>
-        <div class="row">
-          <div class="col-sm-12 text-center">
-            <p>
-	      <span class="h5">{{ ex[0] }}</span><br><br> <!-- the frame -->
-	      <i class="fa fa-quote-left"></i>&nbsp;&nbsp;
-	      <span class="h5">{{ ex[1] }}</span>&nbsp;&nbsp; <!-- the proverb -->
-	      <i class="fa fa-quote-right"></i><br><br>
-	      <span class="h5">{{ ex[2] }}</span> <!-- the explanation -->
-	    </p>
-            <div class="col-sm-12">
-              <small><em>{{ ex[3] }}</em> ({{ ex[4] }}), {{ ex[5] }}</small>
+              <small><em>{{ ex[4] }}</em> ({{ ex[5] }}), {{ ex[6] }}</small>
             </div>
           </div>
         </div>
       </blockquote>  
     </div>
     {% endfor %}
-
+    
   </div>
   <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>

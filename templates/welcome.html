@@ -19,19 +19,18 @@
 {% if current_user.id %}
 
 <div id="UserPanel">
-<h5>Common User Panel</h5>
-Here all users that have logged in can see what is happening. This is good to have games here (as well as on the top menu). Quick click and play.
+<h5>Play Games</h5>
 </div>
 
 <!-- <div class="btn-group"> -->
-<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Haiku on <br>Demand</b></button>
+<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Haiku on <br>Demand</b><br>(soon)</button>
 <form action="{{ url_for('sexwithme_info') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Sex with <br>Me</b></button>
 </form>
 <form action="{{ url_for('wickedproverbs_info') }}" style="display:inline;">
   <button type="submit"  class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Wicked<br>Proverbs</b></button>
 </form>
-  <button type="submit"  class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Forced <br>Links</b></button>
+  <button type="submit"  class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Forced <br>Links</b><br>(soon)</button>
 <!-- </div> -->
 
 <hr>

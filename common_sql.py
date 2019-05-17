@@ -13,8 +13,7 @@ def qs(ll):
 app = Flask(__name__)
 with app.app_context():
 
-    ROOT  = path.dirname(path.realpath(__file__))
-    
+    ROOT  = path.dirname(path.realpath(__file__))    
     ADMINDB = 'db/admin.db'
     CALLIGDB = 'db/callig.db'
 
@@ -23,12 +22,10 @@ with app.app_context():
     # SET UP CONNECTIONS
     ############################################################################
     def connect_admin():
-        # return sqlite3.connect(ADMINDB)
         return sqlite3.connect(path.join(ROOT, ADMINDB))
 
     def connect_callig():
         return sqlite3.connect(path.join(ROOT, CALLIGDB))
-        # return sqlite3.connect(CALLIGDB)
     
     def query_admin(query, args=(), one=False):
         cur = g.admin.execute(query, args)
