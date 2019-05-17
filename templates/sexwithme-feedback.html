@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<div class="col-sm-12 text-center">
+<h4>Feedback</h4>
+</div>
+<br>
+
+<div class="col-sm-12 text-center">
+<br> Hey there! <br> No matter how hilarious your answer might have been <br> -- <i>I'm just a machine, I really really don't care </i> -- <br> It seems possible that your answer was not grammatical. 
+<br><br>
+This is what you wrote:
+
+            <p><i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+	      <span class="h5">{{ answer }}</span>&nbsp;&nbsp;
+	      <i class="fa fa-quote-right"></i></p>
+
+<br><br>
+This is what we think might be wrong with it: {{ tag }}
+<br><br>
+{% if focus == 0 %} You might want to look if the error involves: {{ focus }} {% endif %}
+
+<br><br>
+
+Your answer was not saved. <br> <b>Sorry, not sorry!</b>
+</div>
+<div class="col-sm-12 text-center">
+  <br>
+  <form action="{{ url_for('sexwithme_game') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;"><b>Play Again</b></button>
+  </form>
+  <form action="" style="display:inline;">
+    <button type="button" class="btn btn-dark btn-lg" style="font-size:20px;"><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>Hahahaha! <br>(maybe later)</em>"><b>Complain</b></span></button>
+  </form>
+</div>
+
+
+
+<script>
+// this initializes all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+
+{% endblock %}
