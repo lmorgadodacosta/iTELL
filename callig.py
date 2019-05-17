@@ -18,6 +18,7 @@ from common_sql import *
 
 import wn
 import game_data
+import erg_call
 
 app = Flask(__name__)
 app.debug = True
@@ -177,6 +178,7 @@ def sexwithme_game():
                            noun=noun,
                            definition=definition)
 
+
 @app.route('/_save_sex-with-me', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def save_sexwithme():
@@ -187,9 +189,21 @@ def save_sexwithme():
         answer = result['answer'].strip()
         seconds = result['seconds']
 
-        if answer:
-            write_sexwithme(prompt, answer, seconds, 'eng',
-                            result['username'], current_time())
+        # it's always treated as 1 sentence, so we can do this:
+        parse = erg_call.check_sents([answer])[0]
+        error = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]
+
+        if answer and error:
+            tag = error[0]
+            focus = error[0] 
+            return render_template('sexwithme-feedback.html',
+                                   answer=answer,
+                                   tag=tag,
+                                   focus=focus)
+            
+        elif answer:
+            print(write_sexwithme(prompt, answer, seconds, 'eng',
+                            result['username'], current_time()))
         else:
             write_sexwithme(prompt, None, seconds, 'eng',
                             result['username'], current_time())
