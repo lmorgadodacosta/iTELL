@@ -190,8 +190,11 @@ def save_sexwithme():
         seconds = result['seconds']
 
         # it's always treated as 1 sentence, so we can do this:
-        parse = erg_call.check_sents([answer])[0]
-        error = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]
+        if answer:
+            parse = erg_call.check_sents([answer])[0]
+            error = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]
+        else:
+            error = None
 
         if answer and error:
             tag = error[0]
