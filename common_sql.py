@@ -4,6 +4,7 @@
 import sqlite3
 from flask import Flask, current_app, g
 from collections import defaultdict as dd
+from os import path
 
 def qs(ll):
     """return len(l) ?s sepeated by ','  to use in queries"""
@@ -12,6 +13,7 @@ def qs(ll):
 app = Flask(__name__)
 with app.app_context():
 
+    ROOT  = path.dirname(path.realpath(__file__))    
     ADMINDB = 'db/admin.db'
     CALLIGDB = 'db/callig.db'
 
@@ -20,10 +22,10 @@ with app.app_context():
     # SET UP CONNECTIONS
     ############################################################################
     def connect_admin():
-        return sqlite3.connect(ADMINDB)
+        return sqlite3.connect(path.join(ROOT, ADMINDB))
 
     def connect_callig():
-        return sqlite3.connect(CALLIGDB)
+        return sqlite3.connect(path.join(ROOT, CALLIGDB))
     
     def query_admin(query, args=(), one=False):
         cur = g.admin.execute(query, args)
@@ -88,17 +90,60 @@ with app.app_context():
     ############################################################################
 
     def write_sexwithme(prompt, answer, seconds, language, username, timestamp):
-        return write_callig("""INSERT INTO sexwithme (prompt, answer, 
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""INSERT INTO sex_with_me (prompt, answer, 
                                                       seconds, language, 
                                                       username, timestamp)
                                VALUES (?,?,?,?,?,?)""",
                             [prompt, answer, seconds,
                              language, username, timestamp])
+
+    def write_sexwithme_feedback(answer, sex_with_me_id, feedback,
+                                 seconds, language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""INSERT INTO sex_with_me_feedback 
+                                           (answer, sex_with_me_id, feedback,
+                                            seconds, language, username, timestamp)
+                               VALUES (?,?,?,?,?,?,?)""",
+                            [answer, sex_with_me_id, feedback,
+                             seconds, language, username, timestamp])
+
     
     def fetch_sexwithme_30():
         result = dd()
-        for r in query_callig("""SELECT * FROM sexwithme WHERE answer IS NOT NULL 
-                                 ORDER BY RANDOM() LIMIT 30"""):
+        for r in query_callig("""SELECT * FROM sex_with_me WHERE answer IS NOT NULL 
+                                 ORDER BY timestamp DESC LIMIT 30"""):
             result[r['id']] = [r['prompt'], r['answer'],r['seconds'],r['language'],
                                r['username'], r['timestamp']]
         return result
+
+
+
+    def write_wickedproverbs(frame, w1, w2, proverb, explanation, seconds,
+                             language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""INSERT INTO wicked_proverbs 
+                               (frame, w1, w2, proverb, explanation, seconds,
+                                language, username, timestamp)
+                               VALUES (?,?,?,?,?,?,?,?,?)""",
+                            [frame, w1, w2, proverb, explanation, seconds,
+                             language, username, timestamp])
+
+
+    def fetch_wickedproverbs_30():
+        result = dd()
+        for r in query_callig("""SELECT * FROM wicked_proverbs 
+                                 WHERE proverb IS NOT NULL
+                                 AND explanation IS NOT NULL
+                                 ORDER BY timestamp DESC LIMIT 30"""):
+            result[r['id']] = [r['frame'], r['proverb'],r['explanation'],
+                               r['seconds'],r['language'],
+                               r['username'], r['timestamp']]
+        return result
+

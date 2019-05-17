@@ -48,11 +48,10 @@
 
 	  {% if current_user.id %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="" id="dropdown-projs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Games</a>
+            <a class="nav-link dropdown-toggle" href="" id="dropdown-projs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Play</a>
             <div class="dropdown-menu" aria-labelledby="dropdown-projs">
-              <a class="dropdown-item" href="{{ url_for('index') }}#current">Game 1</a>
-              <a class="dropdown-item" href="{{ url_for('index') }}#current">Game 2</a>
-              <a class="dropdown-item" href="{{ url_for('index') }}#previous">Game 3</a>
+              <a class="dropdown-item" href="{{ url_for('sexwithme_info') }}">Sex with me</a>
+              <a class="dropdown-item" href="{{ url_for('wickedproverbs_info') }}">Wicked Proverbs</a>
             </div>
           </li>
 	  

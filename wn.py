@@ -1,6 +1,7 @@
 import random
 import nltk
 from nltk.corpus import wordnet as wn
+import pwn_data
 
 def extracthypos(synset, limit=999):
     """Given a synset object, return a set with all synsets 
@@ -31,45 +32,102 @@ def randomword(pos, lang):
     return (leml[ranlemnum], ss_def)
 
 
-def random_countable_noun(lang):
-    """ This function returns a countable noun based on wordnet."""
-
-    physical_entity = wn._synset_from_pos_and_offset('n',1930)
-    ssl = extracthypos(physical_entity)
-    lengthoflist = len(ssl)
-    rannum = random.randint(0,lengthoflist-1)
+def x_rand_nouns(x):
+    """
+    This function returns two random nouns from wordnet.
+    It assumes PWN's size for nouns = 82114
+    """
+    rand_ints = []
+    for i in range(0,x):
+        rand_ints.append(random.randint(0,82114))
+    max_rand = max(rand_ints)
     
-    ranss = ssl[rannum] #random synset object
-    ss_def = ranss.definition() # definition
-    # ss_hype = ranss.hypernyms()[0]  # assuming at least 1 hypernym
-    # hype_lem = ss_hype.lemma_names(lang)[0].replace('_',' ')
+    results = []
+    for i, ss in enumerate(wn.all_synsets('n')):
+
+        if i > max_rand:
+            break
+
+        elif i in rand_ints:
+            
+            ss_def = ss.definition()
+            ss_lemma = random.choice(ss.lemma_names('eng'))
+            ss_lemma = ss_lemma.replace("_", " ")
+
+            results.append((ss_lemma,ss_def))
+        else:
+            continue
+        
+    return results
+
+
+
+def x_rand_pos(x,pos):
+    """
+    This function returns X random words with a specified POS from 
+    the PWN's dump.
+    """
+    rand_ss = set()
+
+    pos_dict = pwn_data.pwn[pos]
+    while len(rand_ss) < x:
+        rand_ss.add(random.choice(list(pos_dict.keys())))
+
+    results = []
+    for ss_name in rand_ss:
+        ss = wn.synset(ss_name)
+        ss_def = ss.definition()
+        ss_lemma = random.choice(ss.lemma_names('eng'))
+        ss_lemma = ss_lemma.replace("_", " ")
+        if pos == 'v':
+            ss_lemma = "to " + ss_lemma
+        
+        results.append((ss_lemma,ss_def))
+
+    return results
+
+
+
+
+# def random_countable_noun(lang):
+#     """ This function returns a countable noun based on wordnet."""
+
+#     physical_entity = wn._synset_from_pos_and_offset('n',1930)
+#     ssl = extracthypos(physical_entity)
+#     lengthoflist = len(ssl)
+#     rannum = random.randint(0,lengthoflist-1)
     
-    leml = ranss.lemma_names(lang) # lemma list
-    lemllen = len(leml) #number of lemmas inside the lemma list
-    ranlemnum = random.randint(0,lemllen-1)# random position in the lemma list
-    leml[ranlemnum] = leml[ranlemnum].replace("_", " ")
-    return (leml[ranlemnum], ss_def)
+#     ranss = ssl[rannum] #random synset object
+#     ss_def = ranss.definition() # definition
+#     # ss_hype = ranss.hypernyms()[0]  # assuming at least 1 hypernym
+#     # hype_lem = ss_hype.lemma_names(lang)[0].replace('_',' ')
+    
+#     leml = ranss.lemma_names(lang) # lemma list
+#     lemllen = len(leml) #number of lemmas inside the lemma list
+#     ranlemnum = random.randint(0,lemllen-1)# random position in the lemma list
+#     leml[ranlemnum] = leml[ranlemnum].replace("_", " ")
+#     return (leml[ranlemnum], ss_def)
     
 
 
-wordlist = ['alarm clock', 'backpack',  'pillow',  'bedspread',  'blanket',
-            'bookcase',  'book',  'broom',  'brush',  'bucket',  'calendar',
-            'candle',  'carpet',  'chair',  'clock',  'coffee table',  'comb',
-            'computer',  'laptop',  'PS4',  'couch',  'dish towel',  'dishwasher',
-            'door stop',  'drill',  'dryer',  'extension cord',  'fan',
-            'file cabinet',  'fire extinguisher',  'flashlight',  'flower',
-            'fork',  'video game',  'boardgame',  'hammer',  'heater',  'houseplant',
-            'iPhone',  'ironing board',  'piece of jewelry',  'pocket knive',  'lamp',
-            'light bulb',  'light switch',  'fridge magnet',  'microwave',  'mop',
-            'coffee mug',  'piano',  'guitar',  'violin',  'flute',  'dirty napkin',
-            'napkin',  'oven',  'family painting',  'frying pan',  'pair of trousers',
-            'piece of white paper',  'pen',  'pencil',  'photograph',  'pillow',  'pitcher',
-            'plastic plates',  'radiator',  'old radio',  'refrigerator',  'rug',  'saucer',
-            'saw',  'pair of scissors',  'screw driver',  'smoke detector',
-            'pair of sneakers',  'pair of socks',  'spoon',  'suitcase',  'tablecloth',
-            'dinning table',  'box of tissue paper',  'toaster',  'roll of toilet paper',
-            'toothbrush',  'tube of toothpaste',  'towel',  'TV',  'vacuum cleaner',
-            'vase',  'washing machine'];
+# wordlist = ['alarm clock', 'backpack',  'pillow',  'bedspread',  'blanket',
+#             'bookcase',  'book',  'broom',  'brush',  'bucket',  'calendar',
+#             'candle',  'carpet',  'chair',  'clock',  'coffee table',  'comb',
+#             'computer',  'laptop',  'PS4',  'couch',  'dish towel',  'dishwasher',
+#             'door stop',  'drill',  'dryer',  'extension cord',  'fan',
+#             'file cabinet',  'fire extinguisher',  'flashlight',  'flower',
+#             'fork',  'video game',  'boardgame',  'hammer',  'heater',  'houseplant',
+#             'iPhone',  'ironing board',  'piece of jewelry',  'pocket knive',  'lamp',
+#             'light bulb',  'light switch',  'fridge magnet',  'microwave',  'mop',
+#             'coffee mug',  'piano',  'guitar',  'violin',  'flute',  'dirty napkin',
+#             'napkin',  'oven',  'family painting',  'frying pan',  'pair of trousers',
+#             'piece of white paper',  'pen',  'pencil',  'photograph',  'pillow',  'pitcher',
+#             'plastic plates',  'radiator',  'old radio',  'refrigerator',  'rug',  'saucer',
+#             'saw',  'pair of scissors',  'screw driver',  'smoke detector',
+#             'pair of sneakers',  'pair of socks',  'spoon',  'suitcase',  'tablecloth',
+#             'dinning table',  'box of tissue paper',  'toaster',  'roll of toilet paper',
+#             'toothbrush',  'tube of toothpaste',  'towel',  'TV',  'vacuum cleaner',
+#             'vase',  'washing machine'];
 
 
 #this is to print a title of the pattern "the adjective noun"
