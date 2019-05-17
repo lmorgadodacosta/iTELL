@@ -99,6 +99,19 @@ with app.app_context():
                                VALUES (?,?,?,?,?,?)""",
                             [prompt, answer, seconds,
                              language, username, timestamp])
+
+    def write_sexwithme_feedback(answer, sex_with_me_id, feedback,
+                                 seconds, language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""INSERT INTO sex_with_me_feedback 
+                                           (answer, sex_with_me_id, feedback,
+                                            seconds, language, username, timestamp)
+                               VALUES (?,?,?,?,?,?,?)""",
+                            [answer, sex_with_me_id, feedback,
+                             seconds, language, username, timestamp])
+
     
     def fetch_sexwithme_30():
         result = dd()

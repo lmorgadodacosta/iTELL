@@ -19,13 +19,13 @@ from common_sql import *
 import wn
 import game_data
 import erg_call
+from feedback import eng_feedback
 
 app = Flask(__name__)
 app.debug = True
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
-ROBUSTEXCEPT = False
-#error_logging = open("corpus_inputting_error_log", "a")#, "utf-8")    ####tk####
+
 
 ################################################################################
 # LOGIN
@@ -185,31 +185,56 @@ def save_sexwithme():
     if request.method == 'POST':
         result = request.form
 
+        language = 'eng'
         prompt = result['prompt'].strip()
         answer = result['answer'].strip()
         seconds = result['seconds']
+        username = result['username']
 
         # it's always treated as 1 sentence, so we can do this:
         if answer:
             parse = erg_call.check_sents([answer])[0]
-            error = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]
+            errors = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]            
         else:
-            error = None
+            errors = []
 
-        if answer and error:
-            tag = error[0]
-            focus = error[0] 
+        tags = []
+        foci = []
+        for e in errors:
+            tag = e[0]
+            focus = e[1]
+            tags.append(tag)
+            foci.append(focus)
+
+        if answer and tags and ('NoParse' not in tags):
+            # we are not showing feedback for a 'NoParse'
+
+            sex_with_me_id = None
+            for tag in tags:
+                write_sexwithme_feedback(answer, sex_with_me_id, tag,
+                                         seconds, language, username, current_time())
+
             return render_template('sexwithme-feedback.html',
                                    answer=answer,
-                                   tag=tag,
-                                   focus=focus)
-            
+                                   tags=tags,
+                                   foci=foci,
+                                   eng_feedback=eng_feedback)
+
+        if answer and tags and ('NoParse' in tags):
+            sex_with_me_id = write_sexwithme(prompt, answer, seconds, language,
+                                             username, current_time())
+
+            for tag in tags:
+                write_sexwithme_feedback(answer, sex_with_me_id, tag,
+                                         seconds, language, username, current_time())
+
         elif answer:
-            print(write_sexwithme(prompt, answer, seconds, 'eng',
-                            result['username'], current_time()))
+            print(write_sexwithme(prompt, answer, seconds, language,
+                            username, current_time()))
+            
         else:
-            write_sexwithme(prompt, None, seconds, 'eng',
-                            result['username'], current_time())
+            write_sexwithme(prompt, None, seconds, language,
+                            username, current_time())
     
     return sexwithme_game()
 
