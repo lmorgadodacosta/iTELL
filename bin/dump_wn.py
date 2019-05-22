@@ -2,8 +2,34 @@ from collections import defaultdict as dd
 from nltk.corpus import wordnet as wn
 import nltk
 
-exclude = []
 
+def extracthypos(synset, limit=999):
+    """Given a synset object, return a set with all synsets 
+    underneath it in the PWN structure (including the original)."""
+    l = limit-1
+    result = []
+    result.append(synset)
+    if synset.hyponyms() and l > 0:
+        for each in synset.hyponyms():
+            x = extracthypos(each, l)
+            result += x
+    return result
+
+
+
+
+exclude_ss = []
+
+exclude_hypos_of = [
+    '01326291-n',     # microorganism
+    '07992450-n'      # taxonomic group
+]
+
+for synset in exclude_hypos_of:
+
+    ss_set = extracthypos(wn.of2ss(synset))
+    for ss in ss_set:
+        exclude_ss.append(ss)
 
 pwn = open('pwn_data.py', 'w+')
 pwn.write("from collections import defaultdict as dd\n")
@@ -11,18 +37,20 @@ pwn.write("pwn = dd(lambda: dd())\n")
 
 for ss in wn.all_synsets():
 
-    pos = ss.pos()
-    if pos == 's':
-        pos = 'a'
+    if ss not in exclude_ss:
     
-    ss.name()
+        pos = ss.pos()
+        if pos == 's':
+            pos = 'a'
 
-    
-    lem_list = ss.lemma_names('eng')
-    if ss.name() not in exclude:
+        ss.name()
+
+        lem_list = ss.lemma_names('eng')
         pwn.write('''pwn["{}"]["{}"]={}\n'''.format(pos,
-                                                      ss.name(),
-                                                      str(lem_list)
-                                                      ))
+                                                    ss.name(),
+                                                    str(lem_list)
+        ))
 
+
+        
 pwn.close()

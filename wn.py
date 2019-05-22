@@ -2,6 +2,7 @@ import random
 import nltk
 from nltk.corpus import wordnet as wn
 import pwn_data
+import game_data
 
 def extracthypos(synset, limit=999):
     """Given a synset object, return a set with all synsets 
@@ -61,29 +62,91 @@ def x_rand_nouns(x):
     return results
 
 
+def check_lemma(lemma):
+    result = True
+
+    exclude_lemmas = ['genus', ' bacteria', ' cell', ' organelle',
+                      'pleural']
+    for s in exclude_lemmas:
+        if s in lemma:
+            result = False
+
+    if lemma[0].isupper():
+        result = False
+        
+    return result
+
+
 
 def x_rand_pos(x,pos):
     """
     This function returns X random words with a specified POS from 
     the PWN's dump.
     """
-    rand_ss = set()
-
-    pos_dict = pwn_data.pwn[pos]
-    while len(rand_ss) < x:
-        rand_ss.add(random.choice(list(pos_dict.keys())))
-
     results = []
-    for ss_name in rand_ss:
-        ss = wn.synset(ss_name)
-        ss_def = ss.definition()
-        ss_lemma = random.choice(ss.lemma_names('eng'))
-        ss_lemma = ss_lemma.replace("_", " ")
-        if pos == 'v':
-            ss_lemma = "to " + ss_lemma
-        
-        results.append((ss_lemma,ss_def))
 
+    while len(results) < x:
+
+        if pos == 'n':
+            rand = random.random()
+            if rand < 0.25: # mass from list
+                article = ''
+                all_no_article = game_data.freq_mass_noms + game_data.mass_noms + game_data.characters
+                noun = random.choice(all_no_article)
+                definition = ''
+
+                if check_lemma(noun):
+                    results.append((noun, definition, article))
+
+                
+            elif rand < 0.5: # countable from list
+                all_with_article = game_data.occupations + game_data.freq_countable_noms
+                noun = random.choice(all_with_article)
+                definition = ''
+
+                if noun.lower().startswith(('a','e','i','o','u')):
+                    article = 'an'
+                else:
+                    article ='a'
+
+                if check_lemma(noun):
+                    results.append((noun, definition, article))
+
+            else: # wordnet random
+
+                pos_dict = pwn_data.pwn[pos]
+                ss_name = random.choice(list(pos_dict.keys()))
+                ss = wn.synset(ss_name)
+                ss_def = ss.definition()
+                noun = random.choice(ss.lemma_names('eng'))
+                noun = noun.replace("_", " ")
+        
+                if noun.lower().startswith(('a','e','i','o','u')):
+                    article = 'an'
+                else:
+                    article ='a'
+
+                if check_lemma(noun):
+                    results.append((noun, ss_def, article))
+        
+
+        else: # if it's not a noun
+
+            article = ''
+            pos_dict = pwn_data.pwn[pos]
+
+            ss_name = random.choice(list(pos_dict.keys()))
+
+            ss = wn.synset(ss_name)
+            ss_def = ss.definition()
+            ss_lemma = random.choice(ss.lemma_names('eng'))
+            ss_lemma = ss_lemma.replace("_", " ")
+            if pos == 'v':
+                ss_lemma = "to " + ss_lemma
+
+            if check_lemma(noun):
+                results.append((ss_lemma, ss_def, article))
+            
     return results
 
 

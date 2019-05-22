@@ -8,7 +8,6 @@ from flask_login import LoginManager, UserMixin, login_required, login_user, log
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer # for safe session cookies
 from collections import defaultdict as dd
-from collections import OrderedDict as od
 from hashlib import md5
 from werkzeug import secure_filename
 
@@ -152,25 +151,13 @@ def sexwithme_info():
 @login_required(role=0, group='open')
 def sexwithme_game():
 
+        
     rand_word = wn.x_rand_pos(1,'n')[0]  # only 1 item on the list
     noun = rand_word[0]
     definition = rand_word[1]
+    article = rand_word[2]
 
-    # problems "mass nouns" (they should not take 'a' or 'an')
-    # we should block concepts with 3 or more words 
-    # block = "family ...", "genus..."
-    # block   nouns starting with uppercase
-    # while noun[0].isupper() or\
-    #    noun.startswith(('family ', 'genus ')) or\
-    #    len(noun.split())>2:
-    #     noun, definition = wn.random_countable_noun('eng')
-
-    if noun.lower().startswith(('a','e','i','o','u')):
-        article = 'an'
-    else:
-        article ='a'
-
-    seconds = 30 # this is the max amount of time to play
+    seconds = 40 # this is the max amount of time to play
 
     return render_template('sexwithme-game.html',
                            seconds=seconds,
@@ -307,7 +294,7 @@ def wickedproverbs_game():
             
     frame = random.choice(game_data.proverb_frames)            
 
-    seconds = 60 # this is the max amount of time to play
+    seconds = 90 # this is the max amount of time to play
 
     return render_template('wickedproverbs-game.html',
                            seconds=seconds,
@@ -338,6 +325,13 @@ def save_wickedproverbs():
     
     return wickedproverbs_game()
     
+
+
+
+
+
+
+
 
 
     
