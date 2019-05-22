@@ -7,26 +7,28 @@ proverb_frames = ["My grandmother used to say...",
 
 #lists cannot have space
 freq_countable_noms = ["idiot", "toaster", "legend", "death wish", "marketing idea", "psychic", "knife", "sandwich", "lettuce",
-"kitten", "friendly grandma", "french chef", "corn cake", "candlestick maker", "coffee pot", "tank", "skinny woman", "private investor",
+"kitten", "friendly grandma", "French chef", "corn cake", "candlestick maker", "coffee pot", "tank", "skinny woman", "private investor",
 "elastic band", "telephone", "pistol", "legal warrant", "famous landscape painting", "Irish song", "volcanic crater", "travel guidebook",
 "electric furnace", "oven", "sneaky criminal", "laptop", "dragon", "pervert", "toilet seat", "haunted graveyard", "really tough guy",
 "wrinkle", "multi-billionaire", "mental disorder", "hyena", "bat-shit crazy Amish folk", "beautiful elastic band", "lover", "Christmas party",
 "baby-shower", "machete",  "drug addict", "cold-hearted Eskimo", "bug", "virus", "bad mood", "confrontational freak", "light bulb",
-"broken promises"]
+"broken promise", "mirror", "garbage bin", "wifi password", "blender", "BBQ fork", "chess game", "department meeting", "pocket watch",
+"microwave oven", "well", "abacus", "hair pin"]
 
 
 
-freq_mass_noms =  ["therapy", "antidepressant drug", "mad cow disease", "karate","liquid oxygen", "messiness", "trust fund","dog poop",
-"meditation", "boiling water", "misfortune", "failure", "natural history", "divergent thinking", "guilt", "morality"]
+freq_mass_noms =  ["therapy", "antidepressant drug", "mad cow disease", "karate", "liquid oxygen", "messiness", "trust fund","dog poop",
+"meditation", "boiling water", "misfortune", "failure", "natural history", "divergent thinking", "guilt", "morality",
+ "love at first sight", "curly hair", "balcony furniture"]
 
 
 # no determiner needed
-freq_plural-count_noms = ["hairy legs","laser beams", "scented candles"]
+freq_plural_count_noms = ["hairy legs","laser beams", "scented candles", "sun glasses", "instant nooldes", "ear rings"]
 
 
 
 # to be preceded by "the"
-freq_unique_noms = ["love of her life"]
+freq_unique_noms = ["love of one's life", "bible"]
 
 
 
@@ -137,7 +139,7 @@ occupations = ["asparagus harvester", "astronaut", "auctioneer", "baker", "bar-k
 "electrician", "energy consultant", "estate agent", "event manager", "firefighter", "florist", "gardener", "geriatric nurse", "goldsmith",
 "headhunter", "high school teacher", "housewife", "househusband", "human resources manager", "hunter", "ice-cream vendor",
 "interior designer", "interpreter", "jazz musician", "journalist", "judge", "lawyer", "legal expert", "librarian", "lifeguard",
-"market researcher", "marriage counsellor", "masseur", "meteorologist", "minister of defense", "model", "mountaineer", "music teacher",
+"market researcher", "marriage counsellor", "masseur", "meteorologist", "minister of defense of a country", "model", "mountaineer", "music teacher",
 "nurse", "obstetrician", "optician", "painter", "pathologist", "pharmacist", "photographer", "physician", "physicist", "piano maker",
 "pilot", "plumber", "priest", "puppeteer", "roofer", "salesperson", "santa", "shepherd", "ship-builder", "soccer referee",
 "speech-writer", "tennis instructor", "stonemason", "stuntman", "swimming pool attendant", "taxi driver", "tour guide", "train driver",
