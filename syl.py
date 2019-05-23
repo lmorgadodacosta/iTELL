@@ -5,11 +5,13 @@ allwords = set(["late", "comer", "come", "coming", "cat", "ice", "cream"])
 
 #todo: "The chicken explodes" is counted as 6 syllables, fix it
 def syllables(word):
-    """ this function returns the number of syllables in a string. It first checks
+    """
+    This function returns the number of syllables in a string. It first checks
     whether it is a compound, if it is, it calls this function recursively to
     count the number of syllable of each compound, else, it counts syllables
     normally. I am also stripping the punctuation and making every letter
-    into lowercase"""
+    into lowercase;
+    """
     word = word.lower().strip(".:;?!").replace("-", "")
 
 
@@ -38,9 +40,11 @@ def syllables(word):
 
 
 def compound(word):
-    """ this function returns the number of syllable of a word if it is a
+    """ 
+    This function returns the number of syllable of a word if it is a
     compound, if not, it returns false, only on the first split
-    from the left"""
+    from the left;
+    """
     l=len(word)
     for index in range(0, l):
         if word[:index] in allwords:
@@ -51,7 +55,7 @@ def compound(word):
 
     return False
 
-def noofsyllables(line):
+def num_of_syllables(line):
     wordlist = line.split()
     counter = 0
     for word in wordlist:

@@ -22,8 +22,10 @@
 <h5>Play Games</h5>
 </div>
 
-<!-- <div class="btn-group"> -->
-<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Haiku on <br>Demand</b><br>(soon)</button>
+<form action="{{ url_for('haikuondemand_info') }}" style="display:inline;">
+<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Haiku on <br>Demand</b></button>
+</form>
+
 <form action="{{ url_for('sexwithme_info') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Sex with <br>Me</b></button>
 </form>

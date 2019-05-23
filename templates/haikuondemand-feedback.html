@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<div class="col-sm-12 text-center">
+<h4>Feedback</h4>
+</div>
+<br>
+
+<div class="col-sm-12 text-center">
+  <br> Hey there! <br> No matter how hilarious your answer might have been <br> -- <i>I'm just a machine, I really really don't care </i> -- <br> It looks like your haiku was not well-formed. <br>
+  The number of syllables across the three verses should be 5-7-5. 
+<br><br>
+Title:<br>
+  <span class="h5">{{ title }}</span><br><br>
+
+
+This was your haiku:
+
+<p>
+  <span class="h5"> {{ answer[0][0] }}
+    {% if answer[0][1] != 5 %}
+    <span class="text-danger"> ({{ answer[0][1] }} syllables)</span>
+    {% endif %}
+  </span><br>
+  <span class="h5">{{ answer[1][0] }}
+    {% if answer[1][1] != 7 %}
+    <span class="text-danger"> ({{ answer[1][1] }} syllables)</span>
+    {% endif %}
+  </span><br>
+  <span class="h5">{{ answer[2][0] }}  
+    {% if answer[2][1] != 5 %}
+    <span class="text-danger"> ({{ answer[2][1] }} syllables)</span>
+    {% endif %}
+  </span><br>
+</p>
+
+<br><br>
+
+ <b>Your answer was not saved.</b>
+</div>
+<div class="col-sm-12 text-center">
+  <form action="{{ url_for('haikuondemand_game') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;">
+      <b>Play Again</b>
+    </button>
+  </form>
+  <form action="" style="display:inline;">
+    <button type="button" class="btn btn-dark btn-lg" style="font-size:20px;"><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>Hahahaha! <br>(maybe later)</em>"><b>Complain</b></span></button>
+  </form>
+</div>
+
+
+
+<script>
+// this initializes all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+
+{% endblock %}

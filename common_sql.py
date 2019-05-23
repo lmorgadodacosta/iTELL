@@ -89,6 +89,10 @@ with app.app_context():
     # CALLIG SQL
     ############################################################################
 
+
+    ############################################################################
+    # SEX WITH ME
+    ############################################################################
     def write_sexwithme(prompt, answer, seconds, language, username, timestamp):
         """
         Returns the ID of the recently added entry.
@@ -117,12 +121,16 @@ with app.app_context():
         result = dd()
         for r in query_callig("""SELECT * FROM sex_with_me WHERE answer IS NOT NULL 
                                  ORDER BY timestamp DESC LIMIT 30"""):
-            result[r['id']] = [r['prompt'], r['answer'],r['seconds'],r['language'],
+            result[r['id']] = [r['prompt'], r['answer'], r['seconds'], r['language'],
                                r['username'], r['timestamp']]
         return result
 
 
+    
 
+    ############################################################################
+    # WICKED PROVERBS
+    ############################################################################
     def write_wickedproverbs(frame, w1, w2, proverb, explanation, seconds,
                              language, username, timestamp):
         """
@@ -143,7 +151,53 @@ with app.app_context():
                                  AND explanation IS NOT NULL
                                  ORDER BY timestamp DESC LIMIT 30"""):
             result[r['id']] = [r['frame'], r['proverb'],r['explanation'],
-                               r['seconds'],r['language'],
+                               r['seconds'], r['language'],
                                r['username'], r['timestamp']]
         return result
 
+
+    
+    
+    ############################################################################
+    # HAIKU ON DEMAND
+    ############################################################################
+    def write_haikuondemand(title, l1, l2, l3,
+                            seconds, language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""
+                            INSERT INTO haiku_on_demand 
+                            (title, l1, l2, l3, 
+                             seconds, language, username, timestamp)
+                            VALUES (?,?,?,?,?,?,?,?)
+                            """, [title, l1, l2, l3,
+                                  seconds, language, username, timestamp])
+
+    def write_haikuondemand_feedback(title, feedback, l1, l2, l3, s1, s2, s3,
+                                     seconds, language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""
+                            INSERT INTO haiku_on_demand_feedback 
+                            (title, feedback, l1, l2, l3, s1, s2, s3, 
+                             seconds, language, username, timestamp)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                            """, [title, feedback, l1, l2, l3, s1, s2, s3,
+                                  seconds, language, username, timestamp])
+
+    
+    def fetch_haikuondemand_30():
+        result = dd()
+        for r in query_callig("""
+                              SELECT * FROM haiku_on_demand 
+                              WHERE l1 IS NOT NULL
+                              AND l2 IS NOT NULL
+                              AND l3 IS NOT NULL
+                              ORDER BY timestamp DESC LIMIT 30
+                              """):
+            result[r['id']] = [r['title'], r['l1'], r['l2'], r['l3'],
+                               r['username'], r['timestamp'], r['seconds']]
+        return result
+    

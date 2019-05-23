@@ -144,7 +144,7 @@ def x_rand_pos(x,pos):
             if pos == 'v':
                 ss_lemma = "to " + ss_lemma
 
-            if check_lemma(noun):
+            if check_lemma(ss_lemma):
                 results.append((ss_lemma, ss_def, article))
             
     return results

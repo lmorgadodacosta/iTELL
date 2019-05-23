@@ -16,6 +16,7 @@ from common_login import *
 from common_sql import *
 
 import wn
+import syl
 import game_data
 import erg_call
 from feedback import eng_feedback
@@ -329,12 +330,102 @@ def save_wickedproverbs():
 
 
 
+### HAIKU ON DEMAND
+
+@app.route('/info/haiku-on-demand', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def haikuondemand_info():
+
+    base_ex = [(0,
+                "Title", "Line1", "Line2", "Line3",
+                "The CALLIG System", "Unknown date", "0 seconds")]
+    
+    example_list = []
+    exs = fetch_haikuondemand_30()
+    for i, ex_id in enumerate(exs.keys()):
+        r = exs[ex_id]
+        title = r[0]
+        l1 = r[1]
+        l2 = r[2]
+        l3 = r[3]
+        username = r[4]
+        timestamp = r[5].split()[0]
+        seconds = str(r[6]) + ' '  + 'seconds'
+
+        example_list.append((i, title, l1, l2, l3,
+                             username, timestamp, seconds))
+
+    if example_list:
+        return render_template('haikuondemand-info.html',
+                               example_list=example_list)
+
+    else: # for brand-new dbs, show a system's example
+        return render_template('haikuondemand-info.html',
+                               example_list=base_ex)
 
 
+@app.route('/games/haiku-on-demand', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def haikuondemand_game():
+    rand_noun = wn.x_rand_pos(1,'n')[0]
+    rand_adj = wn.x_rand_pos(1,'a')[0]
+    seconds = 60
 
-
+    return render_template('haikuondemand-game.html',
+                           seconds=seconds,
+                           rand_noun=rand_noun,
+                           rand_adj=rand_adj)
 
     
+@app.route('/_save_haiku-on-demand', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def save_haikuondemand():
+    """
+    Haiku does not have grammar checking; but it checks for the
+    correct number of syllables; in the future, if words are required
+    to be used, this should also be checked;
+    """
+    
+    if request.method == 'POST':
+        result = request.form
+
+        language = 'eng'
+        title = result['title'].strip()
+        l1 = result['line1'].strip() if 'line1' in result.keys() else '' 
+        l2 = result['line2'].strip() if 'line2' in result.keys() else ''
+        l3 = result['line3'].strip() if 'line3' in result.keys() else ''
+        seconds = result['seconds']
+        username = result['username']
+
+        s1 = syl.num_of_syllables(l1)
+        s2 = syl.num_of_syllables(l2)
+        s3 = syl.num_of_syllables(l3)
+
+        if (l1 and l2 and l3):
+            if (s1 != 5) or (s2 != 7) or (s3 != 5): # SYLLABLE PROBLEM
+
+                answer = [(l1, s1), (l2, s2), (l3, s3)]
+                feedback = "syllable count"
+                 
+                write_haikuondemand_feedback(title, feedback, l1, l2, l3, s1, s2, s3,
+                                     seconds, language, username, current_time())
+                
+                return render_template('haikuondemand-feedback.html',
+                                       answer=answer,
+                                       title=title)
+
+            else:
+                write_haikuondemand(title, l1, l2, l3,
+                                    seconds, language, username, current_time())
+                return haikuondemand_game()
+
+            
+        else: # SKIPPED TITLE
+            write_haikuondemand(title, None, None, None,
+                            seconds, language, username, current_time())
+            
+            return haikuondemand_game()
+
 
 ################################################################################
 # ADMIN VIEWS

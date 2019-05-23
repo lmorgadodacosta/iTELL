@@ -1,0 +1,102 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<style>
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23CCC' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+}
+
+.carousel-control-next-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23CCC' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
+}
+</style>
+
+<span class="h5">Here are some recent contributions:</span>
+<hr><br><br>
+<div id="carouselExampleControls" class="carousel slide" data-ride="carousel" >
+  <div class="carousel-inner">
+
+    {% for ex in example_list %}
+    <div class="carousel-item {% if ex[0] == 0 %} active {% endif %}">
+      <blockquote>
+        <div class="row">
+          <div class="col-sm-12 text-center">
+	    <p><span class="h5">{{ ex[1] }}</span></p>
+            <p><i class="fa fa-quote-left"></i>&nbsp;&nbsp;<br>
+	      <span class="h5">{{ ex[2] }}</span> <br>
+	      <span class="h5">{{ ex[3] }}</span> <br>
+	      <span class="h5">{{ ex[4] }}</span> <br>
+	      &nbsp;&nbsp;<i class="fa fa-quote-right"></i></p>
+            <div class="col-sm-12">
+              <small><em>{{ ex[5] }}</em> ({{ ex[6] }}), {{ ex[7] }}</small>
+            </div>
+          </div>
+        </div>
+      </blockquote>
+    </div>
+    {% endfor %}
+
+  </div>
+  <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+    <span class="carousel-control-next-icon"  aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+<br><br><hr>
+
+
+<div class="col-sm-12 text-center">
+<h4>Haiku on Demand</h4>
+</div>
+
+<br>
+<b>Instructions:</b>
+<p>The player will be given a prompt, which looks like this:</p>
+<p>…</p>
+
+<p>The title... </p>
+
+<p>The goal of the game is ... </p>
+
+<p><b>title</b>: XXX<br>
+  “Line1 <br>
+  Line2 <br>
+  Line3”</p>
+
+
+<p>This game...</p>
+
+
+<div class="col-sm-12 text-center">
+  <br><br>
+  <form action="{{ url_for('haikuondemand_game') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;"><b>Play Now</b></button>
+  </form>
+</div>
+
+
+<script>
+// When the DOM is ready, run this function
+$(document).ready(function() {
+  //Set the carousel options
+  $('#quote-carousel').carousel({
+    pause: true,
+    interval: 3000,
+  });
+});
+</script>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

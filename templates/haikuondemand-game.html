@@ -1,0 +1,58 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+
+<span class="h4">The
+  <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ rand_adj[1] }}</em>"><u>{{ rand_adj[0].title() }}</u></span>
+  <span data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{ rand_noun[1] }}</em>"><u>{{ rand_noun[0].title() }}</u></span>
+</span>
+
+
+<form action="{{ url_for('save_haikuondemand') }}" style="display:inline;" method = "POST">
+  &nbsp;&nbsp;&nbsp;
+  <button type="submit" class="btn btn-sm"
+	  style="font-size:20px; background-color: transparent; border-color: transparent;">
+    <i class="fa fa-refresh"></i></button>
+  <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+  <input type="hidden" id="title" name="title" value="The {{ rand_adj[0].title() }} {{ rand_noun[0].title() }}">
+  <br>
+  <div id="game-input" class="btn-toolbar" role="toolbar">
+    <input id="line1" name="line1" type="textarea" class="form-control" placeholder="5 syllables"><br>
+    <input id="line2" name="line2" type="textarea" class="form-control" placeholder="7 syllables"><br>
+    <input id="line3" name="line3" type="textarea" class="form-control" placeholder="5 syllables">
+    <div class="btn-group" role="group" aria-label="First group">
+      <br><br><button type="submit" class="btn btn-dark">submit</button>
+    </div>
+  </div>
+  <input type="hidden" id="seconds" name="seconds" value="0">
+  <br><span id="countdown"></span>
+  <br><span id="countup"></span>
+</form>
+
+
+
+<script>
+// COUNT-DOWN
+countdown({{ seconds }}, 0, "countdown");
+// COUNT-SECONDS
+countseconds(0,0,"seconds");
+</script>
+
+<script>
+// this initializes all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}
