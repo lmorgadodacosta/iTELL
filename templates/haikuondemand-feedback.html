@@ -20,17 +20,17 @@ This was your haiku:
 <p>
   <span class="h5"> {{ answer[0][0] }}
     {% if answer[0][1] != 5 %}
-    <span class="text-danger"> ({{ answer[0][1] }} syllables)</span>
+    <span class="text-danger"> ({{ answer[0][1] }} syllable{% if answer[0][1] != 1 %}s{% endif %})</span>
     {% endif %}
   </span><br>
   <span class="h5">{{ answer[1][0] }}
     {% if answer[1][1] != 7 %}
-    <span class="text-danger"> ({{ answer[1][1] }} syllables)</span>
+    <span class="text-danger"> ({{ answer[1][1] }} syllable{% if answer[0][1] != 1 %}s{% endif %})</span>
     {% endif %}
   </span><br>
   <span class="h5">{{ answer[2][0] }}  
     {% if answer[2][1] != 5 %}
-    <span class="text-danger"> ({{ answer[2][1] }} syllables)</span>
+    <span class="text-danger"> ({{ answer[2][1] }} syllable{% if answer[0][1] != 1 %}s{% endif %})</span>
     {% endif %}
   </span><br>
 </p>

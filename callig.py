@@ -337,7 +337,7 @@ def save_wickedproverbs():
 def haikuondemand_info():
 
     base_ex = [(0,
-                "Title", "Line1", "Line2", "Line3",
+                "The Heavy Power Drill", "The drill is unplugged", "Like a dead and heavy man", "Cordless and lifeless",
                 "The CALLIG System", "Unknown date", "0 seconds")]
     
     example_list = []
@@ -369,7 +369,7 @@ def haikuondemand_info():
 def haikuondemand_game():
     rand_noun = wn.x_rand_pos(1,'n')[0]
     rand_adj = wn.x_rand_pos(1,'a')[0]
-    seconds = 60
+    seconds = 90
 
     return render_template('haikuondemand-game.html',
                            seconds=seconds,
