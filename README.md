@@ -1,6 +1,10 @@
-# CALLIG
-Computer-Assisted Language Learning using Improvisational Games
+# iTELL: Intelligent Technologically Enhanced Language Learning
 
+
+Includes:
+- LCC-NTU English Writing Support System
+- CALLIG: Computer-Assisted Language Learning using Improvisational Games
+- iXue: an intelligent system to support Mandarin Chinese learners   
 
 
 
