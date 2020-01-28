@@ -1,0 +1,20 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<div>
+  <br><br>
+  <p><b>Congratulations!</b></p>
+  <p>An email with the details of your registration has been sent to the email address provided.</p>
+  <p>Please check your email and <a href="{{ url_for('login') }}">sign in</a> with your new credentials.</p>
+</div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

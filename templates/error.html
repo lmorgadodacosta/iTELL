@@ -1,0 +1,16 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<!-- Custom styles for this template -->
+<link href="{{ url_for('static', filename='lcc.css') }}" rel="stylesheet">
+
+
+<div class="col-sm-12 text-center">
+  <br>
+  <br>
+  {{ error }}
+  <br>
+  <br>
+</div>
+
+{% endblock %}

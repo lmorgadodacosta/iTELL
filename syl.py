@@ -1,76 +1,25 @@
 from nltk.corpus import cmudict
-exception = {"giant":2,
-"am":1,
-"latecomer":3,
-"latecomers":3,
-"penelope":4,
-"table":2,
-"I'll":1,
-"you'll":1,
-"he'll":1,
-"you'll":1,
-"she'll":1,
-"they'll":1,
-"who'll":1,
-"I'm":1,
-"you're":1,
-"we're":1,
-"they're":1,
-"he's":1,
-"she's":1,
-"What's":1,
-"where's":1,
-"who's":1,
-"when's":1,
-"that's":1,
-"there's":1,
-"there're":1,
-"who're":1,
-"where're":1,
-"can't":1,
-"couldn't":2,
-"mustn't":2,
-"doesn't":2,
-"wouldn't":2,
-"shouldn't":2,
-"shan't":1,
-"needn't":2,
-"oughtn't":2,
-"won't":1,
-"don't":1,
-"wasn't":2,
-"haven't":2,
-"hasn't":2,
-"aren't":1,
-"were't":1,
-"ain't":1,
-"I've":1,
-"You've":1,
-"should've":2,
-"would've":2,
-"could've":2,
-"they've":1,
-"must've":2,
-"I'd":1,
-"you'd":1,
-"he'd":1,
-"she'd":1,
-"we'd":1,
-"they'd":1,
-"where'd":1,
-"y'all":1,
-"McDonald":3}
+cmu_syl = cmudict.dict()
 
+exception = {"am":1, "giant":2, "latecomer":3, "latecomers":3, "penelope":4, "table":2,
+"onomatopoeia":6}
 
 allwords = set(["late", "comer", "come", "coming", "cat", "ice", "cream"])
+
+def stripPunc(sent):
+    """Strips punctuation from list of words"""
+    puncList = [".",";",":","!","?","/","\\",",","#","@","$","&",")","(","\""]
+    for punc in puncList:
+        sent = sent.replace(punc,'')
+    return sent
 
 #todo: "The chicken explodes" is counted as 6 syllables, fix it
 def syllables(word):
     """
-    This function returns the number of syllables in a string. It first
-    checks whether it is a compound, if it is, it calls this function
-    recursively to count the number of syllable of each compound, else,
-    it counts syllables normally. I am also stripping the punctuation
+    This function returns the number of syllables in a string. It first 
+    checks whether it is a compound, if it is, it calls this function 
+    recursively to count the number of syllable of each compound, else, 
+    it counts syllables normally. I am also stripping the punctuation 
     and making every letter into lowercase;
     """
     word = word.lower().strip(".:;?!").replace("-", "")
@@ -101,7 +50,7 @@ def syllables(word):
 
 
 def compound(word):
-    """
+    """ 
     This function returns the number of syllable of a word if it is a
     compound, if not, it returns false, only on the first split
     from the left;
@@ -117,32 +66,27 @@ def compound(word):
     return False
 
 def num_of_syllables(line):
+    line = stripPunc(line)
     wordlist = line.split()
     counter = 0
     for word in wordlist:
         counter += nsyl(word)
-        # if word in exception:
-        #     counter = counter + exception[word]
-        # #elif word is a compound then return number of syllable compound
-        # else:
-        #     counter = counter + syllables(word)
     return counter
-
 
 def nsyl(word):
     """
-    This function computes the nuber of syllables in a word by first
-    trying check if the CMU dictionary has that info. If not, it uses
-    a rule-based system that is not yet completely correct but it's
-    getting there.  When the CMU dictionary provides more than one
-    reading, we are defaulting to the max number of syllables, since
-    the other  values are based on 'fast reading' pronunciations of
+    This function computes the nuber of syllables in a word by first 
+    trying check if the CMU dictionary has that info. If not, it uses 
+    a rule-based system that is not yet completely correct but it's 
+    getting there.  When the CMU dictionary provides more than one 
+    reading, we are defaulting to the max number of syllables, since 
+    the other  values are based on 'fast reading' pronunciations of 
     that same word.
     """
     if word in exception.keys():
         return exception[word]
     else:
         try:
-            return max([len(list(y for y in x if y[-1].isdigit())) for x in cmu_syl[word.lower()]]) # returning the max value
-        except KeyError:
+            return max([len(list(y for y in x if y[-1].isdigit())) for x in cmu_syl[word.lower()]]) # returning the max value 
+        except KeyError:        
             return syllables(word)

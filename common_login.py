@@ -33,7 +33,7 @@ with app.app_context():
         to include a 'role' argument to allow users with different
         roles access different views and a group access to close some
         views by groups. For example:
-        @login_required(role=0, group='ntuwn')   0 = for all
+        @login_required(role=0, group='ntuwn-omw')   0 = for all
         """
         def wrapper(fn):
             @wraps(fn)
@@ -42,8 +42,16 @@ with app.app_context():
                     return login_manager.unauthorized()
                 if current_user.role < role:
                     return login_manager.unauthorized()
-                if group != 'open' and current_user.group != group:
-                    return login_manager.unauthorized()
+                if group != 'open':
+
+                    access = False
+                    user_groups = current_user.group.split('-')
+                    for grp in user_groups:
+                        if grp != group:
+                            access = True
+
+                    if access == False:
+                        return login_manager.unauthorized()
 
                 return fn(*args, **kwargs)
             return decorated_view
@@ -54,8 +62,8 @@ with app.app_context():
         def __init__(self, userID, password, role, group, name):
             self.id = userID
             self.password = password
-            self.role = role
-            self.group = group
+            self.role = role           # an integer from 0 to 99
+            self.group = group         # group1-group2-group3
             self.name = name
 
         def get_auth_token(self):

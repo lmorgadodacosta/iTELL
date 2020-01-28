@@ -1,0 +1,54 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<div class="col-sm-12 text-center">
+<h4>Single Sentence Checker</h4>
+</div>
+<br>
+
+<div class="col-sm-12 text-center">
+This is what you wrote:
+
+<p>
+  <i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+  <span class="h5">{{ sent }}</span>&nbsp;&nbsp;
+  <i class="fa fa-quote-right"></i>
+</p>
+
+<br>
+
+<hr>		
+{% if errors %}
+
+<b>This is what we think might be wrong with it:</b>
+    {% for e in errors %}
+        <br>{{ e|safe }}
+    {% endfor %}
+{% else %}
+Our system was not able to find any problems with this sentence.<br>
+This does not mean the sentence does not have any problems with it.  
+{% endif %}
+<br><br>
+<br><br>
+</div>
+
+<div class="col-sm-12 text-center">
+  <form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;">
+      <b>Check Another Sentence</b>
+    </button>
+  </form>
+</div>
+
+
+
+<script>
+// this initializes all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+
+{% endblock %}

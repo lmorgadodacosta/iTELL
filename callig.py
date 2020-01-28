@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os, sys, sqlite3, datetime, urllib, gzip, requests, codecs, random
-from time import sleep
+import os, sys, sqlite3, datetime, urllib, gzip, requests, codecs
+import random, string 
 from flask import Flask, render_template, g, request, redirect, url_for, send_from_directory, session, flash, jsonify, make_response, Markup
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+from flask_mail import Mail, Message
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer # for safe session cookies
 from collections import defaultdict as dd
@@ -12,31 +13,66 @@ from hashlib import md5
 from werkzeug import secure_filename
 
 
+import lxml.html # to manipulate html 
+
 from common_login import *
 from common_sql import *
 
+from collections import defaultdict as dd
+def inf_dd():
+    return dd(inf_dd)
+
+
+import lcc
 import wn
 import syl
 import game_data
 import erg_call
+import common_sql as csql
 from feedback import eng_feedback
 
 app = Flask(__name__)
-app.debug = True
+#app.debug = True
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 
+app.config.update(
+    # When using gmail, we need to allow unsafe apps to use the email.
+    # check: https://pythonprogramming.net/flask-email-tutorial/
+    
+    DEBUG=True, 
+    #EMAIL SETTINGS
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME = 'openwns@gmail.com',
+    MAIL_PASSWORD = 'changeme'
+)
+
+
+ 
+mail = Mail(app)
 
 ################################################################################
 # LOGIN
 ################################################################################
 login_manager.init_app(app)
 
+def randomPassword(stringLength=10):
+    """
+    Generate a random string of letters and digits. 
+    This is being used to generate random passwords.
+    """
+    letters_nums = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters_nums) for i in range(stringLength))
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """ This login function checks if the username & password
+    """
+    This login function checks if the username & password
     match the admin.db; if the authentication is successful,
-    it passes the id of the user into login_user() """
+    it passes the id of the user into login_user().
+    """
 
     if request.method == "POST" and \
        "username" in request.form and \
@@ -74,12 +110,14 @@ def logout():
 def before_request():
     g.admin = connect_admin()
     g.callig = connect_callig()
+    g.lcc = connect_lcc()
 
 @app.teardown_request
 def teardown_request(exception):
     if hasattr(g, 'db'):
         g.admin.close()
         g.callig.close()
+        g.lcc.close()
 ################################################################################
 
 
@@ -88,7 +126,7 @@ def teardown_request(exception):
 # GENERAL FUNCTIONS
 ################################################################################
 def current_time():
-    '''   2017-8-17  14:35    '''
+    '''   YYYY-MM-DD  HH:MM    '''
     d = datetime.datetime.now()
     return d.strftime('%Y-%m-%d %H:%M:%S')
 ################################################################################
@@ -97,6 +135,27 @@ def current_time():
 ################################################################################
 # AJAX REQUESTS
 ################################################################################
+
+@app.route('/_lccReport', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lccReport():
+    """
+    This function produces the HTML report for any given document.
+    """
+
+    filename = request.args.get('fn', None)
+
+    docx_html = lcc.docx2html(filename)
+    (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename) 
+
+    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report)
+    
+    
+    # lxml.html.tostring returns type=bytes, must decode here
+    structured_html = lxml.html.tostring(htmlElem).decode('utf-8')
+    return jsonify(result=structured_html)
+
+
 
 
 ################################################################################
@@ -110,9 +169,27 @@ def index():
 def team():
     return render_template('team.html')
 
+@app.route('/callig', methods=['GET', 'POST'])
+def callig_intro():
+    return render_template('callig_intro.html')
+
+@app.route('/lcc', methods=['GET', 'POST'])
+def lcc_intro():
+    return render_template('lcc_intro.html')
+
+
 @app.route('/improvisation', methods=['GET', 'POST'])
 def improvisation():
     return render_template('improvisation.html')
+
+
+################################################################################
+# ADMIN VIEWS
+################################################################################
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return render_template('register.html')
 
 
 ################################################################################
@@ -427,6 +504,231 @@ def save_haikuondemand():
             return haikuondemand_game()
 
 
+
+
+################################################################################
+# EMAIL VIEWS
+################################################################################
+@app.route('/test-email-settings')
+def send_mail():
+	try:
+	    msg = Message("Send Mail Tutorial!",
+		          sender="openwns@gmail.com",
+		          recipients=["luis.passos.morgado@gmail.com"])
+	    msg.body = "Yo!\nHave you heard the good word of Python???"
+	    mail.send(msg)
+	    return 'Mail sent!'
+	except Exception as e:
+	    return(str(e))
+        
+
+@app.route('/register-mail', methods=['GET', 'POST'])
+def register_mail():
+    if request.method == 'POST':
+        result = request.form
+
+        email = result['email'].strip()
+        name = result['name'].strip()
+
+        pw = randomPassword()
+        hashed_pw = hash_pass(pw) 
+        
+
+        
+        ########################################################################
+        # Group is a field defines what uses can see and/or can access.
+        # it should be a string of the form "grp1-grp2-grp3". All users should
+        # start their group with "user-..." e.g. "user-grp1-grp2", while admins
+        # should start with "admin-..." instead. However, order of the other
+        # groups should not be relevant.
+        ########################################################################
+        group = 'user'
+        if 'callig' in result.keys():
+            group += "-callig"
+
+        if 'lccapp' in result.keys():
+            group += "-lccapp"
+
+        if group == "user":
+            group = "user-callig-lccapp"
+        ########################################################################
+
+
+        
+        print(email) #TEST
+        print(name) #TEST
+        print(pw) #TEST
+        print(hashed_pw) #TEST
+        print(group) #TEST
+
+        # TODO: check if the email already exists... if it does, reject!
+        # if it doesn't then create a new user in the DB
+        # prepare an html template in case something goes wrong
+        #
+        
+        try:
+            msg = Message("Welcome!", # Subject
+                          sender="openwns@gmail.com",
+                          recipients=["luis.passos.morgado@gmail.com"])
+
+            # msg.body = "..." # if a text-only version is needed
+            msg.html = render_template('email-register.html',
+                                       name=name,
+                                       username=email,
+                                       password=pw)
+
+            mail.send(msg)
+            return render_template('registration_confirmation.html')
+
+        except Exception as e:
+            print(str(e))
+            return 'Something went wrong! Please report this.'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+# LCC VIEWS
+################################################################################
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def upload():
+    return render_template('upload.html')
+
+
+@app.route('/single-sentence', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lcc_sentence():
+    return render_template('lcc_sentence.html')
+
+
+@app.route('/report', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def report():
+    """
+    This function saves the uploaded file and starts the process that will 
+    check the uploaded document. The document check is actually called 
+    asynchronously via javascript from within the report template.
+    """
+    passed, filename = lcc.uploadFile(current_user.id)
+
+    if passed == False:
+        error = """There was a problem while uploading your your file. """
+        error += """Please check that the file type you are using is '.docx'"""
+        error += """ and not '.doc', for example."""
+        return render_template('error.html', error=error)
+
+    else:
+        return render_template('report.html',
+                               passed=passed,
+                               filename=filename)
+
+@app.route('/_save_singlesentence', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def save_lcc_sentence():
+    if request.method == 'POST':
+        result = request.form
+
+        sent = result['sentence'].strip()
+        username = result['username']
+
+        ########################################################################
+        # WRITE SENTENCE IN DATABASE
+        ########################################################################
+        docid = csql.fetch_max_doc_id() + 1
+        csql.insert_into_doc(docid, 'single_sentence')
+
+        sid = docid * 100000
+        pid = 0
+        csql.insert_into_sent(sid, docid, pid, sent)
+        print()
+        word_list = lcc.pos_lemma(lcc.sent2words(sent))        
+        for w in word_list:
+            wid = csql.fetch_max_wid(sid) + 1
+            (surface, pos, lemma) = w
+            csql.insert_into_word(sid, wid, surface, pos, lemma)
+
+        words = csql.fetch_words_by_sid(sid, sid)[sid]
+        app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc')
+
+        ########################################################################
+        # WRITE ERRORS TO CORPUS DB
+        ########################################################################
+        all_errors = app_errors | non_app_errors
+        for i, (label, loc) in enumerate(all_errors):
+            csql.insert_into_error(sid, i, label, loc)
+
+
+
+            
+        errors = []
+        
+        for e in app_errors:
+            tag = e[0]
+            focus = e[1]
+            if tag in eng_feedback:
+                if 'lcc' in eng_feedback[tag]:
+                    print(eng_feedback[tag])
+                    feedback = eng_feedback[tag]['lcc'][0].format(focus)
+                    errors.append(feedback)
+            
+
+        return render_template('lcc_feedback.html',
+                               sent=sent,
+                               errors=errors,
+                               eng_feedback=eng_feedback)
+    
+
+
+        # if answer and tags and ('NoParse' not in tags):
+        #     # we are not showing feedback for a 'NoParse'
+
+        #     sex_with_me_id = None
+        #     for tag in tags:
+        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
+        #                                  seconds, language, username, current_time())
+
+        #     return render_template('lcc_feedback.html',
+        #                            answer=answer,
+        #                            tags=tags,
+        #                            foci=foci,
+        #                            eng_feedback=eng_feedback)
+
+        # if answer and tags and ('NoParse' in tags):
+        #     sex_with_me_id = write_sexwithme(prompt, answer, seconds, language,
+        #                                      username, current_time())
+
+        #     for tag in tags:
+        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
+        #                                  seconds, language, username, current_time())
+
+        # elif answer:
+        #     print(write_sexwithme(prompt, answer, seconds, language,
+        #                     username, current_time()))
+            
+        # else:
+        #     write_sexwithme(prompt, None, seconds, language,
+        #                     username, current_time())
+    
+    return sexwithme_game()
+
+
+        
+        
 ################################################################################
 # ADMIN VIEWS
 ################################################################################
@@ -437,18 +739,7 @@ def useradmin():
     users = fetch_allusers()
     return render_template("useradmin.html", users=users)
 
-@app.route('/upload', methods=['GET', 'POST'])
-@login_required(role=0, group='open')
-def upload():
-    return render_template('upload.html')
 
-@app.route('/report', methods=['GET', 'POST'])
-@login_required(role=0, group='open')
-def report():
-    passed, filename = uploadFile(current_user.id)
-    return render_template('report.html',
-                           passed=passed,
-                           filename=filename)
 
 
 if __name__ == '__main__':

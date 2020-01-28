@@ -5,9 +5,9 @@ from os import path
 from flask import Flask, current_app, g
 from collections import defaultdict as dd
 
-import delphin
-from delphin.interfaces import ace
-from delphin.derivation import UdfNode, UdfTerminal
+#import delphin
+from delphin import ace
+from delphin.derivation import UDFNode, UDFTerminal
 
 
 
@@ -49,7 +49,7 @@ def check_nodes(obj,errors):
     and "mal_" is in the type hierarchy. This is not necessarity 
     true for Zhong later
     """
-    if isinstance(obj, UdfNode):
+    if isinstance(obj, UDFNode):
         error = ''
         if 'rbst' in obj.entity:  
             error = obj.entity
@@ -86,7 +86,7 @@ with app.app_context():
 
     def check_sents(sent_list):
         """
-        Given a list of sentences, this function tries to parse each one with 
+        Given a list of sentences, this function tries to parse each one with
         the default ERG and, if it fails, it uses the ERG enhanced with mal-rules
         to parse the same input. It returns a list with the same list of
         sentences and a list of error codes found for each sentence.
@@ -95,18 +95,16 @@ with app.app_context():
         """
 
         erg_results = [] 
-        with ace.AceParser(path.join(ROOT, ERG),
+        with ace.ACEParser(path.join(ROOT, ERG),
                            executable=path.join(ROOT, ACE),
                            cmdargs=['-1', '--timeout=10']) as parser, \
-             ace.AceParser(path.join(ROOT, MAL_ERG),
+             ace.ACEParser(path.join(ROOT, MAL_ERG),
                            executable=path.join(ROOT, ACE),
                            cmdargs=['-1', '--timeout=10', '--udx']) as mal:
 
             for sent in sent_list:
                 
                 erg_parse = parser.interact(sent)
-
-                # list_lexids(erg_parse.result(0).derivation()) # FIXME REMOVE!
 
                 if not erg_parse['results']: # if there were no parses
 
@@ -131,7 +129,32 @@ with app.app_context():
                     else: # only a general NoParse tag can be given
                         erg_results.append((sent, [('NoParse', '')]))
                 
-                else: # assumed error-free for now
-                    erg_results.append((sent, []))  
+                else:
 
+                    # Check for Mood (Imperative and Interrogative)
+                    try:
+                        mrs = erg_parse.result(0).mrs()                        
+                        sf = mrs.properties(mrs.index)['SF']
+                    except:
+                        print("MRS ERROR: "+sent , file=sys.stderr)
+                        sf = []
+
+                    
+                    if sf != 'prop':
+                        erg_results.append((sent, [(sf, '')]))
+                                
+
+                    else: # Propositions are good
+                        erg_results.append((sent, []))
+                    
         return erg_results
+
+    
+
+# CHECK this sentence. The ERG parse fails and the mal-erg does not give any node to inspect
+# This means that the mal-erg is using some rules that we are not catching properly
+# Maybe not marked in Instances?
+# NOTE: parsed 1 / 1 sentences, avg 120710k, time 0.67562s
+# NOTE: parsed 0 / 1 sentences, avg 87374k, time 0.54862s
+# ('Since Singapore only has a land area of 719.9 square kilometer, it is also not advisable for the government to increase sitting facilities due to limited space and resource.', [])
+

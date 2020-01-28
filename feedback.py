@@ -1,9 +1,7 @@
 from collections import defaultdict as dd
 eng_feedback = dd(lambda: dd())
 
-eng_feedback['a_det_mass_rbst']['lcc'] = ("""<strong>⇒</strong> You may be using an indefinite article, 'a' or 'an', before an uncountable noun (such as 'research'): 
-{}. Indefinite articles should only precede singular countable nouns. Please check your sentence for uncountable nouns and remove any 
-indefinite articles that precede them.""", 1)
+eng_feedback['a_det_mass_rbst']['lcc'] = ("""<strong>⇒</strong> You may be using an indefinite article, 'a' or 'an', before an uncountable noun (such as 'research'): {}. Indefinite articles should only precede singular countable nouns. Please check your sentence for uncountable nouns and remove any indefinite articles that precede them.""", 1)
 eng_feedback['a_det_mass_rbst']['callig'] = """You may be using an indefinite article, 'a' or 'an', before an uncountable noun (such as 'research'). Indefinite articles should only precede singular countable nouns."""
 
 
@@ -275,28 +273,19 @@ eng_feedback['Contraction']['lcc'] = ("""<strong>⇒</strong> This sentence cont
 not used in formal documents. You may want to expand the contractions to spell out the verb or the word 'not' in full.""", 1)
 
 
-eng_feedback['Formal']['lcc'] = ("""<strong>⇒</strong> This sentence may contain overly formal/archaic words or expressions that may make your writing 
-seem stilted or pompous: {}. You may want to replace these words and expressions with more commonly used expressions, such 
-as mentioned above, previously and according to, that will make your writing more accessible. """, 0.5)
+eng_feedback['Formal']['lcc'] = ("""<strong>⇒</strong> This sentence may contain overly formal/archaic words or expressions that may make your writing seem stilted or pompous: {}. You may want to replace these words and expressions with more commonly used expressions, such as mentioned above, previously and according to, that will make your writing more accessible. """, 0.5)
 
 
-eng_feedback['Informal']['lcc'] = ("""<strong>⇒</strong> This sentence may contain subjective or informal words or expressions: {}. You may want to
- replace these words and expressions with more formal and objective alternatives. """, 0.5)
+eng_feedback['Informal']['lcc'] = ("""<strong>⇒</strong> This sentence may contain subjective or informal words or expressions: {}. You may want to replace these words and expressions with more formal and objective alternatives. """, 0.5)
 
 
-eng_feedback['LongSentence']['lcc'] = ("""<strong>⇒</strong> This sentence is much longer than the average sentence. It may be difficult for readers to 
-read the sentence and understand it after reading it once. There is also a higher risk of making grammar mistakes in such a 
-long sentence. You may want to consider breaking up the sentence to make it easier for the reader to follow the text.""", 0.5)
+eng_feedback['LongSentence']['lcc'] = ("""<strong>⇒</strong> This sentence is much longer than the average sentence. It may be difficult for readers to read the sentence and understand it after reading it once. There is also a higher risk of making grammar mistakes in such a long sentence. You may want to consider breaking up the sentence to make it easier for the reader to follow the text.""", 0.5)
 
 
-eng_feedback['VeryLongSentence']['lcc'] = ("""<strong>⇒</strong> This sentence is much longer than the average sentence. It may be difficult for readers to 
-read the sentence and understand it after reading it once. There is also a higher risk of making grammar mistakes in such a 
-long sentence. You may want to consider breaking up the sentence to make it easier for the reader to follow the text.""", 1)
+eng_feedback['VeryLongSentence']['lcc'] = ("""<strong>⇒</strong> This sentence is much longer than the average sentence. It may be difficult for readers to read the sentence and understand it after reading it once. There is also a higher risk of making grammar mistakes in such a long sentence. You may want to consider breaking up the sentence to make it easier for the reader to follow the text.""", 1)
 
 
-eng_feedback['PronounStyle']['lcc'] = ("""<strong>⇒</strong> This sentence contains a first person singular pronoun (e.g. 'I', 'mine') or a second person
- pronoun (e.g. 'you', 'yours'): {}. These pronouns are not used in formal technical writing. You may want to remove the pronouns listed above and 
-use alternative sentence constructions that avoid the use of such pronouns.""", 1)
+eng_feedback['PronounStyle']['lcc'] = ("""<strong>⇒</strong> This sentence contains a first person singular pronoun (e.g. 'I', 'mine') or a second person pronoun (e.g. 'you', 'yours'): {}. These pronouns are not used in formal technical writing. You may want to remove the pronouns listed above and use alternative sentence constructions that avoid the use of such pronouns.""", 1)
 
 
 eng_feedback['ques']['lcc'] = ("""<strong>⇒</strong> The system has identified this sentence as a question (discouraged in formal writing). Read your sentence
@@ -304,7 +293,7 @@ eng_feedback['ques']['lcc'] = ("""<strong>⇒</strong> The system has identified
 proposal. You can ignore the alert if the ‘question’ appears in your references list.""", 0.5)
 
 
-eng_feedback['Word Case']['lcc'] = ("""<strong>⇒</strong> You may be using upper or lower case (capital and small letters) inappropriately in this 
+eng_feedback['WordCase']['lcc'] = ("""<strong>⇒</strong> You may be using upper or lower case (capital and small letters) inappropriately in this 
 sentence: {}. Please check your sentence and make changes to your use of upper or lower case only if you feel it is 
 necessary.""", 0.5)
 
@@ -322,12 +311,18 @@ entry in your references list. Read your sentence carefully, and decide whether 
 if it is actually a command/instruction.""", 0.5)
 
 
+# FIXME: Maybe these should be distributed among other categories?
+eng_feedback['WordChoice']['lcc'] = ("""<strong>⇒</strong> You may used a word or phrase that our lecturers would like you to avoid: {}. Please double check if it is necessary, and rephrase it if possible.""", 0.5)
+
+
+
 ################################################################################
 # OTHER GENERIC FEEDBACK
 ################################################################################
 
-eng_feedback['RepeatedWord']['lcc'] = ("""<strong>⇒</strong> You may have repeated a word in this sentence: {}.  
-Please check the sentence and remove one instance of this word if necessary.""", 1)
+eng_feedback['RepeatedWord']['lcc'] = ("""<strong>⇒</strong> You may have repeated a word in this sentence: {}. Please check the sentence and remove one instance of this word if necessary.""", 1)
+
+eng_feedback['Spelling']['lcc'] = ("""<strong>⇒</strong> You may have mispelled a word: {}. Please double check the spelling of this word and change it if necessary.""", 0.5)
 
 
 eng_feedback['NoParse']['lcc'] = ("""<strong>⇒</strong> The system indicates that this sentence may be problematic but cannot specify the error/s. 

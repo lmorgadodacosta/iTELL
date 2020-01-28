@@ -1,0 +1,24 @@
+
+
+/***
+ This is the class for errors, it could be adapted into a gradient later
+***/
+
+.doccheck {
+    background: rgba(144,238,144,0.4);
+    border-radius: 7px;
+    padding: 0px 5px 0px 5px;
+}
+
+
+.milderror {
+    background: rgba(255,255,0,0.4);
+    border-radius: 7px;
+    padding: 0px 5px 0px 5px;
+}
+
+.seriouserror {
+    background: rgba(255,0,0,0.2);
+    border-radius: 7px;
+    padding: 0px 5px 0px 5px;
+}

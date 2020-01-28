@@ -53,3 +53,11 @@ code {
   font-size: 10px;
   margin: 30px;
 }
+
+
+
+/* all images occupy max 70% of available horizontal space */
+img {max-width: 70%;max-height: 250px;}
+
+/*     max-width: 70%;  Breaks the alignment of the tooltip       */
+.tooltip-inner { max-width: 1000px; font-size: 16px; text-align: left;}

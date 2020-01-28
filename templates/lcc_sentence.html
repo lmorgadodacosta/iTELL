@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<form action="{{ url_for('save_lcc_sentence') }}" style="display:inline;" method="POST">
+  <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+  <input type="hidden" id="frame" name="frame" value="test">
+  <br>
+  <div id="game-input" class="btn-toolbar" role="toolbar">
+    <textarea id="sentence" name="sentence" type="textarea"  rows="4" 
+	      class="form-control"
+	      placeholder="Type your sentence here..."></textarea>
+    <br><br>
+  </div>  
+    <div class="col-sm-12 text-center ">
+      <br><button type="submit" class="btn btn-dark"><b>Submit</b></button>
+    </div>
+</form>
+
+<br><br>
+<h5>Intructions</h5>
+Here you can check individual sentences. Contrary to what happens in the <em>docx</em> checker, this method expects a single sentence. If you want to check multiple sentences at the same time, you should use the <em>docx</em> <a href="{{ url_for('upload') }}">Assignment Checker</a> instead.
+
+<br><br>
+<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This is the licence warning.
+
+
+
+{% endblock %}

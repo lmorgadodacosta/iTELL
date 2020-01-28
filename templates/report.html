@@ -1,8 +1,8 @@
 {% extends "index.html" %}
 {% block body %}
 
-
-<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+<link href="{{ url_for('static', filename='lcc.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='lcc_report.js') }}"></script>
 <input type="hidden" name="current_user" value="{{ current_user.id }}">
 <input type="hidden" name="fn" value="{{ filename }}">
 
@@ -10,9 +10,8 @@
 
   <div id="msg" style="text-align:center">
     {% if passed %}
-    <h6>The file "{{ filename }}" was uploaded successfully.</h6>
-    <p>Your file will now be examined by the our Assignment Checker.
-      This process can take a little while (up to 5 mins). Please leave this window open.</p>
+    <h6>Your file was uploaded successfully and it will now be examined by the our application.</h6>
+    <p> Depending on the lenght of the document, this process can take a little while (usually not more than 5 mins). Please leave this window open.</p>
     {% else %}
     <p><i class="fa fa-times" aria-hidden="true"></i>
       The file failed to upload. Please make sure you are using a
@@ -20,10 +19,22 @@
     {% endif %}
   </div>
 
-  <div id="val2"> </div><br>
-
+  <br> <br>
+  <div id="lccreport" onresize="alert('You have changed the size of the window')"> </div><br>
 </div>
 
+
 <div style="clear: both;"></div>
+
+<script>
+window.setInterval(function(){
+  $(function () {
+     $('[data-toggle="tooltip"]').tooltip();
+  })
+}, 1000);
+  
+</script>
+
+
 
 {% endblock %}

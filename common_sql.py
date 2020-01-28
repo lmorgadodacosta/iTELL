@@ -13,9 +13,10 @@ def qs(ll):
 app = Flask(__name__)
 with app.app_context():
 
-    ROOT  = path.dirname(path.realpath(__file__))    
+    ROOT  = path.dirname(path.realpath(__file__))
     ADMINDB = 'db/admin.db'
     CALLIGDB = 'db/callig.db'
+    LCCDB = 'db/lcc.db'
 
 
     ############################################################################
@@ -27,6 +28,9 @@ with app.app_context():
     def connect_callig():
         return sqlite3.connect(path.join(ROOT, CALLIGDB))
     
+    def connect_lcc():
+        return sqlite3.connect(path.join(ROOT, LCCDB))
+
     def query_admin(query, args=(), one=False):
         cur = g.admin.execute(query, args)
         rv = [dict((cur.description[idx][0], value)
@@ -39,6 +43,12 @@ with app.app_context():
                    for idx, value in enumerate(row)) for row in cur.fetchall()]
         return (rv[0] if rv else None) if one else rv
 
+    def query_lcc(query, args=(), one=False):
+        cur = g.lcc.execute(query, args)
+        rv = [dict((cur.description[idx][0], value)
+                   for idx, value in enumerate(row)) for row in cur.fetchall()]
+        return (rv[0] if rv else None) if one else rv
+    
     def write_admin(query, args=(), one=False):
         cur = g.admin.cursor()
         cur.execute(query, args)
@@ -53,6 +63,12 @@ with app.app_context():
         g.callig.commit()
         return lastid
 
+    def write_lcc(query, args=(), one=False):
+        cur = g.lcc.cursor()
+        cur.execute(query, args)
+        lastid = cur.lastrowid
+        g.lcc.commit()
+        return lastid
 
     ############################################################################
     # ADMIN SQL
@@ -109,7 +125,7 @@ with app.app_context():
         """
         Returns the ID of the recently added entry.
         """
-        return write_callig("""INSERT INTO sex_with_me_feedback 
+        return write_callig("""INSERT INTO sex_with_me_feedback
                                            (answer, sex_with_me_id, feedback,
                                             seconds, language, username, timestamp)
                                VALUES (?,?,?,?,?,?,?)""",
@@ -119,7 +135,7 @@ with app.app_context():
     
     def fetch_sexwithme_30():
         result = dd()
-        for r in query_callig("""SELECT * FROM sex_with_me WHERE answer IS NOT NULL 
+        for r in query_callig("""SELECT * FROM sex_with_me WHERE answer IS NOT NULL
                                  ORDER BY timestamp DESC LIMIT 30"""):
             result[r['id']] = [r['prompt'], r['answer'], r['seconds'], r['language'],
                                r['username'], r['timestamp']]
@@ -136,7 +152,7 @@ with app.app_context():
         """
         Returns the ID of the recently added entry.
         """
-        return write_callig("""INSERT INTO wicked_proverbs 
+        return write_callig("""INSERT INTO wicked_proverbs
                                (frame, w1, w2, proverb, explanation, seconds,
                                 language, username, timestamp)
                                VALUES (?,?,?,?,?,?,?,?,?)""",
@@ -146,7 +162,7 @@ with app.app_context():
 
     def fetch_wickedproverbs_30():
         result = dd()
-        for r in query_callig("""SELECT * FROM wicked_proverbs 
+        for r in query_callig("""SELECT * FROM wicked_proverbs
                                  WHERE proverb IS NOT NULL
                                  AND explanation IS NOT NULL
                                  ORDER BY timestamp DESC LIMIT 30"""):
@@ -168,7 +184,7 @@ with app.app_context():
         """
         return write_callig("""
                             INSERT INTO haiku_on_demand 
-                            (title, l1, l2, l3, 
+                            (title, l1, l2, l3,
                              seconds, language, username, timestamp)
                             VALUES (?,?,?,?,?,?,?,?)
                             """, [title, l1, l2, l3,
@@ -180,8 +196,8 @@ with app.app_context():
         Returns the ID of the recently added entry.
         """
         return write_callig("""
-                            INSERT INTO haiku_on_demand_feedback 
-                            (title, feedback, l1, l2, l3, s1, s2, s3, 
+                            INSERT INTO haiku_on_demand_feedback
+                            (title, feedback, l1, l2, l3, s1, s2, s3,
                              seconds, language, username, timestamp)
                             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                             """, [title, feedback, l1, l2, l3, s1, s2, s3,
@@ -191,7 +207,7 @@ with app.app_context():
     def fetch_haikuondemand_30():
         result = dd()
         for r in query_callig("""
-                              SELECT * FROM haiku_on_demand 
+                              SELECT * FROM haiku_on_demand
                               WHERE l1 IS NOT NULL
                               AND l2 IS NOT NULL
                               AND l3 IS NOT NULL
@@ -201,3 +217,72 @@ with app.app_context():
                                r['username'], r['timestamp'], r['seconds']]
         return result
     
+
+
+    ############################################################################
+    # LCC SQL
+    ############################################################################
+
+    def fetch_max_doc_id():
+        for r in query_lcc("""SELECT MAX(docid) from doc"""):
+            if r['MAX(docid)']:
+                return r['MAX(docid)']
+            else:
+                return 0
+
+    def fetch_max_sid():
+        for r in query_lcc("""SELECT MAX(sid) from sent"""):
+            if r['MAX(sid)']:
+                return r['MAX(sid)']
+            else:
+                return 0
+
+    def fetch_sents_by_docid(docid):
+        sents = dd()
+        for r in query_lcc("""SELECT sid, sent from sent
+                              WHERE docid = ?
+                           """, [docid]):
+            sents[r['sid']] = r['sent']
+        return sents
+
+    def fetch_words_by_sid(sid_min, sid_max):
+        words = dd(lambda: dd())
+        for r in query_lcc("""SELECT sid, wid, word, pos, lemma from word
+                              WHERE sid >= ? AND sid <= ?
+                           """, [sid_min, sid_max]):
+                words[r['sid']][r['wid']]=[r['word'], r['pos'],r['lemma']]
+        return words
+
+    def fetch_max_wid(sid):
+        for r in query_lcc("""SELECT MAX(wid) from word WHERE sid = ?""", [sid]):
+
+            if r['MAX(wid)']:
+                return r['MAX(wid)']
+            else:
+                return 0
+
+    def insert_into_doc(docid, docname):
+        return write_lcc("""INSERT INTO doc (docid, title)
+                               VALUES (?,?)
+                            """, [docid, docname])
+
+    def update_html_into_doc(docid, html):
+        return write_lcc("""UPDATE doc SET doc = ? 
+                               WHERE docid = ?
+                            """, [html, docid])
+
+    def insert_into_sent(sid, docid, pid, sent):
+        return write_lcc("""INSERT INTO sent (sid, docID, pid, sent)
+                               VALUES (?,?,?,?)
+                            """, [sid, docid, pid, sent])
+
+    def insert_into_word(sid, wid, word, pos, lemma):
+        return write_lcc("""INSERT INTO word (sid, wid, word, pos, lemma)
+                               VALUES (?,?,?,?,?)
+                            """, [sid, wid, word, pos, lemma])
+
+    def insert_into_error(sid, eid, label, comment):
+        return write_lcc("""INSERT INTO error (sid, eid, label, comment)
+                               VALUES (?,?,?,?)
+                            """, [sid, eid, label, comment])
+

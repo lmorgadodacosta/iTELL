@@ -1,0 +1,49 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<div id="registration_form"><br>
+
+  {% if current_user.id %}
+  
+  It seems you are already logged in. There is no point in registering.
+  We don't reccomend that you create more than one account.
+  
+  {% else %}
+  <p>Register to accesss our application here. Your email will be your username.
+    You can create a nickname, and this is the name that will be visible to you (and possibly other users also using the app).</p>
+  <p>A randomized password will automatically be sent to your email account.</p>
+  <p>If you don't select any application (i.e. deselect all), all application  will be automatically selected for your account.</p>
+  <hr>
+  <form action="{{ url_for('register_mail') }}" style="display:inline;" method="POST">
+    <div id="input" class="btn-toolbar" role="toolbar">
+      <b>Username/Email Address:</b>
+      <input id="email" name="email" type="email" class="form-control" placeholder="Type your email here" required><br>
+      <b>Name:</b> <input id="name" name="name" type="textarea" class="form-control" placeholder="Type your name or desired nickname here" required>
+      <b>Application: &nbsp;</b>
+      <label class="checkbox-inline">
+	<input type="checkbox" id="callig" name="callig" value="callig" checked>CALLIG &nbsp; &nbsp;
+      </label>
+      <label class="checkbox-inline">
+	<input type="checkbox" id="lccapp" name="lccapp" value="lccapp" checked>LCC-APP &nbsp; &nbsp;
+      </label>
+      <!-- <label class="checkbox-inline"> -->
+      <!--   <input type="checkbox" id="mandarin" name="mandarin" value="mandarin">Mandarin -->
+      <!-- </label> -->    
+    </div>
+    <br><button id="register_confirm" id="register_confirm" type="submit" class="btn btn-dark">Register</button>
+</form>
+    
+  {% endif %}
+
+</div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}
