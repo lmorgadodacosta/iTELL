@@ -2,6 +2,7 @@ from collections import defaultdict as dd
 eng_feedback = dd(lambda: dd())
 
 eng_feedback['a_det_mass_rbst']['lcc'] = ("""<strong>⇒</strong> You may be using an indefinite article, 'a' or 'an', before an uncountable noun (such as 'research'): {}. Indefinite articles should only precede singular countable nouns. Please check your sentence for uncountable nouns and remove any indefinite articles that precede them.""", 1)
+eng_feedback['a_det_mass_rbst']['lcc2'] = ("""<strong>⇒</strong> You may be using an indefinite article, 'a' before an uncountable noun (such as 'research'): {}. Indefinite articles should only precede singular countable nouns. Please check your sentence for uncountable nouns and remove any indefinite articles that precede them.""", 1)
 eng_feedback['a_det_mass_rbst']['callig'] = """You may be using an indefinite article, 'a' or 'an', before an uncountable noun (such as 'research'). Indefinite articles should only precede singular countable nouns."""
 
 
