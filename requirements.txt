@@ -1,0 +1,10 @@
+flask
+flask-login
+requests
+lxml
+nltk
+mammoth
+flask-mail
+pydelphin
+werkzeug
+pyspellchecker

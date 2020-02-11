@@ -1,0 +1,27 @@
+{% extends "index.html" %}
+{% block body %}
+
+<h3>iXue</h3>
+<br>
+
+
+
+<hr>
+
+
+<hr>
+<h4>Team:</h4>
+<p><a href=''>Luis Morgado da Costa</a>
+<br><a href=''>Francis Bond</a></p>
+
+
+{% if current_user.id %}
+<hr>
+<h4>Available Apps</h4>
+
+
+{% endif %}
+
+
+
+{% endblock %}

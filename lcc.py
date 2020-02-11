@@ -11,7 +11,7 @@ from common_login import *
 
 from itsdangerous import URLSafeTimedSerializer # for safe session cookies
 
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 import datetime
 
 

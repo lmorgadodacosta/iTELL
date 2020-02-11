@@ -10,7 +10,7 @@ from functools import wraps
 from itsdangerous import URLSafeTimedSerializer # for safe session cookies
 from collections import defaultdict as dd
 from hashlib import md5
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 
 import lxml.html # to manipulate html 
@@ -176,6 +176,10 @@ def callig_intro():
 @app.route('/lcc', methods=['GET', 'POST'])
 def lcc_intro():
     return render_template('lcc_intro.html')
+
+@app.route('/ixue', methods=['GET', 'POST'])
+def ixue_intro():
+    return render_template('ixue_intro.html')
 
 
 @app.route('/improvisation', methods=['GET', 'POST'])

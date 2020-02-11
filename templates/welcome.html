@@ -5,7 +5,7 @@
 
 <br>
 <div>
-<p>Welcom to iTELL. Currently, there are three projects being devloped under iTELL: .</p>
+<p>Welcome to iTELL. Currently, there are three projects being devloped under iTELL: .</p>
 </div>
 
 
@@ -15,11 +15,11 @@
 
 {% if current_user.id %}
 <div id="LCC-UserPanel">
-<h5>LCC-APP: Improve your English Skills!</h5>
+  <h5>LCC-APP: Improve your English Skills!</h5>
 </div>
 
 <form action="{{ url_for('upload') }}" style="display:inline;">
-<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Assignment <br> Checker</b></button>
+  <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Assignment <br> Checker</b></button>
 </form>
 
 <form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
@@ -27,43 +27,51 @@
     <b>Sentence <br>Checker</b></button>
 </form>
 
+<form action="{{ url_for('lcc_intro') }}" style="display:inline;">
+  <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
+</form>
 
 {% if current_user.group == 'admin' %}
 <form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
-  <button type="submit" class="btn btn-secondary btn-sq-lg text-dark" style="font-size:20px;">
-    <b>Sentence <br>Analyzer</b>
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b>Sentence <br>Analyzer<br>(soon)</b>
   </button>
 </form>
 {% endif %}
 
-
-<form action="{{ url_for('lcc_intro') }}" style="display:inline;">
-<button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
-</form>
 <hr>
 {% endif %}
 
 
 {% if current_user.id %}
-<div id="CMN-UserPanel">
+<div id="iXue-UserPanel">
 <h5>iXue: Let's Learn Mandarin Chinese!</h5>
 </div>
 
-<form action="{{ url_for('haikuondemand_info') }}" style="display:inline;">
-<button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn New <br>Vocabulary</b></button>
+<!-- <form action="{{ url_for('haikuondemand_info') }}" style="display:inline;"> -->
+<!-- <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn New <br>Vocabulary</b></button> -->
+<!-- </form> -->
+
+<!-- <form action="{{ url_for('haikuondemand_info') }}" style="display:inline;"> -->
+<!-- <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Review <br>Vocabulary</b></button> -->
+<!-- </form> -->
+
+<form  style="display:inline;">
+  <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences<br>(soon)</b></button>
 </form>
 
-<form action="{{ url_for('haikuondemand_info') }}" style="display:inline;">
-<button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Review <br>Vocabulary</b></button>
+<form  action="{{ url_for('ixue_intro') }}"  style="display:inline;">
+<button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
 
-<form action="{{ url_for('sexwithme_info') }}" style="display:inline;">
-  <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences</b></button>
-</form>
 
-<form action="{{ url_for('upload') }}" style="display:inline;">
-<button type="submit" class="btn btn-outline-danger btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
+
+{% if current_user.group == 'admin' %}
+<form style="display:inline;">
+<button type="submit" class="btn btn-outline-danger btn-sq-lg" style="font-size:20px;"><b>Sentence <br> Analyzer<br>(soon)</b></button>
 </form>
+{% endif %}
+
 <hr>
 {% endif %}
 
@@ -86,7 +94,7 @@
   <button type="submit"  class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Forced <br>Links</b><br>(soon)</button>
 <!-- </div> -->
 <form action="{{ url_for('callig_intro') }}" style="display:inline;">
-<button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
+<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
 
 <hr>
@@ -100,10 +108,18 @@
 <div id="AdminPanel">
   <h5>Admin User Panel</h5>
 
+
+
+  <form action="{{ url_for('send_mail') }}" style="display:inline;">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>Test Email <br> Settings</b></button>
+  </form>
+
+  
+<br><br>
+
   Here only admin users can see what is happening. This is useful for checking the databse, see our users, etc.
 
 
-<br><br>
 <h6>Games in the making</h6>
 <ul>
   <li>Haiku (5-7-5 syllables requirement, random title, must-use word)</li>
