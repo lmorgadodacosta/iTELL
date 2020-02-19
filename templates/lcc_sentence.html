@@ -18,12 +18,17 @@
 </form>
 
 <br><br>
-<h5>Intructions</h5>
-Here you can check individual sentences. Contrary to what happens in the <em>docx</em> checker, this method expects a single sentence. If you want to check multiple sentences at the same time, you should use the <em>docx</em> <a href="{{ url_for('upload') }}">Assignment Checker</a> instead.
+<h5>Instructions</h5>
+Here you can check individual sentences. Contrary to what happens in the <a href="{{ url_for('upload') }}">Assignment Checker</a>, this method expects a single sentence. If you want to check multiple sentences at the same time, you should use the <a href="{{ url_for('upload') }}">Assignment Checker</a> instead.
 
 <br><br>
-<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This is the licence warning.
-
-
+<b>License:</b> <br>
+<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Sentences submitted
+here will be anonymised and released under a
+<a href="https://creativecommons.org/share-your-work/public-domain/cc0/"> Creative
+  Commons CC0 Licence</a>.  All data collected in this wasy will be used to improve
+this system. As NTU students, your privacy is very important to us. If you prefer
+not to release your data please use the <a href="{{ url_for('upload') }}">Assignment
+  Checker</a> instead.
 
 {% endblock %}

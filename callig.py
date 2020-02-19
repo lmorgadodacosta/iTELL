@@ -36,11 +36,20 @@ app = Flask(__name__)
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 
+
+################################################################################
+# MODE defines which apps are available in the deployed instance
+#
+# 'test' MODE is used to hide incomplete applications 
+#  The other modes include: 'lcc', 'ixue', 'callig'
+################################################################################
+MODE = ['lcc', 'ixue', 'callig','test']
+
 app.config.update(
     # When using gmail, we need to allow unsafe apps to use the email.
     # check: https://pythonprogramming.net/flask-email-tutorial/
     
-    DEBUG=True, 
+    DEBUG=False, 
     #EMAIL SETTINGS
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=465,
@@ -92,7 +101,8 @@ def login():
             return redirect(url_for("index"))
         else:
             flash(u"Invalid username, please try again.")
-    return render_template("login.html")
+    return render_template("login.html",
+                           MODE=MODE)
 
 @app.route("/logout")
 @login_required(role=0, group='open')
@@ -163,28 +173,34 @@ def lccReport():
 ################################################################################
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('welcome.html')
+    return render_template('welcome.html',
+                           MODE=MODE)
 
 @app.route('/team', methods=['GET', 'POST'])
 def team():
-    return render_template('team.html')
+    return render_template('team.html',
+                           MODE=MODE)
 
 @app.route('/callig', methods=['GET', 'POST'])
 def callig_intro():
-    return render_template('callig_intro.html')
+    return render_template('callig_intro.html',
+                           MODE=MODE)
 
 @app.route('/lcc', methods=['GET', 'POST'])
 def lcc_intro():
-    return render_template('lcc_intro.html')
+    return render_template('lcc_intro.html',
+                           MODE=MODE)
 
 @app.route('/ixue', methods=['GET', 'POST'])
 def ixue_intro():
-    return render_template('ixue_intro.html')
+    return render_template('ixue_intro.html',
+                           MODE=MODE)
 
 
-@app.route('/improvisation', methods=['GET', 'POST'])
-def improvisation():
-    return render_template('improvisation.html')
+@app.route('/introduction', methods=['GET', 'POST'])
+def itell_intro():
+    return render_template('itell_intro.html',
+                           MODE=MODE)
 
 
 ################################################################################
@@ -193,7 +209,8 @@ def improvisation():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+    return render_template('register.html',
+                           MODE=MODE)
 
 
 ################################################################################
@@ -222,11 +239,13 @@ def sexwithme_info():
 
     if example_list:
         return render_template('sexwithme-info.html',
-                               example_list=example_list)
+                               example_list=example_list,
+                               MODE=MODEx)
 
     else: # for brand-new dbs, show a system's example
         return render_template('sexwithme-info.html',
-                               example_list=base_ex)
+                               example_list=base_ex,
+                               MODE=MODE)
 
     
 @app.route('/games/sex-with-me', methods=['GET', 'POST'])
@@ -245,7 +264,8 @@ def sexwithme_game():
                            seconds=seconds,
                            article=article,
                            noun=noun,
-                           definition=definition)
+                           definition=definition,
+                           MODE=MODE)
 
 
 @app.route('/_save_sex-with-me', methods=['GET', 'POST'])
@@ -287,7 +307,8 @@ def save_sexwithme():
                                    answer=answer,
                                    tags=tags,
                                    foci=foci,
-                                   eng_feedback=eng_feedback)
+                                   eng_feedback=eng_feedback,
+                                   MODE=MODE)
 
         if answer and tags and ('NoParse' in tags):
             sex_with_me_id = write_sexwithme(prompt, answer, seconds, language,
@@ -298,8 +319,8 @@ def save_sexwithme():
                                          seconds, language, username, current_time())
 
         elif answer:
-            print(write_sexwithme(prompt, answer, seconds, language,
-                            username, current_time()))
+            write_sexwithme(prompt, answer, seconds, language,
+                            username, current_time())
             
         else:
             write_sexwithme(prompt, None, seconds, language,
@@ -342,11 +363,13 @@ def wickedproverbs_info():
 
     if example_list:
         return render_template('wickedproverbs-info.html',
-                               example_list=example_list)
+                               example_list=example_list,
+                               MODE=MODE)
 
     else: # for brand-new dbs, show a system's example
         return render_template('wickedproverbs-info.html',
-                               example_list=base_ex)
+                               example_list=base_ex,
+                               MODE=MODE)
 
 
 
@@ -382,7 +405,8 @@ def wickedproverbs_game():
                            seconds=seconds,
                            w1=w1,
                            w2=w2,
-                           frame=frame)
+                           frame=frame,
+                           MODE=MODE)
 
 
 @app.route('/_save_wicked-proverbs', methods=['GET', 'POST'])
@@ -438,11 +462,13 @@ def haikuondemand_info():
 
     if example_list:
         return render_template('haikuondemand-info.html',
-                               example_list=example_list)
+                               example_list=example_list,
+                               MODE=MODE)
 
     else: # for brand-new dbs, show a system's example
         return render_template('haikuondemand-info.html',
-                               example_list=base_ex)
+                               example_list=base_ex,
+                               MODE=MODE)
 
 
 @app.route('/games/haiku-on-demand', methods=['GET', 'POST'])
@@ -455,7 +481,8 @@ def haikuondemand_game():
     return render_template('haikuondemand-game.html',
                            seconds=seconds,
                            rand_noun=rand_noun,
-                           rand_adj=rand_adj)
+                           rand_adj=rand_adj,
+                           MODE=MODE)
 
     
 @app.route('/_save_haiku-on-demand', methods=['GET', 'POST'])
@@ -493,7 +520,8 @@ def save_haikuondemand():
                 
                 return render_template('haikuondemand-feedback.html',
                                        answer=answer,
-                                       title=title)
+                                       title=title,
+                                       MODE=MODE)
 
             else:
                 write_haikuondemand(title, l1, l2, l3,
@@ -559,11 +587,11 @@ def register_mail():
 
 
         
-        print(email) #TEST
-        print(name) #TEST
-        print(pw) #TEST
-        print(hashed_pw) #TEST
-        print(group) #TEST
+        # print(email) #TEST
+        # print(name) #TEST
+        # print(pw) #TEST
+        # print(hashed_pw) #TEST
+        # print(group) #TEST
 
         # TODO: check if the email already exists... if it does, reject!
         # if it doesn't then create a new user in the DB
@@ -611,13 +639,15 @@ def register_mail():
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def upload():
-    return render_template('upload.html')
+    return render_template('upload.html',
+                           MODE=MODE)
 
 
 @app.route('/single-sentence', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def lcc_sentence():
-    return render_template('lcc_sentence.html')
+    return render_template('lcc_sentence.html',
+                           MODE=MODE)
 
 
 @app.route('/report', methods=['GET', 'POST'])
@@ -634,12 +664,15 @@ def report():
         error = """There was a problem while uploading your your file. """
         error += """Please check that the file type you are using is '.docx'"""
         error += """ and not '.doc', for example."""
-        return render_template('error.html', error=error)
+        return render_template('error.html',
+                               error=error,
+                               MODE=MODE)
 
     else:
         return render_template('report.html',
                                passed=passed,
-                               filename=filename)
+                               filename=filename,
+                               MODE=MODE)
 
 @app.route('/_save_singlesentence', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
@@ -659,7 +692,6 @@ def save_lcc_sentence():
         sid = docid * 100000
         pid = 0
         csql.insert_into_sent(sid, docid, pid, sent)
-        print()
         word_list = lcc.pos_lemma(lcc.sent2words(sent))        
         for w in word_list:
             wid = csql.fetch_max_wid(sid) + 1
@@ -686,7 +718,7 @@ def save_lcc_sentence():
             focus = e[1]
             if tag in eng_feedback:
                 if 'lcc' in eng_feedback[tag]:
-                    print(eng_feedback[tag])
+                    #print(eng_feedback[tag])
                     feedback = eng_feedback[tag]['lcc'][0].format(focus)
                     errors.append(feedback)
             
@@ -694,7 +726,8 @@ def save_lcc_sentence():
         return render_template('lcc_feedback.html',
                                sent=sent,
                                errors=errors,
-                               eng_feedback=eng_feedback)
+                               eng_feedback=eng_feedback,
+                               MODE=MODE)
     
 
 
@@ -728,7 +761,7 @@ def save_lcc_sentence():
         #     write_sexwithme(prompt, None, seconds, language,
         #                     username, current_time())
     
-    return sexwithme_game()
+    # return sexwithme_game()
 
 
         
@@ -741,7 +774,9 @@ def save_lcc_sentence():
 @login_required(role=99, group='admin')
 def useradmin():
     users = fetch_allusers()
-    return render_template("useradmin.html", users=users)
+    return render_template("useradmin.html",
+                           users=users,
+                           MODE=MODE)
 
 
 

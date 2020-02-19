@@ -1,7 +1,9 @@
 {% extends "index.html" %}
 {% block welcome %}
 
+<div class="text-center">
 <h4>iTELL: An application suite for Intelligent Technology Enhanced Language Learning</h4>
+</div>
 
 <br>
 <div>
@@ -12,10 +14,15 @@
 <hr>
 
 
+
+{% if 'lcc' in MODE %}
+
 {% if current_user.id %}
 <div id="LCC-UserPanel">
   <h5>LCC-APP: Improve your English Skills!</h5>
 </div>
+
+
 
 <form action="{{ url_for('upload') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Assignment <br> Checker</b></button>
@@ -30,6 +37,8 @@
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
 
+
+
 {% if current_user.group == 'admin' %}
 <form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
   <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
@@ -40,8 +49,11 @@
 
 <hr>
 {% endif %}
+{% endif %}
 
 
+
+{% if 'ixue' in MODE %}
 {% if current_user.id %}
 <div id="iXue-UserPanel">
 <h5>iXue: Let's Learn Mandarin Chinese!</h5>
@@ -73,8 +85,11 @@
 
 <hr>
 {% endif %}
+{% endif %}
 
 
+
+{% if 'callig' in MODE %}
 {% if current_user.id %}
 <div id="CALLIG-UserPanel">
 <h5>CALLIG: Let's Play Some Awesome Games!</h5>
@@ -97,6 +112,41 @@
 </form>
 
 <hr>
+{% endif %}
+{% endif %}
+
+
+
+
+
+{% if not current_user.id %}
+<div class="text-center">
+<p>You need to be signed-in in order to use our applications. But, before that, you can learn more about them by clicking below.</p>
+
+<p>
+
+  {% if 'lcc' in MODE %}
+  <form action="{{ url_for('lcc_intro') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>LCC-APP</b></button>
+  </form>
+  {% endif %}
+
+  
+  {% if 'ixue' in MODE %}
+  <form  action="{{ url_for('ixue_intro') }}"  style="display:inline;">
+    <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>iXue</b></button>
+  </form>
+  {% endif %}
+  
+  {% if 'callig' in MODE %}
+  <form action="{{ url_for('callig_intro') }}" style="display:inline;">
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>CALLIG</b></button>
+  </form>
+  {% endif %}
+  
+</p>
+
+</div>
 {% endif %}
 
 
