@@ -22,13 +22,18 @@ This is what you wrote:
 This is what we think might be wrong with it:
 
   {% for tag in tags %}
-      {% if tag in eng_feedback.keys() %}
-          {% if 'callig' in eng_feedback[tag].keys() %}
-              <br><b>{{ eng_feedback[tag]['callig'] }}</b>
-          {% else %}
-              <br><b>Something is wrong with this sentence.</b>
-          {% endif %}
-      {% endif %}
+    {% if tag in eng_feedback.keys() %}
+
+      {% if 'callig' in eng_feedback[tag].keys() %}
+        <br><b><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="{{ tag }}">{{ eng_feedback[tag]['callig'] }}</span></b>
+      {% else %}
+         <br><b><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="{{ tag }}">Something is wrong with this sentence.</span></b>
+
+
+	 {% endif %}
+
+    {% endif %}
+	 
   {% endfor %}
 
 <br><br>

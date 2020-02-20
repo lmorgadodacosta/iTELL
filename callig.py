@@ -240,7 +240,7 @@ def sexwithme_info():
     if example_list:
         return render_template('sexwithme-info.html',
                                example_list=example_list,
-                               MODE=MODEx)
+                               MODE=MODE)
 
     else: # for brand-new dbs, show a system's example
         return render_template('sexwithme-info.html',
@@ -771,7 +771,7 @@ def save_lcc_sentence():
 ################################################################################
 
 @app.route("/useradmin",methods=["GET"])
-@login_required(role=99, group='admin')
+@login_required(role=0, group='admin')
 def useradmin():
     users = fetch_allusers()
     return render_template("useradmin.html",
