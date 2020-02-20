@@ -42,22 +42,33 @@
 	  <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="" id="dropdown-cv" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Project</a>
             <div class="dropdown-menu" aria-labelledby="dropdown-cv">
+              <a class="dropdown-item" href="{{ url_for('itell_intro') }}">Introduction</a>
               <a class="dropdown-item" href="{{ url_for('team') }}">Team</a>
-              <a class="dropdown-item" href="{{ url_for('improvisation') }}">Improvisation</a>
           </li>
 
 
-	  {% if current_user.id %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="" id="dropdown-projs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Apps</a>
             <div class="dropdown-menu" aria-labelledby="dropdown-projs">
-              <a class="dropdown-item" href="{{ url_for('sexwithme_info') }}">Sex with me</a>
-              <a class="dropdown-item" href="{{ url_for('wickedproverbs_info') }}">Wicked Proverbs</a>
-              <a class="dropdown-item" href="{{ url_for('haikuondemand_info') }}">Haiku on Demand</a>
+
+
+	      {# 
+	      <!-- The dropdown menu should only show things for the active modes  -->
+	      #}
+	      {% if 'lcc' in MODE  %}
+              <a class="dropdown-item" href="{{ url_for('lcc_intro') }}">LCC-APP</a>
+	      {% endif %}
+
+	      {% if 'ixue' in MODE  %}
+              <a class="dropdown-item" href="{{ url_for('ixue_intro') }}">iXue</a>
+	      {% endif %}
+
+	      {% if 'callig' in MODE  %}
+              <a class="dropdown-item" href="{{ url_for('callig_intro') }}">CALLIG</a>
+	      {% endif %}
 	    </div>
           </li>
 	  
-	  {% endif %}
 
 
 	    {% if not current_user.id %}
@@ -65,11 +76,18 @@
             <a class="nav-link" href="{{ url_for('login') }}" title="Sign-in">
 	       <i class="fas fa-sign-in-alt"></i> Sign in</a>
 	  </li>
+
+	  {#
+	  <!-- registration is still incomplete, should only be shown in test mode -->
+	  #}
+	  {% if 'test' in MODE  %}
 	  <li class="nav-item">	  
             <a class="nav-link" href="{{ url_for('register') }}" title="Register">
 	      <i class="fa fa-user" aria-hidden="true"></i> Register</a>
 	  </li>
-	    {% else %}
+	  {% endif %}
+
+	  {% else %}
 	  <li class="nav-item">
 	    <a class="nav-link" href="{{ url_for('logout') }}" title="Logout">
 	      Welcome, <b>{{ current_user.name }}</b> (click to Log Off)</a>
@@ -93,9 +111,7 @@
     <footer class="footer">
       <div class="container">
         <span class="text-muted">
-	  iTELL. 
-	  <span class="span3 pull-right">Last modified: September 2019</span>
-
+	  iTELL. Last modified: February 2020
 	</span>
       </div>
     </footer>

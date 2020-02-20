@@ -10,7 +10,6 @@ from delphin import ace
 from delphin.derivation import UDFNode, UDFTerminal
 
 
-
 def list_lexids(deriv_tree):
     """
     ACE must called with udx mode otherwise the terminals
@@ -103,6 +102,7 @@ with app.app_context():
                            cmdargs=['-1', '--timeout=10', '--udx']) as mal:
 
             for sent in sent_list:
+
                 
                 erg_parse = parser.interact(sent)
 

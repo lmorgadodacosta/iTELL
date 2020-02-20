@@ -1,0 +1,21 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<br>
+<h3>iTELL</h3>
+<br>
+
+<p>
+  <b>iTELL</b> is a suite of applications looking into applying deep computational parsers to <b>i</b>ntelligent <b>T</b>echnology <b>E</b>nhanced <b>L</b>anguage <b>L</b>earning environments. iTELL includes several applications, for both English and Mandarin Chinese, exploring how to leverage the broad linguistic knowledge available to deep computational parsers and apply it to pedagogical settings.
+</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}
