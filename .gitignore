@@ -1,3 +1,7 @@
+
+/delphin/*
+!/delphin/pull_remotes.bash
+
 # Emacs temp files
 *~
 

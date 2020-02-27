@@ -27,7 +27,7 @@ import lcc
 import wn
 import syl
 import game_data
-import erg_call
+import delphin_call
 import common_sql as csql
 from feedback import eng_feedback
 
@@ -240,7 +240,7 @@ def sexwithme_info():
     if example_list:
         return render_template('sexwithme-info.html',
                                example_list=example_list,
-                               MODE=MODEx)
+                               MODE=MODE)
 
     else: # for brand-new dbs, show a system's example
         return render_template('sexwithme-info.html',
@@ -282,7 +282,7 @@ def save_sexwithme():
 
         # it's always treated as 1 sentence, so we can do this:
         if answer:
-            parse = erg_call.check_sents([answer])[0]
+            parse = delphin_call.check_sents([answer])[0]
             errors = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]            
         else:
             errors = []
@@ -542,6 +542,7 @@ def save_haikuondemand():
 # EMAIL VIEWS
 ################################################################################
 @app.route('/test-email-settings')
+@login_required(role=0, group='admin')
 def send_mail():
 	try:
 	    msg = Message("Send Mail Tutorial!",
@@ -629,6 +630,13 @@ def register_mail():
 
 
 
+################################################################################
+# IXUE VIEWS
+################################################################################
+@app.route('/ixue-jumbled', methods=['GET', 'POST'])
+def ixue_jumbled():
+    return render_template('ixue_jumbledsents.html',
+                           MODE=MODE)
 
 
 
@@ -707,9 +715,6 @@ def save_lcc_sentence():
         all_errors = app_errors | non_app_errors
         for i, (label, loc) in enumerate(all_errors):
             csql.insert_into_error(sid, i, label, loc)
-
-
-
             
         errors = []
         
@@ -728,40 +733,6 @@ def save_lcc_sentence():
                                errors=errors,
                                eng_feedback=eng_feedback,
                                MODE=MODE)
-    
-
-
-        # if answer and tags and ('NoParse' not in tags):
-        #     # we are not showing feedback for a 'NoParse'
-
-        #     sex_with_me_id = None
-        #     for tag in tags:
-        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
-        #                                  seconds, language, username, current_time())
-
-        #     return render_template('lcc_feedback.html',
-        #                            answer=answer,
-        #                            tags=tags,
-        #                            foci=foci,
-        #                            eng_feedback=eng_feedback)
-
-        # if answer and tags and ('NoParse' in tags):
-        #     sex_with_me_id = write_sexwithme(prompt, answer, seconds, language,
-        #                                      username, current_time())
-
-        #     for tag in tags:
-        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
-        #                                  seconds, language, username, current_time())
-
-        # elif answer:
-        #     print(write_sexwithme(prompt, answer, seconds, language,
-        #                     username, current_time()))
-            
-        # else:
-        #     write_sexwithme(prompt, None, seconds, language,
-        #                     username, current_time())
-    
-    # return sexwithme_game()
 
 
         
@@ -771,12 +742,128 @@ def save_lcc_sentence():
 ################################################################################
 
 @app.route("/useradmin",methods=["GET"])
-@login_required(role=99, group='admin')
+@login_required(role=0, group='admin')
 def useradmin():
     users = fetch_allusers()
     return render_template("useradmin.html",
                            users=users,
                            MODE=MODE)
+
+
+
+@app.route('/tsdb', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def itell_table_play():
+
+    tsdb_min = delphin_call.tsdb_min('delphin/erg2018/tsdb/gold/csli')
+    
+    return render_template('table_test.html',
+                           tsdb_min=tsdb_min,
+                           MODE=MODE)
+
+
+@app.route('/delphin-analyser', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def itell_delphin_analyser():
+    if request.method == 'POST':
+        result = request.form
+
+        grammar = result['grammar'].strip()
+
+        if 'grammar_mode' in result.keys():
+            grammar_mode = result['grammar_mode'].strip()
+        else:
+            grammar_mode = None
+
+        if 'max_parses' in result.keys():
+            max_parses = result['max_parses'].strip()
+        else:
+            max_parses = None
+            
+        return render_template('itell_erg-analyser.html',
+                               grammar=grammar,
+                               grammar_mode=grammar_mode,
+                               max_parses=max_parses,
+                               MODE=MODE)
+
+
+
+@app.route('/_delphin-analyser-output', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_analyser_output():
+    if request.method == 'POST':
+        result = request.form
+
+        sent = result['sentence'].strip()
+        grammar = result['grammar'].strip()
+        grammar_mode = result['grammar_mode'].strip()
+        max_parses = result['max_parses'].strip()
+        
+        results = delphin_call.full_parse(sent, grammar_mode, max_parses)
+
+        
+        return render_template('itell_erg-analyser-output.html',
+                               sent=sent,
+                               results=results,
+                               grammar=grammar,
+                               grammar_mode=grammar_mode,
+                               max_parses=max_parses,
+                               MODE=MODE)
+
+        
+        
+        ########################################################################
+        # WRITE SENTENCE IN DATABASE
+        ########################################################################
+        # docid = csql.fetch_max_doc_id() + 1
+        # csql.insert_into_doc(docid, 'single_sentence')
+
+        # sid = docid * 100000
+        # pid = 0
+        # csql.insert_into_sent(sid, docid, pid, sent)
+        # word_list = lcc.pos_lemma(lcc.sent2words(sent))        
+        # for w in word_list:
+        #     wid = csql.fetch_max_wid(sid) + 1
+        #     (surface, pos, lemma) = w
+        #     csql.insert_into_word(sid, wid, surface, pos, lemma)
+
+        # words = csql.fetch_words_by_sid(sid, sid)[sid]
+        # app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc')
+
+        ########################################################################
+        # WRITE ERRORS TO CORPUS DB
+        ########################################################################
+        # all_errors = app_errors | non_app_errors
+        # for i, (label, loc) in enumerate(all_errors):
+        #     csql.insert_into_error(sid, i, label, loc)
+            
+        # errors = []
+        
+        # for e in app_errors:
+        #     tag = e[0]
+        #     focus = e[1]
+        #     if tag in eng_feedback:
+        #         if 'lcc' in eng_feedback[tag]:
+        #             #print(eng_feedback[tag])
+        #             feedback = eng_feedback[tag]['lcc'][0].format(focus)
+        #             errors.append(feedback)
+            
+
+        # return render_template('lcc_feedback.html',
+        #                        sent=sent,
+        #                        errors=errors,
+        #                        eng_feedback=eng_feedback,
+        #                        MODE=MODE)
+
+
+
+
+
+
+
+
+
+
 
 
 

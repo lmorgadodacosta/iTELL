@@ -1,0 +1,112 @@
+{% extends "index.html" %}
+{% block body %}
+
+<h3>Jumbled Sentence</h3>
+<br>
+
+{% if current_user.id %}
+
+
+{% endif %}
+
+  
+<style>
+#div1 {
+  height: 250px;
+}
+</style>
+
+
+<div class="card">
+  <h5 class="card-header">Click on the words from this box to make a sentence:</h5>
+  <div class="card-body" id="div1" ondrop="drop(event, this)"
+       ondragover="allowDrop(event)" style="font-size:40px;">
+
+    <span id="word0" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 我 ');">
+      <b>&nbsp;&nbsp;我&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word1" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 汉语 ');">
+      <b>&nbsp;&nbsp;汉语&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word2" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 日语 ');">
+      <b>&nbsp;&nbsp;日语&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word3" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 主 ');">
+      <b>&nbsp;&nbsp;主&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word4" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 在 ');">
+      <b>&nbsp;&nbsp;在&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word5" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 说 ');">
+      <b>&nbsp;&nbsp;说&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word6" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 中国 ');">
+      <b>&nbsp;&nbsp;中国&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word7" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 会 ');">
+      <b>&nbsp;&nbsp;会&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word8" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 新加坡 ');">
+      <b>&nbsp;&nbsp;新加坡&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word9" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 吗 ');">
+      <b>&nbsp;&nbsp;吗&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word10" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 你 ');">
+      <b>&nbsp;&nbsp;你&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word11" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 。 ');">
+      <b>&nbsp;&nbsp;。&nbsp;&nbsp;</b>
+    </span>
+
+    <span id="word12" class="btn-outline-dark btn-sq-lg"
+	  onclick="$('#sentence').append(' 呢 ');">
+      <b>&nbsp;&nbsp;呢&nbsp;&nbsp;</b>
+    </span>
+    
+  </div>
+</div>
+
+
+  <textarea id="sentence" name="sentence" type="textarea"  rows="3" 
+	    class="col-sm-12 form-control form-control-lg text-center"
+	    style="font-size:30px;font-weight: bold;"
+	    placeholder="Click words above to write a sentence... "
+	    required disabled></textarea>
+
+
+  <div class="col-sm-12 text-center">
+    <br>
+    <button onClick="$('#sentence').empty();" class="btn btn-dark btn-lg" style="font-size:20px;"><b>Clear</b></button>
+    <button onClick="$('#sentence').empty();" class="btn btn-dark btn-lg" style="font-size:20px;"><b>Submit</b></button>
+</div>
+
+  
+
+<hr>
+
+
+{% endblock %}

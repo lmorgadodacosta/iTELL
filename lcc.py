@@ -24,7 +24,7 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 
-import erg_call
+import delphin_call
 from feedback import eng_feedback
 
 import lcc_data
@@ -719,7 +719,7 @@ with app.app_context():
                 LongSentenceSkip = True
 
         if not LongSentenceSkip: # Don't parse long sentences
-            erg_errors = erg_call.check_sents([sent])[0][1]
+            erg_errors = delphin_call.check_sents([sent])[0][1]
         else:
             erg_errors= []
 

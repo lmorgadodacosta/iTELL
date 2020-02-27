@@ -5,10 +5,13 @@ from os import path
 from flask import Flask, current_app, g
 from collections import defaultdict as dd
 
-#import delphin
+import json
+import delphin.dmrs
+import delphin.mrs
+from delphin.codecs import mrsjson, dmrsjson, simplemrs
 from delphin import ace
 from delphin.derivation import UDFNode, UDFTerminal
-
+from delphin import itsdb, tsql
 
 def list_lexids(deriv_tree):
     """
@@ -47,15 +50,19 @@ def check_nodes(obj,errors):
     In principle, the ERG puts "rbst" on instance names/Ids
     and "mal_" is in the type hierarchy. This is not necessarity 
     true for Zhong later
+
+    FIXME: there are special types, such as 'stutter' that do not 
+    have 'mal' or 'rbst' in the name.
+
     """
     if isinstance(obj, UDFNode):
         error = ''
-        if 'rbst' in obj.entity:  
+        if ('rbst' in obj.entity) or ('mal' in obj.entity):  
             error = obj.entity
             span = " ".join([t.form for t in obj.terminals()])
             errors.append((error, span))
             
-        if  obj.type and ('mal_' in obj.type):   
+        if  obj.type and (('mal_' in obj.type) or ('rbst' in obj.type)):   
             span = " ".join([t.form for t in obj.terminals()])
             error = obj.type
             errors.append((error, span))
@@ -78,10 +85,14 @@ error_msgs = dd(tuple)
 app = Flask(__name__)
 with app.app_context():
 
-    ROOT  = path.dirname(path.realpath(__file__))    
+    ROOT  = path.dirname(path.realpath(__file__))
+    
     ACE = 'static/ace'
+
     ERG = 'static/erg.dat'
     MAL_ERG = 'static/erg-mal.dat'
+
+    ZHONG = 'static/zhong.dat'
 
     def check_sents(sent_list):
         """
@@ -108,7 +119,7 @@ with app.app_context():
 
                 if not erg_parse['results']: # if there were no parses
 
-                    mal_result = mal.interact(sent) 
+                    mal_result = mal.interact(sent)
 
                     if mal_result['results']:  # If the mal-grammar got a parse
                         error_tags = check_nodes(mal_result.result(0).derivation(),[])
@@ -122,7 +133,7 @@ with app.app_context():
                                 if len(tag) == 0:
                                     tag = "empty_tag"
                                 else:
-                                    tag = ":".join(tag)                                
+                                    tag = ":".join(tag)
 
                         erg_results.append((sent, error_tags))
                         
@@ -133,7 +144,7 @@ with app.app_context():
 
                     # Check for Mood (Imperative and Interrogative)
                     try:
-                        mrs = erg_parse.result(0).mrs()                        
+                        mrs = erg_parse.result(0).mrs()
                         sf = mrs.properties(mrs.index)['SF']
                     except:
                         print("MRS ERROR: "+sent , file=sys.stderr)
@@ -149,8 +160,99 @@ with app.app_context():
                     
         return erg_results
 
-    
 
+
+    def full_parse(sent, grammar_mode, max_parses):
+        """
+        """
+
+        results = dd(lambda: dd())
+        
+        if grammar_mode == 'erg_strict':
+            GRAMMAR = ERG
+        elif grammar_mode == 'erg_robust':
+            GRAMMAR = MAL_ERG
+        elif grammar_mode == 'zhong_strict':
+            GRAMMAR = ZHONG
+
+
+
+        ########################################################################
+        # ACE cmdargs (currently only for the number of parses)
+        ########################################################################
+        if max_parses == 'all':
+            ace_cmdargs = ['--timeout=10']
+        else:
+            ace_cmdargs = ['-n', max_parses, '--timeout=10']
+
+        ########################################################################
+        # To silence ACE we need to give it a file to stream its own stderr.
+        ########################################################################
+        ace_stderr = open(path.join(ROOT, 'static/ace_stderr.txt'), 'w+')
+        
+        with ace.ACEParser(path.join(ROOT, GRAMMAR),
+                           executable=path.join(ROOT, ACE),
+                           cmdargs=ace_cmdargs,
+                           stderr=ace_stderr) as parser:
+
+            erg_parse = parser.interact(sent)
+
+        if erg_parse['results']:
+
+            n_parses = len(erg_parse['results'])
+
+            for n in list(range(n_parses)):
+                
+                deriv = erg_parse.result(n).derivation()
+                deriv_json = json.dumps(deriv.to_dict())
+
+
+                mrs = erg_parse.result(n).mrs()
+                mrs_json = mrsjson.encode(mrs)
+                mrs_simplemrs = simplemrs.encode(mrs)
+
+                ################################################################
+                # This was breaking too often, throwing keyErrors for handles.
+                # We need to check if it's well formed before conversion.
+                ################################################################
+                if delphin.mrs.is_well_formed(mrs):
+                    dmrs = delphin.dmrs.from_mrs(mrs)
+                    dmrs_json = dmrsjson.encode(dmrs)
+                else:
+                    dmrs_json = False
+                    
+                errors = check_nodes(deriv,[])
+
+                results[n]['deriv_json'] = deriv_json
+                results[n]['mrs_json'] = mrs_json
+                results[n]['mrs_simplemrs'] = mrs_simplemrs
+                results[n]['dmrs_json'] = dmrs_json
+                results[n]['errors'] = errors
+
+
+            return results
+        else:
+            return results
+
+
+
+
+
+    def tsdb_min(path_to_profile):
+        """
+        Profile should be the path to a GOLD/PARSED profile.
+        for now this should look like 'static/mrs'
+        """
+        ts = itsdb.TestSuite(path.join(ROOT, path_to_profile))
+
+        data = list()
+        for row in tsql.select('i-id i-wf readings i-input  i-comment', ts):
+            data.append(row)
+
+        return data
+
+
+    
 # CHECK this sentence. The ERG parse fails and the mal-erg does not give any node to inspect
 # This means that the mal-erg is using some rules that we are not catching properly
 # Maybe not marked in Instances?
