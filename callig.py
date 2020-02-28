@@ -151,14 +151,23 @@ def current_time():
 def lccReport():
     """
     This function produces the HTML report for any given document.
+
+    The feedback_set sets which group of errors and which feedback
+    messages to show students. Originally, this was set to 'lcc'.
+    But with the current addition of new sets of errors and new error 
+    messages, this is now a mandatory option for check_docx.
+
     """
 
     filename = request.args.get('fn', None)
 
+    # feedback_set = 'lcc'  # original error-set and messages
+    feedback_set = 'lcc2' 
+    
     docx_html = lcc.docx2html(filename)
     (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename) 
 
-    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report)
+    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report, feedback_set)
     
     
     # lxml.html.tostring returns type=bytes, must decode here
@@ -751,15 +760,52 @@ def useradmin():
 
 
 
-@app.route('/tsdb', methods=['GET', 'POST'])
-@login_required(role=0, group='open')
-def itell_table_play():
-
-    tsdb_min = delphin_call.tsdb_min('delphin/erg2018/tsdb/gold/csli')
+@app.route('/delphin/select-profile', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_select_profile():
     
-    return render_template('table_test.html',
-                           tsdb_min=tsdb_min,
+    # Not all grammar strucutres are similar. E.g., Zhong is a mess
+    # Because of this, I need to have the path to the tsdb folder of each
+    # grammar in question; Since we import the grammars via remotes,
+    # these shouldn't really change
+
+    erg_gold_names = next(os.walk('delphin/erg2018/tsdb/gold/'))[1]
+
+    zhong_gold_names = next(os.walk('delphin/zhong/cmn/zhs/tsdb/gold/'))[1]
+
+    # print(erg_gold_profiles)
+
+    # Skeletons are actually messier, even in the ERG.
+    # erg_skeleton_profiles = next(os.walk('delphin/erg2018/tsdb/skeletons/'))[1]
+    # print(erg_skeleton_profiles)
+
+    return render_template('delphin_profiles_selector.html',
+                           erg_gold_names=sorted(erg_gold_names),
+                           zhong_gold_names=sorted(zhong_gold_names),
                            MODE=MODE)
+
+@app.route('/delphin/see-profile', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_see_profile():
+    if request.method == 'POST':
+        result = request.form
+
+    if 'erg_gold_prof' in result.keys():
+        profile = 'delphin/erg2018/tsdb/gold/' + result['erg_gold_prof'].strip()
+    elif 'zhong_gold_prof' in result.keys():
+        profile = 'delphin/zhong/cmn/zhs/tsdb/gold/' + result['zhong_gold_prof'].strip()
+    else:
+        profile = None
+        
+    if profile:
+        tsdb_min = delphin_call.tsdb_min(profile)
+    
+        return render_template('delphin_simple_profile.html',
+                               tsdb_min=tsdb_min,
+                               MODE=MODE)
+    else:
+        return "Some tampering was detected. This should not happen."
+    
 
 
 @app.route('/delphin-analyser', methods=['GET', 'POST'])

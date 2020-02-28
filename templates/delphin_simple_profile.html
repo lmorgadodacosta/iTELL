@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block welcome %}
 
-<h4>Table Play</h4>
+<h4>Simple Profile View</h4>
 
 <br>
 
@@ -20,7 +20,7 @@
             <tr>
                 <th>i-id</th>
                 <th>i-wf</th>
-                <th>readings</th> <!-- number derivations trees -->
+                <th>readings</th> <!-- number of deriv trees -->
                 <th>i-input</th> 
                 <th>i-comment</th>
             </tr>
@@ -29,10 +29,10 @@
 
 	    {% for item in tsdb_min %}
             <tr>
-                <td>{{ item[0] }}</td>   <!-- id -->
+                <td>{{ item[0] }}</td> <!-- id -->
                 <td>{{ item[1] }}</td> <!-- i-wf -->
                 <td>{{ item[2] }}</td> <!-- readings -->
-                <td>{{ item[3] }}</td>  <!-- i-input -->
+                <td>{{ item[3] }}</td> <!-- i-input -->
                 <td>{{ item[4] }}</td> <!-- i-comments -->
             </tr>
 	    {% endfor %}
@@ -68,7 +68,7 @@ $(document).ready(function() {
     // DataTable //
     var table = $('#example').DataTable({
         "dom": 'l<"top"i>rpt<"bottom"><"clear">',
-	"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+	"lengthMenu": [[5, 6, 7, 8, 9, 10, 25, 50, -1], [5, 6, 7, 8, 9, 10, 25, 50, "All"]],
 
 
         "createdRow": function ( row, data, index ) {

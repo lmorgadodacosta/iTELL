@@ -102,6 +102,7 @@ eng_feedback['everyday_adv_rbst']['callig'] = """You have used 'everyday' as an 
 eng_feedback['hdn_bnp_c_rbst']['lcc'] = ("""<strong>⇒</strong> This sentence has a singular noun without an article ('a', 'an', 'the'), determiner 
 (e.g. 'each', 'this') or possessive (e.g. 'my', 'her') before it: {}. Please check your sentence carefully and add an article, determiner 
 or possessive before the singular noun if necessary.""", 1)
+eng_feedback['hdn_bnp_c_rbst']['lcc2'] = ("""<strong>Missing Article: "{}"</strong><br><ul> <li>This sentence has a singular noun without an article ('a', 'an', 'the'), determiner (e.g. 'each', 'this') or possessive (e.g. 'my', 'her') before it. <li>Please check your sentence carefully and add an article, determiner or possessive before the singular noun if necessary.</ul>""", 1)
 eng_feedback['hdn_bnp_c_rbst']['callig'] = """This sentence has a singular noun without an article ('a', 'an', 'the'), determiner 
 (e.g. 'each', 'this') or possessive (e.g. 'my', 'her') before it."""
 

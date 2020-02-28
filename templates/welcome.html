@@ -140,7 +140,7 @@
 {% if current_user.group == 'admin' %}
 <div id="DelphinPanel">
 
-  <h5>DELPH-IN Panel</h5>
+  <h5>DELPH-IN Grammarium</h5>
   <form action="{{ url_for('itell_delphin_analyser') }}" style="display:inline;" method="POST">
     <input type="hidden" id="grammar" name="grammar" value="erg">
     <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
@@ -155,7 +155,7 @@
     </button>
   </form>
 
-  <form action="{{ url_for('itell_table_play') }}" style="display:inline;" method="POST">
+  <form action="{{ url_for('delphin_select_profile') }}" style="display:inline;" method="POST">
     <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
       <b>Delphin<br>Profiles</b>
     </button>
