@@ -718,7 +718,7 @@ def save_lcc_sentence():
             csql.insert_into_word(sid, wid, surface, pos, lemma)
 
         words = csql.fetch_words_by_sid(sid, sid)[sid]
-        app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc')
+        app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc2')
 
         ########################################################################
         # WRITE ERRORS TO CORPUS DB
