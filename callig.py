@@ -733,9 +733,9 @@ def save_lcc_sentence():
             tag = e[0]
             focus = e[1]
             if tag in eng_feedback:
-                if 'lcc' in eng_feedback[tag]:
+                if 'lcc2' in eng_feedback[tag]:
                     #print(eng_feedback[tag])
-                    feedback = eng_feedback[tag]['lcc'][0].format(focus)
+                    feedback = eng_feedback[tag]['lcc2'][0].format(focus)
                     errors.append(feedback)
             
 
