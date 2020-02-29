@@ -36,7 +36,7 @@ $(function() {
         <!-- SCRIPT_ROOT = 'appname/delphin/';   -->
         <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
 	#}
-        $.getJSON($SCRIPT_ROOT + '_update_erg2018', {
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_erg2018', {
         }, function(data) {
     
 	    if (data.result) {
@@ -70,7 +70,7 @@ $(function() {
         <!-- SCRIPT_ROOT = 'appname/delphin/';   -->
         <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
 	#}
-        $.getJSON($SCRIPT_ROOT + '_update_ergTRUNK', {
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_ergTRUNK', {
         }, function(data) {
     
 	    if (data.result) {
@@ -102,10 +102,10 @@ $(function() {
 
 
         {#
-        <!-- SCRIPT_ROOT = 'appname/delphin/';   -->
+        <!-- SCRIPT_ROOT = 'appname/delphin/';   --> 
         <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
 	#}
-        $.getJSON($SCRIPT_ROOT + '_update_zhong', {
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_zhong', {
         }, function(data) {
     
 	    if (data.result) {
