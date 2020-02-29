@@ -24,7 +24,7 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 
-import erg_call
+import delphin_call
 from feedback import eng_feedback
 
 import lcc_data
@@ -528,7 +528,7 @@ with app.app_context():
 
 
 
-    def check_docx_html(docid, htmlRoot, report):
+    def check_docx_html(docid, htmlRoot, report, feedback_set):
         """
         This function receives the docID,  HTML element, and Report dictionary
         and checks each sentences with the ERG and other NLP checks.
@@ -553,7 +553,7 @@ with app.app_context():
             sent_words = words[sid]
             (app_errors, non_app_errors) = full_check_sent(sent_text,
                                                            sent_words,
-                                                           'lcc')
+                                                           feedback_set)
 
 
             # print(sents[sid]) #TEST
@@ -574,8 +574,8 @@ with app.app_context():
                 feedback_msg = ''
                 feedback_conf = 0
                 for i, (label, loc) in enumerate(app_errors):
-                    msg = eng_feedback[label]['lcc'][0]
-                    conf = eng_feedback[label]['lcc'][1]
+                    msg = eng_feedback[label][feedback_set][0]
+                    conf = eng_feedback[label][feedback_set][1]
 
                     if conf > feedback_conf:
                         feedback_conf = conf
@@ -707,7 +707,14 @@ with app.app_context():
 
 
 
-    def full_check_sent(sent, words, app_name):
+    def full_check_sent(sent, words, feedback_set):
+        """
+        Feedback set refers to which set of errors and error messages are 
+        being taken by the app. 'lcc' was the original error set and 
+        feedback messages. But 'callig' is another possible value; 
+        We're currently working on 'lcc2'; 
+        """
+        
         nlp_errors = NLP_checks_sent(sent, words)
 
         LongSentenceSkip = False
@@ -719,7 +726,7 @@ with app.app_context():
                 LongSentenceSkip = True
 
         if not LongSentenceSkip: # Don't parse long sentences
-            erg_errors = erg_call.check_sents([sent])[0][1]
+            erg_errors = delphin_call.check_sents([sent])[0][1]
         else:
             erg_errors= []
 
@@ -728,7 +735,7 @@ with app.app_context():
         for e in nlp_errors + erg_errors:
             label = e[0]
             if label in eng_feedback.keys():
-                if app_name in eng_feedback[label].keys():
+                if feedback_set in eng_feedback[label].keys():
                     app_errors.add(e)
                 else:
                     non_app_errors.add(e)

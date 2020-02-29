@@ -38,15 +38,6 @@
 </form>
 
 
-
-{% if current_user.group == 'admin' %}
-<form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
-  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
-    <b>Sentence <br>Analyzer<br>(soon)</b>
-  </button>
-</form>
-{% endif %}
-
 <hr>
 {% endif %}
 {% endif %}
@@ -67,21 +58,14 @@
 <!-- <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Review <br>Vocabulary</b></button> -->
 <!-- </form> -->
 
-<form  style="display:inline;">
-  <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences<br>(soon)</b></button>
+<form action="{{ url_for('ixue_jumbled') }}" style="display:inline;">
+  <button  type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences</b></button>
 </form>
 
 <form  action="{{ url_for('ixue_intro') }}"  style="display:inline;">
 <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
 
-
-
-{% if current_user.group == 'admin' %}
-<form style="display:inline;">
-<button type="submit" class="btn btn-outline-danger btn-sq-lg" style="font-size:20px;"><b>Sentence <br> Analyzer<br>(soon)</b></button>
-</form>
-{% endif %}
 
 <hr>
 {% endif %}
@@ -154,61 +138,60 @@
 
 
 {% if current_user.group == 'admin' %}
+<div id="DelphinPanel">
+
+  <h5>DELPH-IN Grammarium</h5>
+  <form action="{{ url_for('itell_delphin_analyser') }}" style="display:inline;" method="POST">
+    <input type="hidden" id="grammar" name="grammar" value="erg">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+      <b>ERG <br>Analyzer<br></b>
+    </button>
+  </form>
+
+  <form action="{{ url_for('itell_delphin_analyser') }}" style="display:inline;" method="POST">
+    <input type="hidden" id="grammar" name="grammar" value="zhong">
+    <button type="submit" class="btn btn-outline-danger btn-sq-lg" style="font-size:20px;">
+      <b>ZHONG <br> Analyzer</b>
+    </button>
+  </form>
+
+  <form action="{{ url_for('delphin_select_profile') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+      <b>Delphin<br>Profiles</b>
+    </button>
+  </form>
+
+
+  <form action="{{ url_for('delphin_update_grammars') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+      <b>Update/<br>Compile<br>Grammars</b>
+    </button>
+  </form>
+
+  
+</div>
+<hr>
+
+
 <div id="AdminPanel">
   <h5>Admin User Panel</h5>
-
-
 
   <form action="{{ url_for('send_mail') }}" style="display:inline;">
     <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>Test Email <br> Settings</b></button>
   </form>
 
+  <form action="{{ url_for('useradmin') }}" style="display:inline;">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>User<br>Manager</b></button>
+  </form>
+
+
   
-<br><br>
+  
 
-  Here only admin users can see what is happening. This is useful for checking the databse, see our users, etc.
-
-
-<h6>Games in the making</h6>
-<ul>
-  <li>Haiku (5-7-5 syllables requirement, random title, must-use word)</li>
-  <li>Proverb (give Noun+Verb/Noun+Noun/Noun+Adjective, they write a proverb, grammatical), then explain the usage </li>
-  <li>Sex with me </li>
-  <li>Association: 2 nouns... link them (levels: Adj+Noun, Adj+Noun?, time, X number of links)</li>
-  <li>Storytelling, random title, 1 word per sentence </li>
-</ul>
-
-<h6>We need a timer. (either to cut people off, or to store how long they took)</h6>
-
-<br>
-<h6>FOR THE FUTURE:</h6>
-<ul>
-  <li>game levels</li>
-  <li>voting systems</li>
-  <li></li>
-  <li></li>
-</ul>
-
-
-<h6>FOR THE DISPLAY:</h6>
- we are thinking of displaying only 1 random result at a time...
-
-<br>
-<br>
-"Sex with me is like..."  by Anonymous
-<br>
-<br>
-
-
-<h6>FOR THE GRAMMAR CORRECTION:</h6>
-I'm thinking that I would like to not break the flow of the game unless there is something wrong with the sentence. Maybe on submission I can try to have the grammar loaded and just get a parse from it... if the grammar finds anything wrong, then we show an intermediate page about that sentence. (maybe even allowing them to correct their sentence?)
-
-
-
-There is some bug on resubmitting things when the clock automatically cycles through.
-After countdown, make input and submit disappear.
 </div>
 <hr>
+
+
 {% endif %}
 
 

@@ -1,0 +1,117 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<h4>Simple Profile View</h4>
+
+<br>
+
+<!-- <div> -->
+<!--   Toggle column: -->
+<!--   <a class="toggle-vis" data-column="0">Name</a>  - -->
+<!--   <a class="toggle-vis" data-column="1">Position</a> - -->
+<!--   <a class="toggle-vis" data-column="2">Office</a> - -->
+<!--   <a class="toggle-vis" data-column="3">Age</a> - -->
+<!--   <a class="toggle-vis" data-column="4">Start date</a> - -->
+<!--   <a class="toggle-vis" data-column="5">Salary</a> -->
+<!-- </div> -->
+
+<table id="example" class="table" style="width:100%">
+        <thead>
+            <tr>
+                <th>i-id</th>
+                <th>i-wf</th>
+                <th>readings</th> <!-- number of deriv trees -->
+                <th>i-input</th> 
+                <th>i-comment</th>
+            </tr>
+        </thead>
+        <tbody>
+
+	    {% for item in tsdb_min %}
+            <tr>
+                <td>{{ item[0] }}</td> <!-- id -->
+                <td>{{ item[1] }}</td> <!-- i-wf -->
+                <td>{{ item[2] }}</td> <!-- readings -->
+                <td>{{ item[3] }}</td> <!-- i-input -->
+                <td>{{ item[4] }}</td> <!-- i-comments -->
+            </tr>
+	    {% endfor %}
+
+	    
+        </tbody>
+        <tfoot>
+            <tr>
+                <th><input type="text" size="1" placeholder="i-id"/></th>
+                <th><input type="text" size="1" placeholder="i-wf"/></th>
+                <th><input type="text" size="4" placeholder="readings"/></th> <!-- number derivations trees -->
+                <th><input type="text" size="30" placeholder="i-input"/></th> 
+                <th><input type="text" size="5" placeholder="i-comment"/></th>
+            </tr>
+        </tfoot>
+    </table>
+
+
+
+<style>
+td.overparse {
+        color: red;
+}
+td.lackingcoverage {
+        color: #FF7E00;
+}
+</style>
+
+
+<script>
+$(document).ready(function() {
+
+    // DataTable //
+    var table = $('#example').DataTable({
+        "dom": 'l<"top"i>rpt<"bottom"><"clear">',
+	"lengthMenu": [[5, 6, 7, 8, 9, 10, 25, 50, -1], [5, 6, 7, 8, 9, 10, 25, 50, "All"]],
+
+
+        "createdRow": function ( row, data, index ) {
+
+	    {# <!-- lacking coverage = (grammatical) + (no parses) -->   #}
+            if ( data[1] == 1 && data[2] == 0 ) {
+                $('td', row).addClass('lackingcoverage');
+            }
+
+	
+	    {# <!-- over parsing = (ungrammatical) + (parses) -->   #}
+            if ( data[1] == 0 && data[2] > 0 ) {
+                $('td', row).addClass('overparse');
+            }
+	
+	
+        }
+
+
+
+	
+    });
+
+    // Apply the search //
+    table.columns().eq( 0 ).each( function ( colIdx ) {
+        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
+            table
+                .column( colIdx )
+                .search( this.value )
+                .draw();
+        } );
+    } );
+
+} );
+</script>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+{% endblock %}

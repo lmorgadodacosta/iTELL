@@ -46,8 +46,9 @@ with app.app_context():
 
                     access = False
                     user_groups = current_user.group.split('-')
+                    
                     for grp in user_groups:
-                        if grp != group:
+                        if grp == group:
                             access = True
 
                     if access == False:

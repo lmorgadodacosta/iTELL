@@ -1,0 +1,130 @@
+{% extends "index.html" %}
+{% block body %}
+
+<h3>Update / Compile Grammars</h3>
+<br>
+
+<div class="text-center">
+<button id="erg2018"  class="btn btn-outline-dark btn-sq-lg  col-sm-3" style="font-size:20px;"><b>Update<br> ERG2018</b></button>
+    <button id="ergTRUNK"  class="btn btn-outline-dark btn-sq-lg col-sm-3" style="font-size:20px;"><b>Update<br> ERG-TRUNK</b></button>
+    <button id="zhong"  class="btn btn-outline-dark btn-sq-lg col-sm-3" style="font-size:20px;"><b>Update<br> ZHONG</b></button>
+    <button id="jacy"  class="btn btn-outline-dark btn-sq-lg col-sm-3" style="font-size:20px;"><b>Update<br> JACY</b><br>(soon)</button>
+    <button id="indra"  class="btn btn-outline-dark btn-sq-lg col-sm-3" style="font-size:20px;"><b>Update<br> INDRA</b><br>(soon)</button>
+</div>
+    
+<hr>
+
+<div id="msg"  class="text-center"> Click to update a grammar (please wait till it finishes)</div>
+<div id="bash_stdout"></div>
+
+<hr>
+
+
+
+<script>
+$(function() {
+    $("#erg2018").bind("click", function() {
+
+	var report_div = document.getElementById("bash_stdout");
+	report_div.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var msg = document.getElementById("msg");
+        msg.innerHTML = "We are currently updating the grammar<hr>";
+
+
+        {#
+        <!-- SCRIPT_ROOT = 'appname/delphin/';   -->
+        <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
+	#}
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_erg2018', {
+        }, function(data) {
+    
+	    if (data.result) {
+		r = String(data.result);
+		msg.innerHTML = "It has finished. See results below. <hr>";
+		report_div.innerHTML = r;
+	    } else {
+		msg.innerHTML = "";
+		report_div.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+
+	});
+
+    });
+});
+
+
+
+$(function() {
+    $("#ergTRUNK").bind("click", function() {
+
+	var report_div = document.getElementById("bash_stdout");
+	report_div.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var msg = document.getElementById("msg");
+        msg.innerHTML = "We are currently updating the grammar<hr>";
+
+
+        {#
+        <!-- SCRIPT_ROOT = 'appname/delphin/';   -->
+        <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
+	#}
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_ergTRUNK', {
+        }, function(data) {
+    
+	    if (data.result) {
+		r = String(data.result);
+		msg.innerHTML = "It has finished. See results below. <hr>";
+		report_div.innerHTML = r;
+	    } else {
+		msg.innerHTML = "";
+		report_div.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+
+	});
+
+    });
+});
+
+
+
+
+$(function() {
+    $("#zhong").bind("click", function() {
+
+	var report_div = document.getElementById("bash_stdout");
+	report_div.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var msg = document.getElementById("msg");
+        msg.innerHTML = "We are currently updating the grammar<hr>";
+
+
+        {#
+        <!-- SCRIPT_ROOT = 'appname/delphin/';   --> 
+        <!-- In Flask, the AJAX function should be under 'app/delphin/_funcName' -->
+	#}
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_zhong', {
+        }, function(data) {
+    
+	    if (data.result) {
+		r = String(data.result);
+		msg.innerHTML = "It has finished. See results below. <hr>";
+		report_div.innerHTML = r;
+	    } else {
+		msg.innerHTML = "";
+		report_div.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+
+	});
+
+    });
+});
+
+</script>
+
+
+
+{% endblock %}

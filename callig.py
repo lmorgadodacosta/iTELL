@@ -25,9 +25,10 @@ def inf_dd():
 
 import lcc
 import wn
+import utils
 import syl
 import game_data
-import erg_call
+import delphin_call
 import common_sql as csql
 from feedback import eng_feedback
 
@@ -36,6 +37,7 @@ app = Flask(__name__)
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 
+ROOT  = path.dirname(path.realpath(__file__))
 
 ################################################################################
 # MODE defines which apps are available in the deployed instance
@@ -151,14 +153,23 @@ def current_time():
 def lccReport():
     """
     This function produces the HTML report for any given document.
+
+    The feedback_set sets which group of errors and which feedback
+    messages to show students. Originally, this was set to 'lcc'.
+    But with the current addition of new sets of errors and new error 
+    messages, this is now a mandatory option for check_docx.
+
     """
 
     filename = request.args.get('fn', None)
 
+    # feedback_set = 'lcc'  # original error-set and messages
+    feedback_set = 'lcc2' 
+    
     docx_html = lcc.docx2html(filename)
     (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename) 
 
-    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report)
+    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report, feedback_set)
     
     
     # lxml.html.tostring returns type=bytes, must decode here
@@ -240,7 +251,7 @@ def sexwithme_info():
     if example_list:
         return render_template('sexwithme-info.html',
                                example_list=example_list,
-                               MODE=MODEx)
+                               MODE=MODE)
 
     else: # for brand-new dbs, show a system's example
         return render_template('sexwithme-info.html',
@@ -282,7 +293,7 @@ def save_sexwithme():
 
         # it's always treated as 1 sentence, so we can do this:
         if answer:
-            parse = erg_call.check_sents([answer])[0]
+            parse = delphin_call.check_sents([answer])[0]
             errors = parse[1] # should be of type [('non_third_sg_fin_v_rbst', 'wants')]            
         else:
             errors = []
@@ -542,6 +553,7 @@ def save_haikuondemand():
 # EMAIL VIEWS
 ################################################################################
 @app.route('/test-email-settings')
+@login_required(role=0, group='admin')
 def send_mail():
 	try:
 	    msg = Message("Send Mail Tutorial!",
@@ -629,6 +641,13 @@ def register_mail():
 
 
 
+################################################################################
+# IXUE VIEWS
+################################################################################
+@app.route('/ixue-jumbled', methods=['GET', 'POST'])
+def ixue_jumbled():
+    return render_template('ixue_jumbledsents.html',
+                           MODE=MODE)
 
 
 
@@ -699,7 +718,7 @@ def save_lcc_sentence():
             csql.insert_into_word(sid, wid, surface, pos, lemma)
 
         words = csql.fetch_words_by_sid(sid, sid)[sid]
-        app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc')
+        app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc2')
 
         ########################################################################
         # WRITE ERRORS TO CORPUS DB
@@ -707,9 +726,6 @@ def save_lcc_sentence():
         all_errors = app_errors | non_app_errors
         for i, (label, loc) in enumerate(all_errors):
             csql.insert_into_error(sid, i, label, loc)
-
-
-
             
         errors = []
         
@@ -717,9 +733,9 @@ def save_lcc_sentence():
             tag = e[0]
             focus = e[1]
             if tag in eng_feedback:
-                if 'lcc' in eng_feedback[tag]:
+                if 'lcc2' in eng_feedback[tag]:
                     #print(eng_feedback[tag])
-                    feedback = eng_feedback[tag]['lcc'][0].format(focus)
+                    feedback = eng_feedback[tag]['lcc2'][0].format(focus)
                     errors.append(feedback)
             
 
@@ -728,40 +744,6 @@ def save_lcc_sentence():
                                errors=errors,
                                eng_feedback=eng_feedback,
                                MODE=MODE)
-    
-
-
-        # if answer and tags and ('NoParse' not in tags):
-        #     # we are not showing feedback for a 'NoParse'
-
-        #     sex_with_me_id = None
-        #     for tag in tags:
-        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
-        #                                  seconds, language, username, current_time())
-
-        #     return render_template('lcc_feedback.html',
-        #                            answer=answer,
-        #                            tags=tags,
-        #                            foci=foci,
-        #                            eng_feedback=eng_feedback)
-
-        # if answer and tags and ('NoParse' in tags):
-        #     sex_with_me_id = write_sexwithme(prompt, answer, seconds, language,
-        #                                      username, current_time())
-
-        #     for tag in tags:
-        #         write_sexwithme_feedback(answer, sex_with_me_id, tag,
-        #                                  seconds, language, username, current_time())
-
-        # elif answer:
-        #     print(write_sexwithme(prompt, answer, seconds, language,
-        #                     username, current_time()))
-            
-        # else:
-        #     write_sexwithme(prompt, None, seconds, language,
-        #                     username, current_time())
-    
-    # return sexwithme_game()
 
 
         
@@ -771,13 +753,156 @@ def save_lcc_sentence():
 ################################################################################
 
 @app.route("/useradmin",methods=["GET"])
-@login_required(role=99, group='admin')
+@login_required(role=0, group='admin')
 def useradmin():
     users = fetch_allusers()
     return render_template("useradmin.html",
                            users=users,
                            MODE=MODE)
 
+
+
+@app.route('/delphin/select-profile', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_select_profile():
+    
+    # Not all grammar strucutres are similar. E.g., Zhong is a mess
+    # Because of this, I need to have the path to the tsdb folder of each
+    # grammar in question; Since we import the grammars via remotes,
+    # these shouldn't really change
+
+    # print(delphin_call.get_shell_script_output_using_check_output())
+
+    erg_gold_names = next(os.walk(path.join(ROOT,'delphin/erg2018/tsdb/gold/')))[1]
+
+    zhong_gold_names = next(os.walk(path.join(ROOT,'delphin/zhong/cmn/zhs/tsdb/gold/')))[1]
+
+    # print(erg_gold_profiles)
+
+    # Skeletons are actually messier, even in the ERG.
+    # erg_skeleton_profiles = next(os.walk('delphin/erg2018/tsdb/skeletons/'))[1]
+    # print(erg_skeleton_profiles)
+
+    return render_template('delphin_profiles_selector.html',
+                           erg_gold_names=sorted(erg_gold_names),
+                           zhong_gold_names=sorted(zhong_gold_names),
+                           MODE=MODE)
+
+@app.route('/delphin/see-profile', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_see_profile():
+    if request.method == 'POST':
+        result = request.form
+
+    if 'erg2018_gold_prof' in result.keys():
+        profile = 'delphin/erg2018/tsdb/gold/' + result['erg2018_gold_prof'].strip()
+    elif 'zhong_gold_prof' in result.keys():
+        profile = 'delphin/zhong/cmn/zhs/tsdb/gold/' + result['zhong_gold_prof'].strip()
+    else:
+        profile = None
+        
+    if profile:
+        tsdb_min = delphin_call.tsdb_min(profile)
+    
+        return render_template('delphin_simple_profile.html',
+                               tsdb_min=tsdb_min,
+                               MODE=MODE)
+    else:
+        return "Some tampering was detected. This should not happen."
+    
+
+
+@app.route('/delphin-analyser', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def itell_delphin_analyser():
+    if request.method == 'POST':
+        result = request.form
+
+        grammar = result['grammar'].strip()
+
+        if 'grammar_mode' in result.keys():
+            grammar_mode = result['grammar_mode'].strip()
+        else:
+            grammar_mode = None
+
+        if 'max_parses' in result.keys():
+            max_parses = result['max_parses'].strip()
+        else:
+            max_parses = None
+            
+        return render_template('itell_erg-analyser.html',
+                               grammar=grammar,
+                               grammar_mode=grammar_mode,
+                               max_parses=max_parses,
+                               MODE=MODE)
+
+
+
+@app.route('/_delphin-analyser-output', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_analyser_output():
+    if request.method == 'POST':
+        result = request.form
+
+        sent = result['sentence'].strip()
+        grammar = result['grammar'].strip()
+        grammar_mode = result['grammar_mode'].strip()
+        max_parses = result['max_parses'].strip()
+        
+        results = delphin_call.full_parse(sent, grammar_mode, max_parses)
+
+        
+        return render_template('itell_erg-analyser-output.html',
+                               sent=sent,
+                               results=results,
+                               grammar=grammar,
+                               grammar_mode=grammar_mode,
+                               max_parses=max_parses,
+                               MODE=MODE)
+
+        
+
+
+
+
+@app.route("/delphin/update-grammars", methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_update_grammars():
+    return render_template("delphin_update_grammars.html",
+                           MODE=MODE)
+
+
+
+@app.route('/delphin/_update_erg2018', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_erg2018():
+    "Update the ERG2018 repository and build the grammars with ACE."
+    
+    bash_stdout = delphin_call.update_erg2018()
+    bash_stdout = utils.stdout2html(bash_stdout)
+        
+    return jsonify(result=bash_stdout)
+
+@app.route('/delphin/_update_ergTRUNK', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_ergTRUNK():
+    "Update the ERG-TRUNK repository and build the grammars with ACE."
+    
+    bash_stdout = delphin_call.update_ergTRUNK()
+    bash_stdout = utils.stdout2html(bash_stdout)
+        
+    return jsonify(result=bash_stdout)
+
+
+@app.route('/delphin/_update_zhong', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_zhong():
+    "Update ZHONG's repository and build the grammars with ACE."
+
+    bash_stdout = delphin_call.update_zhong()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    
+    return jsonify(result=bash_stdout)
 
 
 

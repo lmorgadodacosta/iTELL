@@ -1,3 +1,11 @@
+
+/delphin/*
+!/delphin/pull_remotes.bash
+!/delphin/pull_update_erg2018.bash
+!/delphin/pull_update_ergTRUNK.bash
+!/delphin/pull_update_zhong.bash
+
+
 # Emacs temp files
 *~
 

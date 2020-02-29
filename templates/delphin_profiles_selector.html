@@ -1,0 +1,41 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+
+
+<h4>ERG2018 Gold Profiles</h4>
+<form action="{{ url_for('delphin_see_profile') }}"  method="POST">
+  <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+  <div class="row">
+    <select class="col-sm-9 form-control form-control-lg" id="erg2018_gold_prof" name="erg2018_gold_prof" required>
+      <option><b></b></option>  
+      {% for name in erg_gold_names  %} 
+      <option value="{{ name }}"><b>{{ name }}</b></option>  
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-dark btn-lg col-sm-3" style="font-size:20px;"><b>See ERG Profile</b></button>
+  </div>
+</form>
+
+<br>
+<br>
+
+<h4>Zhong Gold Profiles</h4>
+<form action="{{ url_for('delphin_see_profile') }}"  method="POST">
+  <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+  <div class="row">
+    <select class="col-sm-9 form-control form-control-lg" id="zhong_gold_prof" name="zhong_gold_prof" required>
+      <option><b></b></option>  
+      {% for name in zhong_gold_names  %} 
+      <option value="{{ name }}"><b>{{ name }}</b></option>  
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-dark btn-lg col-sm-3" style="font-size:20px;"><b>See Zhong Profile</b></button>
+  </div>
+</form>
+
+
+
+
+{% endblock %}
