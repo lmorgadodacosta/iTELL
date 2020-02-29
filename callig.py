@@ -37,6 +37,7 @@ app = Flask(__name__)
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 
+ROOT  = path.dirname(path.realpath(__file__))
 
 ################################################################################
 # MODE defines which apps are available in the deployed instance
@@ -772,9 +773,9 @@ def delphin_select_profile():
 
     # print(delphin_call.get_shell_script_output_using_check_output())
 
-    erg_gold_names = next(os.walk('delphin/erg2018/tsdb/gold/'))[1]
+    erg_gold_names = next(os.walk(path.join(ROOT,'delphin/erg2018/tsdb/gold/')))[1]
 
-    zhong_gold_names = next(os.walk('delphin/zhong/cmn/zhs/tsdb/gold/'))[1]
+    zhong_gold_names = next(os.walk(path.join(ROOT,'delphin/zhong/cmn/zhs/tsdb/gold/')))[1]
 
     # print(erg_gold_profiles)
 
