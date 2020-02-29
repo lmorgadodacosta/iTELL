@@ -25,6 +25,7 @@ def inf_dd():
 
 import lcc
 import wn
+import utils
 import syl
 import game_data
 import delphin_call
@@ -769,6 +770,8 @@ def delphin_select_profile():
     # grammar in question; Since we import the grammars via remotes,
     # these shouldn't really change
 
+    # print(delphin_call.get_shell_script_output_using_check_output())
+
     erg_gold_names = next(os.walk('delphin/erg2018/tsdb/gold/'))[1]
 
     zhong_gold_names = next(os.walk('delphin/zhong/cmn/zhs/tsdb/gold/'))[1]
@@ -790,8 +793,8 @@ def delphin_see_profile():
     if request.method == 'POST':
         result = request.form
 
-    if 'erg_gold_prof' in result.keys():
-        profile = 'delphin/erg2018/tsdb/gold/' + result['erg_gold_prof'].strip()
+    if 'erg2018_gold_prof' in result.keys():
+        profile = 'delphin/erg2018/tsdb/gold/' + result['erg2018_gold_prof'].strip()
     elif 'zhong_gold_prof' in result.keys():
         profile = 'delphin/zhong/cmn/zhs/tsdb/gold/' + result['zhong_gold_prof'].strip()
     else:
@@ -857,60 +860,48 @@ def delphin_analyser_output():
                                MODE=MODE)
 
         
+
+
+
+
+@app.route("/delphin/update-grammars", methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def delphin_update_grammars():
+    return render_template("delphin_update_grammars.html",
+                           MODE=MODE)
+
+
+
+@app.route('/delphin/_update_erg2018', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_erg2018():
+    "Update the ERG2018 repository and build the grammars with ACE."
+    
+    bash_stdout = delphin_call.update_erg2018()
+    bash_stdout = utils.stdout2html(bash_stdout)
         
-        ########################################################################
-        # WRITE SENTENCE IN DATABASE
-        ########################################################################
-        # docid = csql.fetch_max_doc_id() + 1
-        # csql.insert_into_doc(docid, 'single_sentence')
+    return jsonify(result=bash_stdout)
 
-        # sid = docid * 100000
-        # pid = 0
-        # csql.insert_into_sent(sid, docid, pid, sent)
-        # word_list = lcc.pos_lemma(lcc.sent2words(sent))        
-        # for w in word_list:
-        #     wid = csql.fetch_max_wid(sid) + 1
-        #     (surface, pos, lemma) = w
-        #     csql.insert_into_word(sid, wid, surface, pos, lemma)
-
-        # words = csql.fetch_words_by_sid(sid, sid)[sid]
-        # app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc')
-
-        ########################################################################
-        # WRITE ERRORS TO CORPUS DB
-        ########################################################################
-        # all_errors = app_errors | non_app_errors
-        # for i, (label, loc) in enumerate(all_errors):
-        #     csql.insert_into_error(sid, i, label, loc)
-            
-        # errors = []
+@app.route('/delphin/_update_ergTRUNK', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_ergTRUNK():
+    "Update the ERG-TRUNK repository and build the grammars with ACE."
+    
+    bash_stdout = delphin_call.update_ergTRUNK()
+    bash_stdout = utils.stdout2html(bash_stdout)
         
-        # for e in app_errors:
-        #     tag = e[0]
-        #     focus = e[1]
-        #     if tag in eng_feedback:
-        #         if 'lcc' in eng_feedback[tag]:
-        #             #print(eng_feedback[tag])
-        #             feedback = eng_feedback[tag]['lcc'][0].format(focus)
-        #             errors.append(feedback)
-            
-
-        # return render_template('lcc_feedback.html',
-        #                        sent=sent,
-        #                        errors=errors,
-        #                        eng_feedback=eng_feedback,
-        #                        MODE=MODE)
+    return jsonify(result=bash_stdout)
 
 
+@app.route('/delphin/_update_zhong', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_zhong():
+    "Update ZHONG's repository and build the grammars with ACE."
 
-
-
-
-
-
-
-
-
+    bash_stdout = delphin_call.update_zhong()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    
+    return jsonify(result=bash_stdout)
 
 
 

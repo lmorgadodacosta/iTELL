@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # ALWAYS DOWNLOAD DELPH-IN REMOTES TO THIS FOLDER  "appName/delphin/"
 DIRECTORY=$(cd `dirname $0` && pwd)
 

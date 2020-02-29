@@ -5,6 +5,10 @@ from os import path
 from flask import Flask, current_app, g
 from collections import defaultdict as dd
 
+import subprocess
+from subprocess import check_output
+
+
 import json
 import delphin.dmrs
 import delphin.mrs
@@ -54,28 +58,24 @@ def check_nodes(obj,errors):
     FIXME: there are special types, such as 'stutter' that do not 
     have 'mal' or 'rbst' in the name.
 
+    'stutter'  must also be included in this search for some errors.
+
     """
     if isinstance(obj, UDFNode):
         error = ''
-        if ('rbst' in obj.entity) or ('mal' in obj.entity):  
+        if ('rbst' in obj.entity) or ('mal' in obj.entity) or ('stutter' in obj.entity):  
             error = obj.entity
             span = " ".join([t.form for t in obj.terminals()])
             errors.append((error, span))
             
-        if  obj.type and (('mal_' in obj.type) or ('rbst' in obj.type)):   
+        if  obj.type and (('mal_' in obj.type) or ('rbst' in obj.type) or ('stutter' in obj.type)):   
             span = " ".join([t.form for t in obj.terminals()])
             error = obj.type
             errors.append((error, span))
             
-        # if error:
-        #     errors.append((error, span))
-            # print(error, span)
         for dtr in obj.daughters:
             dtrs = check_nodes(dtr,errors)
 
-        # print("I'm an instance.\n")
-        # print(obj.entity)
-        # print("\n\n")
     return errors
 
 
@@ -94,6 +94,10 @@ with app.app_context():
 
     ZHONG = 'static/zhong.dat'
 
+
+    ace_stderr = open(path.join(ROOT, 'delphin/ace_stderr.txt'), 'w+')
+
+    
     def check_sents(sent_list):
         """
         Given a list of sentences, this function tries to parse each one with
@@ -107,10 +111,10 @@ with app.app_context():
         erg_results = [] 
         with ace.ACEParser(path.join(ROOT, ERG),
                            executable=path.join(ROOT, ACE),
-                           cmdargs=['-1', '--timeout=10']) as parser, \
+                           cmdargs=['-1', '--timeout=20', '--max-chart-megabytes=2000', '--max-unpack-megabytes=2000']) as parser, \
              ace.ACEParser(path.join(ROOT, MAL_ERG),
                            executable=path.join(ROOT, ACE),
-                           cmdargs=['-1', '--timeout=10', '--udx']) as mal:
+                           cmdargs=['-1', '--timeout=20', '--udx', '--max-chart-megabytes=2000', '--max-unpack-megabytes=2000']) as mal:
 
             for sent in sent_list:
 
@@ -181,14 +185,14 @@ with app.app_context():
         # ACE cmdargs (currently only for the number of parses)
         ########################################################################
         if max_parses == 'all':
-            ace_cmdargs = ['--timeout=10']
+            ace_cmdargs = ['--timeout=20', '--timeout=20', '--max-chart-megabytes=2000', '--max-unpack-megabytes=2000']
         else:
-            ace_cmdargs = ['-n', max_parses, '--timeout=10']
+            ace_cmdargs = ['-n', max_parses, '--timeout=20', '--timeout=20', '--max-chart-megabytes=2000', '--max-unpack-megabytes=2000']
 
         ########################################################################
         # To silence ACE we need to give it a file to stream its own stderr.
         ########################################################################
-        ace_stderr = open(path.join(ROOT, 'static/ace_stderr.txt'), 'w+')
+        # ace_stderr = open(path.join(ROOT, 'static/ace_stderr.txt'), 'w+')
         
         with ace.ACEParser(path.join(ROOT, GRAMMAR),
                            executable=path.join(ROOT, ACE),
@@ -252,11 +256,22 @@ with app.app_context():
         return data
 
 
-    
-# CHECK this sentence. The ERG parse fails and the mal-erg does not give any node to inspect
-# This means that the mal-erg is using some rules that we are not catching properly
-# Maybe not marked in Instances?
-# NOTE: parsed 1 / 1 sentences, avg 120710k, time 0.67562s
-# NOTE: parsed 0 / 1 sentences, avg 87374k, time 0.54862s
-# ('Since Singapore only has a land area of 719.9 square kilometer, it is also not advisable for the government to increase sitting facilities due to limited space and resource.', [])
+    def update_erg2018():
+        stdout = check_output([path.join(ROOT,
+                 'delphin/pull_update_erg2018.bash')],
+                 stderr=ace_stderr).decode('utf-8')
+        return stdout
+
+    def update_ergTRUNK():
+        stdout = check_output([path.join(ROOT,
+                 'delphin/pull_update_ergTRUNK.bash')],
+                 stderr=ace_stderr).decode('utf-8')
+        return stdout
+
+    def update_zhong():
+        stdout = check_output([path.join(ROOT,
+                 'delphin/pull_update_zhong.bash')],
+                 stderr=ace_stderr).decode('utf-8')
+        return stdout
+
 

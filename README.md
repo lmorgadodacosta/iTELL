@@ -58,9 +58,14 @@ Run:
 /var/www/itell/bin$ bash build_db.bash 
 /var/www/itell/bin$ python dump_wn.py 
 
-databases (and the db folder) shoul be set proper permission
 
-www-data should also be the group of the db otherwise it will show as "locked".
+Both the folders and content of [`db\`](db\) and  [`delphin\`](delphin\) need to be accessible by 'www-data', with read, write and executing permissions. 
+
+The best way to do this is to change the group ownership of these folders to 'www-data' 
+
+Failing to do this will, among other things,  show the access to dbs as "locked".
+
+
 
 
 
@@ -103,3 +108,9 @@ export LANG='en_US.UTF-8'
 export LC_ALL='en_US.UTF-8'
 
 
+
+
+
+Make sure ACE is on path.
+
+You can find this out by choosing to put the ACE binary in one the locations shown by running [`$PATH`]($PATH) in your command line.

@@ -4,11 +4,11 @@
 
 
 
-<h4>ERG Gold Profiles</h4>
+<h4>ERG2018 Gold Profiles</h4>
 <form action="{{ url_for('delphin_see_profile') }}"  method="POST">
   <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
   <div class="row">
-    <select class="col-sm-9 form-control form-control-lg" id="erg_gold_prof" name="erg_gold_prof" required>
+    <select class="col-sm-9 form-control form-control-lg" id="erg2018_gold_prof" name="erg2018_gold_prof" required>
       <option><b></b></option>  
       {% for name in erg_gold_names  %} 
       <option value="{{ name }}"><b>{{ name }}</b></option>  
