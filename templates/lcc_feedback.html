@@ -15,13 +15,14 @@ This is what you wrote:
   <span class="h5">{{ sent }}</span>&nbsp;&nbsp;
   <i class="fa fa-quote-right"></i>
 </p>
-
 <br>
 
 <hr>		
 {% if errors %}
 
 <b>This is what we think might be wrong with it:</b>
+</div>
+<div class="col-sm-12">
     {% for e in errors %}
         <br>{{ e|safe }}
     {% endfor %}
