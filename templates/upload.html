@@ -6,35 +6,32 @@
 <h4>Upload Your Assignment</h4>
 
 
-<p>Welcome to the upload section. Before we proceed, we would like to remind you that upload only files
-  with the extension '.docx'. <br>These files can be produced from a variety of word processors including
+<p>Welcome to the upload section. Before we proceed, we would like to remind you to upload only files
+  with the extension '.docx'. <br>These files can be generated from a variety of word processors including
   Microsoft Word, Google Documents, and Pages.</p>
 
 
 <b><u>License</u> (Please Read)</b>
 <p>Before you upload your assignment, we would like to request your permission to use your assignment
-  for research purposes. Systems like this are only possible to be improved if there is relevant data
-  available. As NTU students, your privacy is very important to us, and any data you agree to release
+  for research purposes. Systems like this can only be improved with additional data. As NTU students, your privacy is very important to us, and any data you agree to release
   will be hand-checked and anonymised before being used for research. Anonymised data will be released
   under a <a href="https://creativecommons.org/share-your-work/public-domain/cc0/"> Creative Commons
     CC0 Licence</a> and used to improve this system. This choice will not affect your grade in any way,
   and lecturers won't know your choice before they grade your assignment.</p>
 
 <form enctype="multipart/form-data" action="{{url_for('report')}}" method="post" style="display:inline;">
-<b>You must chose a license:</b>  <br>
+<b>You must choose a license:</b>  <br>
 <select id="license" name="license" required>
 <option value="">-- Choose --</option>
-<option value="1">I <b>ACCEPT</b> to share my assignment so that it can be used for further research</option>
-<option value="0">I <b>DO NOT ACCEPT</b> to share my assignment so that it can be used for further research</option>
+<option value="1">I <b>ALLOW</b> my assignment to be used for further research</option>
+<option value="0">I <b>DO NOT ALLOW</b> my assignment to be used for further research</option>
 </select>
 
 
-
-
 <br>
 <br>
 <br>
-<b>Chose your file to upload:</b>
+<b>Choose your file to upload:</b>
 <p><input type="file" name="file" required>
   <br>
 
