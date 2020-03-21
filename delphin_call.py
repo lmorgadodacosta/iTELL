@@ -405,8 +405,8 @@ with app.app_context():
         
         cmd = ['; '.join([
             "mkdir " + newdir_path,
-            "cp " + dir1_path + "/item " + newdir_path + 'item',
-            "cp " + dir1_path + "/relations " + newdir_path + 'relations',
+            "cp " + dir1_path + "item " + newdir_path + 'item',
+            "cp " + dir1_path + "relations " + newdir_path + 'relations',
             "touch " + newdir_path + 'analysis',
             "touch " + newdir_path + 'decision',
             "touch " + newdir_path + 'edge',

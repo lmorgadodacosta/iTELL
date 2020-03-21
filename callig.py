@@ -946,6 +946,7 @@ def delphin_run_regression():
     # if selected_grammar and dir1 exist, then it's a new regression test
     if (selected_grammar and dir1):    
         stdout, stderr, newdir_path = delphin_call.new_regression(dir1, selected_grammar)
+
         prof2 = delphin_call.tsdb_min(path.join(ROOT, newdir_path))
         dir2_path = newdir_path
         
