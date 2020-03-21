@@ -403,7 +403,38 @@ with app.app_context():
         
         # example: art -a "ace -g ~/git/itell/delphin/zhong.dat" cmnedu-2020-03-17.03/
         
-        cmd = ['; '.join([
+        # cmd = ['; '.join([
+        #     "mkdir " + newdir_path,
+        #     "cp " + dir1_path + "item " + newdir_path + 'item',
+        #     "cp " + dir1_path + "relations " + newdir_path + 'relations',
+        #     "touch " + newdir_path + 'analysis',
+        #     "touch " + newdir_path + 'decision',
+        #     "touch " + newdir_path + 'edge',
+        #     "touch " + newdir_path + 'fold',
+        #     "touch " + newdir_path + 'item-phenomenon',
+        #     "touch " + newdir_path + 'item-set',
+        #     "touch " + newdir_path + 'output',
+        #     "touch " + newdir_path + 'parameter',
+        #     "touch " + newdir_path + 'parse',
+        #     "touch " + newdir_path + 'phenomenon',
+        #     "touch " + newdir_path + 'preference',
+        #     "touch " + newdir_path + 'result',
+        #     "touch " + newdir_path + 'rule',
+        #     "touch " + newdir_path + 'run',
+        #     "touch " + newdir_path + 'score',
+        #     "touch " + newdir_path + 'set',
+        #     "touch " + newdir_path + 'tree',
+        #     "touch " + newdir_path + 'update',
+        #     'art -a "ace -g ' + grammar_path + '" ' + newdir_path
+        # ])]
+        
+        # p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+        # stdout, stderr = p.communicate()
+
+
+        all_stdout = bytes()
+        all_stderr = bytes()
+        commands = [
             "mkdir " + newdir_path,
             "cp " + dir1_path + "item " + newdir_path + 'item',
             "cp " + dir1_path + "relations " + newdir_path + 'relations',
@@ -426,10 +457,13 @@ with app.app_context():
             "touch " + newdir_path + 'tree',
             "touch " + newdir_path + 'update',
             'art -a "ace -g ' + grammar_path + '" ' + newdir_path
-        ])]
-        
-        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
-        stdout, stderr = p.communicate()
+        ]
 
-        return stdout.decode('utf-8'), stderr.decode('utf-8'), newdir_path
+        for c in commands:
+            p = Popen(c, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+            stdout, stderr = p.communicate()
+            all_stdout += stdout 
+            all_stderr += stderr
+            
+        return all_stdout.decode('utf-8'), all_stderr.decode('utf-8'), newdir_path
 
