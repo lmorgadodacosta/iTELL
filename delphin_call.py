@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from os import path
+import shutil
 from flask import Flask, current_app, g
 from collections import defaultdict as dd
 import datetime
@@ -400,10 +402,43 @@ with app.app_context():
         dir1_path = "delphin/regressions/" + dir1 + '/'
         newdir_path = "delphin/regressions/" + newdir + '/'
         grammar_path =  path.join(ROOT, 'delphin/'+selected_grammar)
+
+
+
+        os.makedirs(path.join(ROOT, newdir_path))
+        
+        shutil.copyfile(path.join(ROOT, dir1_path+"item"),
+                        path.join(ROOT, newdir_path+"item"))
+        shutil.copyfile(path.join(ROOT, dir1_path+"relations"),
+                        path.join(ROOT, newdir_path+"relations"))
+
+        open(path.join(ROOT, newdir_path+"analysis"), 'a').close()
+        open(path.join(ROOT, newdir_path+"decision"), 'a').close()
+        open(path.join(ROOT, newdir_path+"edge"), 'a').close()
+        open(path.join(ROOT, newdir_path+"fold"), 'a').close()
+        open(path.join(ROOT, newdir_path+"item-phenomenon"), 'a').close()
+        open(path.join(ROOT, newdir_path+"item-set"), 'a').close()
+        open(path.join(ROOT, newdir_path+"output"), 'a').close()
+        open(path.join(ROOT, newdir_path+"parameter"), 'a').close()
+        open(path.join(ROOT, newdir_path+"parse"), 'a').close()
+        open(path.join(ROOT, newdir_path+"phenomenon"), 'a').close()
+        open(path.join(ROOT, newdir_path+"preference"), 'a').close()
+        open(path.join(ROOT, newdir_path+"result"), 'a').close()
+        open(path.join(ROOT, newdir_path+"rule"), 'a').close()
+        open(path.join(ROOT, newdir_path+"run"), 'a').close()
+        open(path.join(ROOT, newdir_path+"score"), 'a').close()
+        open(path.join(ROOT, newdir_path+"set"), 'a').close()
+        open(path.join(ROOT, newdir_path+"tree"), 'a').close()
+        open(path.join(ROOT, newdir_path+"update"), 'a').close()
+
+        cmd = ['art -a "ace -g ' + grammar_path + '" ' + path.join(ROOT, newdir_path)]
+        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+        stdout, stderr = p.communicate()
+
         
         # example: art -a "ace -g ~/git/itell/delphin/zhong.dat" cmnedu-2020-03-17.03/
         
-        # cmd = ['; '.join([
+        # cmd = [' && '.join([
         #     "mkdir " + newdir_path,
         #     "cp " + dir1_path + "item " + newdir_path + 'item',
         #     "cp " + dir1_path + "relations " + newdir_path + 'relations',
@@ -432,38 +467,40 @@ with app.app_context():
         # stdout, stderr = p.communicate()
 
 
-        all_stdout = bytes()
-        all_stderr = bytes()
-        commands = [
-            "mkdir " + newdir_path,
-            "cp " + dir1_path + "item " + newdir_path + 'item',
-            "cp " + dir1_path + "relations " + newdir_path + 'relations',
-            "touch " + newdir_path + 'analysis',
-            "touch " + newdir_path + 'decision',
-            "touch " + newdir_path + 'edge',
-            "touch " + newdir_path + 'fold',
-            "touch " + newdir_path + 'item-phenomenon',
-            "touch " + newdir_path + 'item-set',
-            "touch " + newdir_path + 'output',
-            "touch " + newdir_path + 'parameter',
-            "touch " + newdir_path + 'parse',
-            "touch " + newdir_path + 'phenomenon',
-            "touch " + newdir_path + 'preference',
-            "touch " + newdir_path + 'result',
-            "touch " + newdir_path + 'rule',
-            "touch " + newdir_path + 'run',
-            "touch " + newdir_path + 'score',
-            "touch " + newdir_path + 'set',
-            "touch " + newdir_path + 'tree',
-            "touch " + newdir_path + 'update',
-            'art -a "ace -g ' + grammar_path + '" ' + newdir_path
-        ]
+        # all_stdout = bytes()
+        # all_stderr = bytes()
+        # commands = [
+        #     "mkdir " + newdir_path,
+        #     "cp " + dir1_path + "item " + newdir_path + 'item',
+        #     "cp " + dir1_path + "relations " + newdir_path + 'relations',
+        #     "touch " + newdir_path + 'analysis',
+        #     "touch " + newdir_path + 'decision',
+        #     "touch " + newdir_path + 'edge',
+        #     "touch " + newdir_path + 'fold',
+        #     "touch " + newdir_path + 'item-phenomenon',
+        #     "touch " + newdir_path + 'item-set',
+        #     "touch " + newdir_path + 'output',
+        #     "touch " + newdir_path + 'parameter',
+        #     "touch " + newdir_path + 'parse',
+        #     "touch " + newdir_path + 'phenomenon',
+        #     "touch " + newdir_path + 'preference',
+        #     "touch " + newdir_path + 'result',
+        #     "touch " + newdir_path + 'rule',
+        #     "touch " + newdir_path + 'run',
+        #     "touch " + newdir_path + 'score',
+        #     "touch " + newdir_path + 'set',
+        #     "touch " + newdir_path + 'tree',
+        #     "touch " + newdir_path + 'update',
+        #     'art -a "ace -g ' + grammar_path + '" ' + newdir_path
+        # ]
 
-        for c in commands:
-            p = Popen(c, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
-            stdout, stderr = p.communicate()
-            all_stdout += stdout 
-            all_stderr += stderr
+        # for c in commands:
+        #     print(c)  #TEST
+        #     p = Popen(c, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+        #     stdout, stderr = p.communicate()
+        #     all_stdout += stdout 
+        #     all_stderr += stderr
             
-        return all_stdout.decode('utf-8'), all_stderr.decode('utf-8'), newdir_path
+        # return all_stdout.decode('utf-8'), all_stderr.decode('utf-8'), newdir_path
+        return stdout.decode('utf-8'), stderr.decode('utf-8'), newdir_path
 
