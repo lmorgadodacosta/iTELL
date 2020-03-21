@@ -40,12 +40,40 @@ app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 ROOT  = path.dirname(path.realpath(__file__))
 
 ################################################################################
-# MODE defines which apps are available in the deployed instance
-#
-# 'test' MODE is used to hide incomplete applications 
-#  The other modes include: 'lcc', 'ixue', 'callig'
+# MODE defines which apps are available in the deployed instance               #
+#                                                                              #
+# 'test' MODE is used to hide incomplete applications                          #
+#  The other modes include: 'lcc', 'ixue', 'callig'                            #
 ################################################################################
-MODE = ['lcc', 'ixue', 'callig','test']
+MODE = ['lcc', 'ixue', 'callig', 'grammarium', 'test']
+
+
+################################################################################
+# ALLGRAMMARS defines all available grammars that the system should look for.  #
+# AVAILABLE_GRAMMARS is a subset of ALLGRAMMARS organized by language, if they #
+# are found compiled under appName/delphin/*                                   #
+################################################################################
+AVAILABLE_GRAMMARS = dd(lambda: list())
+ALLGRAMMARS = [
+    ('erg2018.dat', 'eng'),
+    ('mal-erg2018.dat', 'eng'),
+    ('itell-erg2018.dat', 'eng'),
+    ('erg_trunk.dat','eng'),
+    ('mal-erg_trunk.dat','eng'),
+    
+    ('zhong.dat','cmn'),
+    ('itell-zhong.dat','cmn'),
+    
+    ('jacy.dat','jpn'),
+    
+    ('indra.dat','ind')
+]
+
+for (grm, lang) in ALLGRAMMARS:
+    if os.path.exists(path.join(ROOT,'delphin/'+grm)):
+        AVAILABLE_GRAMMARS[lang].append(grm)
+################################################################################
+
 
 app.config.update(
     # When using gmail, we need to allow unsafe apps to use the email.
@@ -158,7 +186,6 @@ def lccReport():
     messages to show students. Originally, this was set to 'lcc'.
     But with the current addition of new sets of errors and new error 
     messages, this is now a mandatory option for check_docx.
-
     """
 
     filename = request.args.get('fn', None)
@@ -207,7 +234,6 @@ def ixue_intro():
     return render_template('ixue_intro.html',
                            MODE=MODE)
 
-
 @app.route('/introduction', methods=['GET', 'POST'])
 def itell_intro():
     return render_template('itell_intro.html',
@@ -221,6 +247,15 @@ def itell_intro():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     return render_template('register.html',
+                           MODE=MODE)
+
+
+@app.route("/useradmin",methods=["GET"])
+@login_required(role=0, group='admin')
+def useradmin():
+    users = fetch_allusers()
+    return render_template("useradmin.html",
+                           users=users,
                            MODE=MODE)
 
 
@@ -746,21 +781,75 @@ def save_lcc_sentence():
                                MODE=MODE)
 
 
-        
-        
-################################################################################
-# ADMIN VIEWS
-################################################################################
 
-@app.route("/useradmin",methods=["GET"])
+
+
+
+@app.route('/lcc-db', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
-def useradmin():
-    users = fetch_allusers()
-    return render_template("useradmin.html",
-                           users=users,
+def inspect_lcc_db():
+
+# <!-- Things we might want: -->
+
+# <!-- - SELECT docid, title FROM doc  (doc.title can be either the file name or single_sentence) -->
+# <!-- docid are just keys -->
+# <!-- - We definitely don't want to know the doc title, but we might want to check if it was a single sentence -->
+# <!-- We might be able to get by just selecting all docsIDs that pertain to a single sentence -->
+# <!-- Everything else should belonf to a larger document. -->
+
+# <!-- SELECT sid docID sent from sent; -->
+# <!-- - docID is just to know if it actually belongs to a single sent or not. -->
+# <!-- sid id we won't need to show for sure, but we need to keep track;  -->
+# <!-- sent is where the text exists.  -->
+
+
+# <!-- SELECT sid eid label comment FROM error;  -->
+# <!-- one sid can have multiple eid -->
+# <!-- More than one error can exist for each sentence, and these appear in multiple lines of this table -->
+# <!-- label is where the LCC error code is stored  -->
+# <!-- comment is where the error focus is stored (currently just the words) -->
+    
+    sents = fetch_all_sents()
+    errors_by_sent, errors_by_label = fetch_all_errors()
+
+    db_data = dd(lambda: list())
+    for sid in sents.keys():
+        db_data[sid].append(sents[sid][0])
+
+        lcc_errors = []
+        other_errors = []
+        for eid in errors_by_sent[sid]:
+            label = eid[1]
+            comment = eid[2] 
+
+            if label in eng_feedback.keys():
+                if 'lcc2' in eng_feedback[label].keys():
+                    lcc_errors.append(label+': '+comment)
+
+                else:
+                    other_errors.append((label,comment))
+            else:
+                other_errors.append((label,comment))
+                    
+            
+        db_data[sid].append(lcc_errors)
+        db_data[sid].append(other_errors)
+    
+    return render_template('lcc_db.html',
+                           lang='eng',
+                           grammars=AVAILABLE_GRAMMARS[lang],
+                           db_data=db_data,
+                           # sents=sents,
+                           # errors=errors,
                            MODE=MODE)
 
 
+    
+        
+        
+################################################################################
+# GRAMMARIUM VIEWS
+################################################################################
 
 @app.route('/delphin/select-profile', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
@@ -776,7 +865,10 @@ def delphin_select_profile():
     erg_gold_names = next(os.walk(path.join(ROOT,'delphin/erg2018/tsdb/gold/')))[1]
 
     zhong_gold_names = next(os.walk(path.join(ROOT,'delphin/zhong/cmn/zhs/tsdb/gold/')))[1]
+    zhong_skeleton_names = next(os.walk(path.join(ROOT,'delphin/zhong/cmn/zhs/tsdb/skeletons/')))[1]
 
+
+    # print(zhong_skeleton_names)
     # print(erg_gold_profiles)
 
     # Skeletons are actually messier, even in the ERG.
@@ -786,7 +878,157 @@ def delphin_select_profile():
     return render_template('delphin_profiles_selector.html',
                            erg_gold_names=sorted(erg_gold_names),
                            zhong_gold_names=sorted(zhong_gold_names),
+                           zhong_skeleton_names=sorted(zhong_skeleton_names),
                            MODE=MODE)
+
+
+@app.route('/delphin/regression-testing', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_regression_testing():
+    
+    # check/create folder 'delphin/regressions/'
+    if not os.path.exists(path.join(ROOT,'delphin/regressions')):
+        os.makedirs(path.join(ROOT,'delphin/regressions'))
+
+    prev_regressions = next(os.walk(path.join(ROOT,'delphin/regressions/')))[1]
+
+    return render_template('delphin_regression_testing.html',
+                           grammars=AVAILABLE_GRAMMARS,
+                           prev_regressions=sorted(prev_regressions, reverse=True),
+                           MODE=MODE)
+
+
+
+
+@app.route('/delphin_regression_output', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_regression_output():
+    if request.method == 'POST':
+        result = request.form
+
+        if 'selected_grammar' in result.keys():
+            selected_grammar = result['selected_grammar'].strip()
+        else:
+            selected_grammar = ''
+
+        if 'regression_dir1' in result.keys():
+            regression_dir1 = result['regression_dir1'].strip()
+        else:
+            regression_dir1 = ''
+  
+        if 'regression_dir2' in result.keys():
+            regression_dir2 = result['regression_dir2'].strip()
+        else:
+            regression_dir2 = ''
+
+            
+        return render_template('delphin_regression_output.html',
+                               selected_grammar=selected_grammar,
+                               regression_dir1=regression_dir1,
+                               regression_dir2=regression_dir2,
+                               MODE=MODE)
+        
+        
+
+
+@app.route('/_delphin_run_regression', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_run_regression():
+
+    selected_grammar = request.args.get('selected_grammar', None)  
+    dir1 = request.args.get('dir1', None)
+    dir2 = request.args.get('dir2', None)
+
+    dir1_path = "delphin/regressions/" + dir1 + '/'
+    prof1 = delphin_call.tsdb_min(path.join(ROOT, dir1_path))
+
+    
+    # if selected_grammar and dir1 exist, then it's a new regression test
+    if (selected_grammar and dir1):    
+        stdout, stderr, newdir_path = delphin_call.new_regression(dir1, selected_grammar)
+        prof2 = delphin_call.tsdb_min(path.join(ROOT, newdir_path))
+        dir2_path = newdir_path
+        
+    # if dir1 and dir2 exist, then it's just printing previous results
+    elif (dir1 and dir2):
+        dir2_path = "delphin/regressions/" + dir2 + '/'
+        prof2 = delphin_call.tsdb_min(path.join(ROOT, dir2_path))
+        stderr = ''
+        stdout = ''
+    else:
+        return "Something went wrong!"
+
+
+    ############################################################################
+    # GATHER SUMMARY STATISTICS
+    #
+    # We can assume both profiles have the same size and i_id keys
+    ############################################################################
+    summary = dd()
+    summary["prof1"] = dir1_path
+    summary["prof2"] = dir2_path
+    
+    summary["num_of_sents"] = len(prof1.keys())
+    
+    summary["sent_length_sum_prof1"] = 0
+    summary["sent_length_sum_prof2"] = 0
+    
+    summary["parsed_sent_length_sum_prof1"] = 0
+    summary["parsed_sent_length_sum_prof2"] = 0
+    
+    summary["total_num_parses_prof1"] = 0
+    summary["total_num_parses_prof2"] = 0
+    
+    summary["num_of_sents_parsed_prof1"] = 0
+    summary["num_of_sents_parsed_prof2"] = 0
+
+
+    ############################################################################
+    # Create new structure from both profiles 
+    ############################################################################
+    profs = dd(lambda: dd())
+    for i_id in prof1:
+        profs[i_id]['i-wf'] = prof1[i_id]['i-wf']
+        profs[i_id]['i-input'] = prof1[i_id]['i-input']
+        profs[i_id]['i-comment'] = prof1[i_id]['i-comment']
+        profs[i_id]['i-length'] = prof1 [i_id]['i-length']
+
+        summary["sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+        summary["sent_length_sum_prof2"] += int(prof2[i_id]['i-length'])
+
+        if 'readings' in prof1[i_id]:
+            profs[i_id]['old_readings'] = prof1[i_id]['readings']
+            if int(prof1[i_id]['readings'])>0:
+                summary['num_of_sents_parsed_prof1'] += 1
+                summary['total_num_parses_prof1'] += int(prof1[i_id]['readings'])
+                summary["parsed_sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+        else:
+            profs[i_id]['old_readings'] = 0
+
+        if 'readings' in prof2[i_id]:
+            profs[i_id]['new_readings'] = prof2[i_id]['readings']
+            if int(prof2[i_id]['readings'])>0:
+                summary['num_of_sents_parsed_prof2'] += 1
+                summary['total_num_parses_prof2'] += int(prof2[i_id]['readings'])
+                summary["parsed_sent_length_sum_prof2"] += int(prof2[i_id]['i-length'])
+
+        else:
+            profs[i_id]['new_readings'] = 0
+
+
+
+    return jsonify(
+        html=render_template('delphin_regression_results.html',
+                             profs=profs,
+                             selected_grammar=selected_grammar),
+        summary=render_template('delphin_regression_summary.html',
+                                summary=summary),        
+        result= '<br>' + utils.stdout2html(stderr))
+
+
+
+
+
 
 @app.route('/delphin/see-profile', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
@@ -796,70 +1038,153 @@ def delphin_see_profile():
 
     if 'erg2018_gold_prof' in result.keys():
         profile = 'delphin/erg2018/tsdb/gold/' + result['erg2018_gold_prof'].strip()
+        profile_type = 'gold'
+        # grammars = ["erg2018.dat"]
+        lang = "eng"
+        
     elif 'zhong_gold_prof' in result.keys():
         profile = 'delphin/zhong/cmn/zhs/tsdb/gold/' + result['zhong_gold_prof'].strip()
+        profile_type = 'gold'
+        # grammars = ["zhong.dat"]
+        lang = "cmn"
+        
+    elif 'zhong_skeleton_prof' in result.keys():
+        profile = 'delphin/zhong/cmn/zhs/tsdb/skeletons/' + result['zhong_skeleton_prof'].strip()
+        profile_type = 'skeleton'
+        # grammars = ["zhong.dat"]
+        lang = "cmn"
+        
     else:
         profile = None
+        profile_type = None
+        grammars = []
+        lang = None
         
     if profile:
         tsdb_min = delphin_call.tsdb_min(profile)
     
         return render_template('delphin_simple_profile.html',
                                tsdb_min=tsdb_min,
+                               grammars=AVAILABLE_GRAMMARS[lang],
+                               profile_type=profile_type,
+                               lang=lang,
                                MODE=MODE)
     else:
         return "Some tampering was detected. This should not happen."
     
 
 
-@app.route('/delphin-analyser', methods=['GET', 'POST'])
+@app.route('/delphin_analyser', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
-def itell_delphin_analyser():
-    if request.method == 'POST':
-        result = request.form
+def delphin_analyser():
+    """
+    This view generates the main input receiver for grammars. 
+    It is expecting a language, which is used to provide a collection 
+    of available grammars for that language. This can also generate a 
+    small list of examples (especially for some non-english languages). 
+    """
+    # if request.method == 'POST':
+    #     result = request.form
 
-        grammar = result['grammar'].strip()
+    #     lang = result['lang'].strip()
 
-        if 'grammar_mode' in result.keys():
-            grammar_mode = result['grammar_mode'].strip()
-        else:
-            grammar_mode = None
+    #     if 'selected_grammar' in result.keys():
+    #         selected_grammar = result['selected_grammar']
+    #     else:
+    #         selected_grammar = None
 
-        if 'max_parses' in result.keys():
-            max_parses = result['max_parses'].strip()
-        else:
-            max_parses = None
+    #     if 'max_parses' in result.keys():
+    #         max_parses = result['max_parses'].strip()
+    #     else:
+    #         max_parses = None
+        
+        # grammars = sorted(AVAILABLE_GRAMMARS[lang])
+        
+    return render_template('delphin_analyser.html',
+                               # lang=lang,
+                               grammars=AVAILABLE_GRAMMARS,
+                               # selected_grammar=selected_grammar,
+                               # max_parses=max_parses,
+                               MODE=MODE)
             
-        return render_template('itell_erg-analyser.html',
-                               grammar=grammar,
-                               grammar_mode=grammar_mode,
-                               max_parses=max_parses,
-                               MODE=MODE)
 
 
 
-@app.route('/_delphin-analyser-output', methods=['GET', 'POST'])
+# @app.route('/_delphin_analyser_output', methods=['GET', 'POST'])
+# @login_required(role=0, group='open')
+# def delphin_analyser_output():
+#     if request.method == 'POST':
+#         result = request.form
+
+#         lang = result['lang'].strip()
+#         sent = result['sentence'].strip()
+#         selected_grammar = result['selected_grammar'].strip()
+#         max_parses = result['max_parses'].strip()
+
+#         results = delphin_call.full_parse(sent, selected_grammar, max_parses)
+
+#         # print(results[0]['mrs_simplemrs'])
+        
+#         return render_template('delphin_analyser_output.html',
+#                                lang=lang,
+#                                sent=sent,
+#                                results=results,
+#                                selected_grammar=selected_grammar,
+#                                max_parses=max_parses,
+#                                MODE=MODE)
+
+
+@app.route('/_delphin_parse_output', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
-def delphin_analyser_output():
-    if request.method == 'POST':
-        result = request.form
+def delphin_parse_output():
+    """
+    This function is returning the data structre required to 
+    populate the parsing overlay pane.
+    """
 
-        sent = result['sentence'].strip()
-        grammar = result['grammar'].strip()
-        grammar_mode = result['grammar_mode'].strip()
-        max_parses = result['max_parses'].strip()
+    sent = request.args.get('sentence', None)
+    selected_grammar = request.args.get('selected_grammar', None)  
+    max_parses = request.args.get('max_parses', 'all')
+
+    results = delphin_call.full_parse(sent, selected_grammar, max_parses)
+    
+    return jsonify(html=render_template('delphin_parse_output.html',
+                                        sent=sent,
+                                        results=results,
+                                        selected_grammar=selected_grammar,
+                                        max_parses=max_parses,
+                                        MODE=MODE),
+                   results=results)
+
+
+    
         
-        results = delphin_call.full_parse(sent, grammar_mode, max_parses)
+@app.route('/_delphin-parse', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_parse():
+
+    sent = request.args.get('sentence', None)
+    selected_grammar = request.args.get('selected_grammar', None)  
+    max_parses = request.args.get('max_parses', 'all')
+
+
+    print(sent)
+    print(selected_grammar)
+    print(max_parses)
+
+    
+    if sent and selected_grammar and max_parses:
 
         
-        return render_template('itell_erg-analyser-output.html',
-                               sent=sent,
-                               results=results,
-                               grammar=grammar,
-                               grammar_mode=grammar_mode,
-                               max_parses=max_parses,
-                               MODE=MODE)
+        results = delphin_call.full_parse(sent, selected_grammar, max_parses)
 
+        # values = 0 must be returned as string "0", otherwise it will 
+        # interfere with 'ifs' when displaying results.
+        return jsonify(result=str(len(results.keys())), full_result=results)
+
+    else:
+        return jsonify(result='!')
+        
         
 
 
@@ -878,20 +1203,30 @@ def delphin_update_grammars():
 def delphin_update_erg2018():
     "Update the ERG2018 repository and build the grammars with ACE."
     
-    bash_stdout = delphin_call.update_erg2018()
+    bash_stdout, bash_stderr = delphin_call.update_erg2018()
     bash_stdout = utils.stdout2html(bash_stdout)
-        
-    return jsonify(result=bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)        
+    return jsonify(result=bash_stdout+bash_stderr)
+
+@app.route('/delphin/_update_itell-erg2018', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_itell_erg2018():
+    "Update the ERG2018 and ITELL-ERG repository and build the grammar with ACE."
+    
+    bash_stdout, bash_stderr = delphin_call.update_itell_erg2018()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)        
+    return jsonify(result=bash_stdout+bash_stderr)
 
 @app.route('/delphin/_update_ergTRUNK', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def delphin_update_ergTRUNK():
     "Update the ERG-TRUNK repository and build the grammars with ACE."
     
-    bash_stdout = delphin_call.update_ergTRUNK()
+    bash_stdout, bash_stderr = delphin_call.update_ergTRUNK()
     bash_stdout = utils.stdout2html(bash_stdout)
-        
-    return jsonify(result=bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)        
+    return jsonify(result=bash_stdout+bash_stderr)
 
 
 @app.route('/delphin/_update_zhong', methods=['GET', 'POST'])
@@ -899,11 +1234,20 @@ def delphin_update_ergTRUNK():
 def delphin_update_zhong():
     "Update ZHONG's repository and build the grammars with ACE."
 
-    bash_stdout = delphin_call.update_zhong()
+    bash_stdout, bash_stderr = delphin_call.update_zhong()
     bash_stdout = utils.stdout2html(bash_stdout)
-    
-    return jsonify(result=bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)
+    return jsonify(result=bash_stdout+bash_stderr)
 
+@app.route('/delphin/_update_itell-zhong', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_itell_zhong():
+    "Update ZHONG and ITELL-ZHONG repository and build the grammar with ACE."
+    
+    bash_stdout, bash_stderr = delphin_call.update_itell_zhong()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)        
+    return jsonify(result=bash_stdout+bash_stderr)
 
 
 if __name__ == '__main__':

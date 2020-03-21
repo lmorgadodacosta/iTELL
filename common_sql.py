@@ -261,6 +261,28 @@ with app.app_context():
             else:
                 return 0
 
+    def fetch_all_sents():
+        sents = dd()
+        for r in query_lcc("""SELECT sid, docID, sent from sent
+                           """):
+            sents[r['sid']] = [r['sent'], r['docID']]
+        return sents
+
+    def fetch_all_errors():
+        errors_by_sent = dd(lambda: list())
+        errors_by_label = dd(lambda: list())
+        for r in query_lcc("""SELECT sid, eid, label, comment from error
+                           """):
+            errors_by_sent[r['sid']].append((r['eid'], r['label'], r['comment']))
+            errors_by_label[r['label']].append((r['sid'], r['eid'], r['comment']))
+        return errors_by_sent, errors_by_label
+
+
+
+
+
+
+            
     def insert_into_doc(docid, docname):
         return write_lcc("""INSERT INTO doc (docid, title)
                                VALUES (?,?)

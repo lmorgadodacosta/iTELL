@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block welcome %}
 
-<h4>Simple Profile View</h4>
+<h4>LCC-DB</h4>
 
 
 <input type="hidden" id="lang" name="lang" value="{{ lang }}">
@@ -10,40 +10,38 @@
 <br>
 
 
+
 <table id="example" class="table" style="width:100%">
         <thead>
             <tr>
-                <th>i-id</th>
-                <th>i-wf</th>
-                <th>readings</th> <!-- number of deriv trees -->
-                <th>i-input</th> 
-                <th>i-comment</th>
-                <th></th>
+                <th>sentence</th>
+                <th>LCC errors</th>
+                <th>Other errors</th>
+                <th>Single Sentence</th> 
+                <th>PARSE?</th>
             </tr>
         </thead>
         <tbody>
 
-	    {% for id, item in tsdb_min.items() %} <!-- keys = i-id -->
+	  {% for sid in db_data %}
+	  
             <tr>
-                <td>{{ id  }}</td> <!-- id -->
-                <td>{{ item["i-wf"] }}</td> <!-- i-wf -->
-                <td>{{ item["readings"] }}</td> <!-- readings -->
-                <td class="sentence">{{ item["i-input"] }}</td> <!-- i-input -->
-                <td>{{ item["i-comment"] }}</td> <!-- i-comments -->
-                <td><button sent="{{ item['i-input'] }}"
-			    class="parse">PARSE</button></td>
+                <td>{{ db_data[sid][0] }}</td> 
+                <td>{{ db_data[sid][1] }}</td>
+                <td>{{ db_data[sid][2] }}</td>
+                <td></td>
+                <td></td> 
             </tr>
-	    {% endfor %}
 
+	    {% endfor %}
 	    
         </tbody>
         <tfoot>
             <tr>
-                <th><input type="text" size="1" placeholder="i-id"/></th>
-                <th><input type="text" size="1" placeholder="i-wf"/></th>
-                <th><input type="text" size="4" placeholder="readings"/></th> <!-- number derivations trees -->
-                <th><input type="text" size="30" placeholder="i-input"/></th> 
-                <th><input type="text" size="5" placeholder="i-comment"/></th>
+                <th><input type="text" size="10" placeholder="sentence"/></th>
+                <th><input type="text" size="1" placeholder="DROP DOWN BOX"/></th>
+                <th><input type="text" size="4" placeholder="focus"/></th>
+                <th><input type="text" size="1" placeholder="SS?"/></th> 
                 <th></th>
             </tr>
         </tfoot>
@@ -59,21 +57,28 @@
   <select class="col-sm-3 form-control form-control-lg"
 	  id="selected_grammar" name="selected_grammar" required>
     {% for g in grammars  %} 
-    <option value="{{ g }}"  {% if g == selected_grammar %}{% endif %}><b>{{ g }}</b></option>  
+    <option value="{{ g }}"><b>{{ g }}</b></option>  
     {% endfor %}
   </select>
   
-{% if profile_type == 'skeleton' %}
-  <button id="parse_profile" name="parse_profile"
-	  type="submit" class="btn btn-dark btn-lg col-sm-2"
-	  style="font-size:20px;"><b>Parse Skeleton</b>
-  </button>
-{% endif %}
 </div>
 
 
+<!-- element[0].attributes['data-synsetid']) { -->
+<!--         var synsetid = element[0].attributes['sent'].value;              -->
+
 <div id="msg"></div>
 <div id="parse_results"></div>
+
+
+<style>
+tr.overparse {
+        color: red;
+}
+tr.lackingcoverage {
+        color: #FF7E00;
+}
+</style>
 
 
 <script>
@@ -102,7 +107,12 @@ $(document).ready( function() {
                 $(row).addClass('overparse');
             }
 	
+
+	
         }
+
+
+
 	
     });
 
@@ -113,10 +123,10 @@ $(document).ready( function() {
                 .column( colIdx )
                 .search( this.value )
                 .draw();
-        });
-    });
+        } );
+    } );
 
-});
+}  );
 
 
 
@@ -184,7 +194,9 @@ $(function() {
 
 
 
-{# <!-- PARSE RESULTS OVERLAY --> #}
+{# <!-- OVERLAY EXAMPLE --> #}
+<!-- <span style="font-size:30px;cursor:pointer" onclick="openNav()">open</span> -->
+
 <div id="myNav" class="overlay">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
   <div id="overlay-content" class="overlay-content">
@@ -206,6 +218,59 @@ function closeNav() {
 </script>
 
 
+<style>
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(255,255,255);
+  background-color: rgba(255,255,255, 0.95);
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.overlay-content {
+  position: relative;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+  overflow: auto;
+}
+
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.overlay a:hover, .overlay a:focus {
+  //color: #f1f1f1;
+  color: black;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 80px;
+}
+
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay .closebtn {
+  font-size: 40px;
+  top: 15px;
+  right: 35px;
+  }
+}
+</style>
 
 
 
@@ -240,18 +305,21 @@ $(function() {
                     deriv_elem = document.getElementById('viztree'+i);
                     deriv_json_string = parse_results[i]["deriv_json"];
                     deriv_json = JSON.parse(deriv_json_string);
-                    try { drawTree(deriv_elem, deriv_json); } catch(err) {}
+                    drawTree(deriv_elem, deriv_json);
 
                     //alert(parse_results[i]["deriv_json"]);
                     mrs_elem = document.getElementById('mrs'+i);
                     mrs_json_string = parse_results[i]["mrs_json"];
                     mrs_json = JSON.parse(mrs_json_string);
-                    try { MRS(mrs_elem, mrs_json); } catch(err) {}
+                    try {
+                        MRS(mrs_elem, mrs_json);
+                    } catch(err) { 
+                    }
 
                     dmrs_elem = document.getElementById('dmrs'+i);
                     dmrs_json_string =  parse_results[i]["dmrs_json"];
                     dmrs_json = JSON.parse(dmrs_json_string);
-                    try { DMRS(dmrs_elem, dmrs_json); } catch(err) {}
+                    DMRS(dmrs_elem, dmrs_json);
 
                 }
 
@@ -261,10 +329,23 @@ $(function() {
 
 	});
 
+
+
+
+
+
+
     });
 });
 </script>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 
 {% endblock %}

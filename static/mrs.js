@@ -95,7 +95,14 @@ function MRS(parentElement, mrsData){
     }
 
     function relFeatStruct(parent, rel) {
-        var pred = rel['predicate'] +'⟨'+rel.lnk.from+':'+rel.lnk.to+'⟩';
+	
+        var pred = rel['predicate'];
+
+	if ('lnk' in rel) {
+	    pred += '⟨'+rel.lnk.from+':'+rel.lnk.to+'⟩';
+	}
+	
+        //var pred = rel['predicate'] +'⟨'+rel.lnk.from+':'+rel.lnk.to+'⟩';
         drawFeatStructType(parent, pred);
         drawFeatValPair(parent, 'LBL', rel['label']);
 

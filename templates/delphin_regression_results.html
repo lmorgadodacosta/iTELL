@@ -1,0 +1,209 @@
+{#
+<!-- This piece of HTML is being served via AJAX as results for profile comparison (regression) -->
+<!-- There are still some JS functions below that do not work, for parsing sentences -->
+<!-- These need to be be read from the stored profiles, since the grammar would have changed -->
+#}
+
+
+<table id="results" class="table" style="width:100%">
+        <thead>
+            <tr>
+                <th>i-id</th>
+                <th>i-wf</th>
+                <th>profile 1<br>readings</th> <!-- number of deriv trees -->
+                <th>profile 2<br>readings</th> <!-- number of deriv trees -->
+                <th>i-input</th> 
+                <!-- <th>i-comment</th> -->
+                <!-- <th></th> -->
+            </tr>
+        </thead>
+        <tbody>
+
+	    {% for id, item in profs.items() %} <!-- keys = i-id -->
+            <tr>
+                <td>{{ id  }}</td> <!-- id -->
+                <td>{{ item["i-wf"] }}</td> <!-- i-wf -->
+                <td>{{ item["old_readings"] }}</td> <!-- readings -->
+                <td>{{ item["new_readings"] }}</td> <!-- readings -->
+                <td class="sentence">{{ item["i-input"] }}</td> <!-- i-input -->
+                <!-- <td>{{ item["i-comment"] }}</td> <\!-- i-comments -\-> -->
+                <!-- <td><button sent="{{ item['i-input'] }}" -->
+		<!-- 	    class="parse">PARSE</button></td> -->
+            </tr>
+	    {% endfor %}
+
+	    
+        </tbody>
+        <tfoot>
+            <tr>
+                <th><input type="text" size="1" placeholder="i-id"/></th>
+                <th><input type="text" size="1" placeholder="i-wf"/></th>
+                <th><input type="text" size="7" placeholder="new readings"/></th> <!-- number derivations trees -->
+                <th><input type="text" size="7" placeholder="old readings"/></th> <!-- number derivations trees -->
+                <th><input type="text" size="30" placeholder="i-input"/></th> 
+                <!-- <th><input type="text" size="5" placeholder="i-comment"/></th> -->
+                <!-- <th></th> -->
+            </tr>
+        </tfoot>
+    </table>
+
+
+
+
+
+
+<!-- <div id="msg"></div> -->
+<!-- <div id="parse_results"></div> -->
+
+
+
+
+
+
+
+
+
+{# <!-- OVERLAY EXAMPLE --> #}
+<!-- <span style="font-size:30px;cursor:pointer" onclick="openNav()">open</span> -->
+
+<div id="myNav" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div id="overlay-content" class="overlay-content">
+    <h2><span id="overlay-header"></span></h2>
+    <div id="parse-results"></div>
+    <!-- <div id="tooltip" class="tooltip"></div> -->
+  </div>
+</div>
+
+
+<script>
+function openNav() {
+  document.getElementById("myNav").style.width = "100%";
+}
+
+function closeNav() {
+  document.getElementById("myNav").style.width = "0%";
+}
+</script>
+
+
+<style>
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(255,255,255);
+  background-color: rgba(255,255,255, 0.95);
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.overlay-content {
+  position: relative;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+  overflow: auto;
+}
+
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.overlay a:hover, .overlay a:focus {
+  //color: #f1f1f1;
+  color: black;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 80px;
+}
+
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay .closebtn {
+  font-size: 40px;
+  top: 15px;
+  right: 35px;
+  }
+}
+</style>
+
+
+
+<script>
+$(function() {
+    {# <!-- Inside #results table, when clicking on something with class .parse --> #}
+    $("#results").on("click", ".parse", function () {
+  
+        var sent = this.attributes['sent'].value;
+        var grammar_sel = document.getElementById("selected_grammar").value;
+	var header = document.getElementById("overlay-header");
+        var results = document.getElementById("parse-results");
+
+
+        openNav();  // open the overlay
+        results.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	$.getJSON($SCRIPT_ROOT + '/_delphin_parse_output', {
+	    sentence: sent,
+	    selected_grammar: grammar_sel,
+            max_parses: "3",
+            lang: "{{ lang }}"
+
+        }, function(data) {
+
+	    if (data.html) {
+
+		results.innerHTML = data.html;
+
+                var parse_results = data.results;
+                for (i in parse_results) {
+                    deriv_elem = document.getElementById('viztree'+i);
+                    deriv_json_string = parse_results[i]["deriv_json"];
+                    deriv_json = JSON.parse(deriv_json_string);
+                    drawTree(deriv_elem, deriv_json);
+
+                    //alert(parse_results[i]["deriv_json"]);
+                    mrs_elem = document.getElementById('mrs'+i);
+                    mrs_json_string = parse_results[i]["mrs_json"];
+                    mrs_json = JSON.parse(mrs_json_string);
+                    try {
+                        MRS(mrs_elem, mrs_json);
+                    } catch(err) { 
+                    }
+
+                    dmrs_elem = document.getElementById('dmrs'+i);
+                    dmrs_json_string =  parse_results[i]["dmrs_json"];
+                    dmrs_json = JSON.parse(dmrs_json_string);
+                    DMRS(dmrs_elem, dmrs_json);
+
+                }
+
+	    } else {
+		msg.innerHTML = "We were not able to produce a parse! Please Report.";
+	    }
+
+	});
+
+
+
+
+
+
+
+    });
+});
+</script>

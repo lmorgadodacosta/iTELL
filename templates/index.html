@@ -35,6 +35,28 @@
     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
   
+
+
+  <!-- DELPH-IN VIZ LIBRARIES -->
+  <script src="https://d3js.org/d3.v3.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.3/lodash.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.3.6/svg.min.js"></script>
+  <script src="{{ url_for('static', filename='tree.js') }}" language="javascript"></script>
+  <script src="{{ url_for('static', filename='dmrs.js') }}" language="javascript"></script>
+  <script src="{{ url_for('static', filename='mrs.js') }}" language="javascript"></script>
+  <script src="{{ url_for('static', filename='jquery-ui.js') }}" language="javascript"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery-ui.css') }}"/>
+  <!-- <script src="{{ url_for('static', filename='svg.js') }}" language="javascript"></script> -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='delphin-viz.css') }}"/>
+
+
+
+
+
+
+
+
+
   
   <title>iTELL</title>
 

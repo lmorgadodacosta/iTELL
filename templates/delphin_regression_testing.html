@@ -1,0 +1,68 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<br>  
+<form action="{{ url_for('delphin_regression_output') }}"  method="POST">
+  <div class="row">
+
+    <select class="col-sm-9 form-control form-control-lg"
+	    id="regression_dir1" name="regression_dir1">
+        {% for r in prev_regressions %}
+        <option value="{{ r }}"><b>{{ r }}</b></option>
+        {% endfor %}
+    </select>
+    
+    <select class="col-sm-3 form-control form-control-lg"
+	    id="selected_grammar" name="selected_grammar" required>
+      
+      <option value="">Select Grammar</option>
+      {% for lang in grammars %}      
+	  <option value="" disabled></option>
+	  <option value="" disabled>{{ lang }}</option>
+	  {% for grm in grammars[lang] %}
+	  <option value="{{ grm }}">{{ grm }}</option>
+	  {% endfor %}
+      {% endfor %}
+    </select>
+    
+    <button class="btn btn-dark btn-block" style="font-size:20px;">
+      <b>Run New Regression Test</b>
+    </button>
+    
+  </div>
+</form>
+
+
+<br>
+<br>
+<br>
+<form action="{{ url_for('delphin_regression_output') }}"  method="POST">
+  <div class="row">
+
+    <select class="col-sm-6 form-control form-control-lg"
+	    id="regression_dir1" name="regression_dir1">
+        {% for r in prev_regressions %}
+        <option value="{{ r }}"><b>{{ r }}</b></option>
+        {% endfor %}
+    </select>
+
+
+    <select class="col-sm-6 form-control form-control-lg"
+	    id="regression_dir2" name="regression_dir2">
+        {% for r in prev_regressions %}
+        <option value="{{ r }}"><b>{{ r }}</b></option>
+        {% endfor %}
+    </select>    
+    
+    <button class="btn btn-dark btn-block" style="font-size:20px;">
+      <b>Compare Regressions</b>
+    </button>
+    
+  </div>
+</form>
+
+
+
+
+{% endblock %}

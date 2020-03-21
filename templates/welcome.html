@@ -50,20 +50,12 @@
 <h5>iXue: Let's Learn Mandarin Chinese!</h5>
 </div>
 
-<!-- <form action="{{ url_for('haikuondemand_info') }}" style="display:inline;"> -->
-<!-- <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn New <br>Vocabulary</b></button> -->
-<!-- </form> -->
-
-<!-- <form action="{{ url_for('haikuondemand_info') }}" style="display:inline;"> -->
-<!-- <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Review <br>Vocabulary</b></button> -->
-<!-- </form> -->
-
 <form action="{{ url_for('ixue_jumbled') }}" style="display:inline;">
-  <button  type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences</b></button>
+  <button  type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Jumbled <br>Sentences</b></button>
 </form>
 
 <form  action="{{ url_for('ixue_intro') }}"  style="display:inline;">
-<button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
+<button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
 
 
@@ -118,7 +110,7 @@
   
   {% if 'ixue' in MODE %}
   <form  action="{{ url_for('ixue_intro') }}"  style="display:inline;">
-    <button type="submit" class="btn btn-danger btn-sq-lg" style="font-size:20px;"><b>iXue</b></button>
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>iXue</b></button>
   </form>
   {% endif %}
   
@@ -141,32 +133,30 @@
 <div id="DelphinPanel">
 
   <h5>DELPH-IN Grammarium</h5>
-  <form action="{{ url_for('itell_delphin_analyser') }}" style="display:inline;" method="POST">
-    <input type="hidden" id="grammar" name="grammar" value="erg">
-    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
-      <b>ERG <br>Analyzer<br></b>
-    </button>
-  </form>
-
-  <form action="{{ url_for('itell_delphin_analyser') }}" style="display:inline;" method="POST">
-    <input type="hidden" id="grammar" name="grammar" value="zhong">
-    <button type="submit" class="btn btn-outline-danger btn-sq-lg" style="font-size:20px;">
-      <b>ZHONG <br> Analyzer</b>
+  <form action="{{ url_for('delphin_analyser') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
+      <b>DELPH-IN <br> Analyzer<br></b>
     </button>
   </form>
 
   <form action="{{ url_for('delphin_select_profile') }}" style="display:inline;" method="POST">
-    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
-      <b>Delphin<br>Profiles</b>
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
+      <b>DELPH-IN  <br> Profiles</b>
     </button>
   </form>
 
-
+  <form action="{{ url_for('delphin_regression_testing') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
+      <b>Regression<br>Testing</b>
+    </button>
+  </form>
+  
   <form action="{{ url_for('delphin_update_grammars') }}" style="display:inline;" method="POST">
-    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
-      <b>Update/<br>Compile<br>Grammars</b>
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
+      <b>Update <br> Grammars</b>
     </button>
   </form>
+
 
   
 </div>
@@ -185,6 +175,11 @@
   </form>
 
 
+  <form action="{{ url_for('inspect_lcc_db') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+      <b>Inspect <br> LCC-DB</b>
+    </button>
+  </form>
   
   
 
