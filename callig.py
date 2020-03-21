@@ -887,8 +887,8 @@ def delphin_select_profile():
 def delphin_regression_testing():
     
     # check/create folder 'delphin/regressions/'
-    if not os.path.exists(path.join(ROOT,'delphin/regressions')):
-        os.makedirs(path.join(ROOT,'delphin/regressions'))
+    # if not os.path.exists(path.join(ROOT,'delphin/regressions')):
+    #     os.makedirs(path.join(ROOT,'delphin/regressions'))
 
     prev_regressions = next(os.walk(path.join(ROOT,'delphin/regressions/')))[1]
 
