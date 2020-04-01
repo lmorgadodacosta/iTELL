@@ -6,14 +6,24 @@
 
 
 <table id="results" class="table" style="width:100%">
-        <thead>
+  <thead>
+    <tr>
+      <th rowspan="2">id</th>
+      <th rowspan="2">wf</th>
+      <th colspan="3">readings</th>
+      <th rowspan="2">length</th>
+      <th rowspan="2">input</th>
+      <!-- <th rowspan="2">origin</th> -->
+      <th rowspan="2"></th>
+    </tr>
             <tr>
-                <th>i-id</th>
-                <th>i-wf</th>
-                <th>profile 1<br>readings</th> <!-- number of deriv trees -->
-                <th>profile 2<br>readings</th> <!-- number of deriv trees -->
-                <th>i-input</th> 
-                <!-- <th>i-comment</th> -->
+                <!-- <th>i-id</th> -->
+                <!-- <th>i-wf</th> -->
+                <th>old</th> <!-- number of deriv trees -->
+                <th>new</th> <!-- number of deriv trees -->
+                <th>Δ</th> <!-- number of deriv trees -->
+                <!-- <th>i-input</th>  -->
+                <!-- <th>i-origin</th> -->
                 <!-- <th></th> -->
             </tr>
         </thead>
@@ -25,10 +35,30 @@
                 <td>{{ item["i-wf"] }}</td> <!-- i-wf -->
                 <td>{{ item["old_readings"] }}</td> <!-- readings -->
                 <td>{{ item["new_readings"] }}</td> <!-- readings -->
-                <td class="sentence">{{ item["i-input"] }}</td> <!-- i-input -->
-                <!-- <td>{{ item["i-comment"] }}</td> <\!-- i-comments -\-> -->
+                <td>{{ item["new_readings"]|int - item["old_readings"]|int }}</td> <!-- readings diff -->
+                <td>{{ item["i-length"] }}</td> <!-- length -->
+
+
+		<td class="sentence"
+
+		    {% if item["i-translation"] %}
+		    data-toggle="tooltip" title="{{ item["i-translation"] }}"
+		    {% endif %}
+		    >{{ item["i-input"] }}</td> <!-- i-input -->
+
+		
                 <!-- <td><button sent="{{ item['i-input'] }}" -->
 		<!-- 	    class="parse">PARSE</button></td> -->
+                <!-- <td>{{ item["i-origin"] }}</td> -->
+ 
+		<td>
+		  {% if item["i-comment"] or item["i-origin"] %}
+		  <span data-toggle="tooltip" data-html="true"  data-placement="left"
+			title="origin: {{item["i-origin"]}} <br> {{ item["i-comment"] }}">
+		    <i class="far fa-comment"></i></span>
+		  {% endif %}
+		  
+		</td>
             </tr>
 	    {% endfor %}
 
@@ -36,11 +66,15 @@
         </tbody>
         <tfoot>
             <tr>
-                <th><input type="text" size="1" placeholder="i-id"/></th>
-                <th><input type="text" size="1" placeholder="i-wf"/></th>
-                <th><input type="text" size="7" placeholder="new readings"/></th> <!-- number derivations trees -->
-                <th><input type="text" size="7" placeholder="old readings"/></th> <!-- number derivations trees -->
+                <th><input type="text" style="width: 35px;" placeholder="id"/></th>
+                <th><input type="text" style="width: 35px;" placeholder="wf"/></th>
+                <th><input type="text" style="width: 35px;" placeholder="old"/></th> <!-- number derivations trees -->
+                <th><input type="text" style="width: 35px;" placeholder="new"/></th> <!-- number derivations trees -->
+                <th><input type="text" style="width: 35px;" placeholder="Δ"/></th> <!-- number derivations trees -->
+                <th><input type="text" style="width: 50px;" placeholder="length"/></th> 
                 <th><input type="text" size="30" placeholder="i-input"/></th> 
+                <!-- <th><input type="text" size="6" placeholder="i-origin"/></th> -->
+                <th></th>
                 <!-- <th><input type="text" size="5" placeholder="i-comment"/></th> -->
                 <!-- <th></th> -->
             </tr>
@@ -204,6 +238,12 @@ $(function() {
 
 
 
-    });
 });
+
+
+
+
+});
+
+
 </script>

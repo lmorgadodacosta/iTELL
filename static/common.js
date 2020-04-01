@@ -4,7 +4,7 @@ function countdown(seconds, tenths, elemID) {
     e.innerHTML =  "Time left: " + seconds + "." + tenths + " seconds";
 
     if (seconds < 1 && tenths < 1) {
-	e.innerHTML = "<input type='hidden' id='answer' name='answer' value=''><b>GAME OVER!</b><br><button type='submit' class='btn btn-dark'>Restart</button>";
+	e.innerHTML = "<input type='hidden' id='answer' name='answer' value=''><b>GAME OVER!</b><br><button type='submit' class='form-control form-control-lg btn btn-dark'>Restart</button>";
 	g.innerHTML = "<input type='hidden' id='answer' name='answer' value=''>";
 			      // setTimeout(location.reload(),2000);
 			      //clearTimeout(timer);

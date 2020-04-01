@@ -339,7 +339,7 @@ function MRS(parentElement, mrsData){
             // object has "properties" field or not.
             var varName = $(this).data('var');
             return mrsData.variables[varName].hasOwnProperty("properties");
-        }).tooltip({
+        }).uitooltip({
             track: true,
             tooltipClass: 'mrs-variable-info',
             content: function(){

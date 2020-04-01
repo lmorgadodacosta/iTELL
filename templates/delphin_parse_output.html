@@ -1,10 +1,11 @@
 
-
+<div>
 <div class="col-sm-12 text-center">
   <h3> {{ results.keys()|length }}
     Parse Result{% if results.keys()|length > 1 %}s{% endif %}</h3>
 </div>
 <br>
+
 
 <div class="col-sm-12 text-center">
 <p>
@@ -13,7 +14,7 @@
   <i class="fa fa-quote-right"></i>
 </p>
 
-<hr>		
+<hr>
 
 
 {# <!-- If there are results for the parse --> #}
@@ -100,6 +101,5 @@ No parses were found.
 
 {% endif %}
 
-    
-
 </div>
+

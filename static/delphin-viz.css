@@ -1,9 +1,9 @@
 .ui-tooltip {
-    background: #444;
+    background: #131313;
     border: 0px;
     border-radius: 8px;
 	box-shadow: 0 0 5px rgba(0, 0, 0, .3);
-    font: 12px sans-serif;
+    font: 14px sans-serif;
     padding: .3em;
 	position: absolute;
 	z-index: 9999;
@@ -130,8 +130,11 @@
 .link.in.labelset { fill: darkorange; stroke: darkorange; }
 .link.out.labelset { fill: green; stroke: green; }
 
-thanks: http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
-.tooltip {
+
+
+/* LMC: this was being used by DMRS, but I changed to ui-tooltip */
+/* thanks: http://bl.ocks.org/d3noob/a22c42db65eb00d4e369 */
+.DMRStooltip {
   position: absolute;
   text-align: center;
   padding: 2px;

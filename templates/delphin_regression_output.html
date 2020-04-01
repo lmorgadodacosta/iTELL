@@ -105,10 +105,13 @@ $(function() {
 
 
 
-
-
-
-
+	        // activate Bootstrap HTML tooltips (inside table)
+		// this must be done at the start and every time
+		// the table is redrawn (search, skip page, etc)
+	        $('[data-toggle="tooltip"]').tooltip()
+        	table.on( 'draw', function () {
+	            $('[data-toggle="tooltip"]').tooltip();
+                } );
 
 
 

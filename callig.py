@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os, sys, sqlite3, datetime, urllib, gzip, requests, codecs
-import random, string 
+import os
+import datetime
+import random
+import string
+import json
 from flask import Flask, render_template, g, request, redirect, url_for, send_from_directory, session, flash, jsonify, make_response, Markup
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_mail import Mail, Message
@@ -18,11 +21,6 @@ import lxml.html # to manipulate html
 from common_login import *
 from common_sql import *
 
-from collections import defaultdict as dd
-def inf_dd():
-    return dd(inf_dd)
-
-
 import lcc
 import wn
 import utils
@@ -32,27 +30,33 @@ import delphin_call
 import common_sql as csql
 from feedback import eng_feedback
 
+
+def inf_dd():
+    return dd(inf_dd)
+
+
 app = Flask(__name__)
-#app.debug = True
+# app.debug = True
 app.secret_key = "!$flhgSgngNO%$#SOET!$!"
 app.config["REMEMBER_COOKIE_DURATION"] = datetime.timedelta(minutes=30)
 
-ROOT  = path.dirname(path.realpath(__file__))
+ROOT = path.dirname(path.realpath(__file__))
 
-################################################################################
-# MODE defines which apps are available in the deployed instance               #
-#                                                                              #
-# 'test' MODE is used to hide incomplete applications                          #
-#  The other modes include: 'lcc', 'ixue', 'callig'                            #
-################################################################################
+
+###############################################################################
+# MODE defines which apps are available in the deployed instance              #
+#                                                                             #
+# 'test' MODE is used to hide incomplete applications                         #
+#  The other modes include: 'lcc', 'ixue', 'callig'                           #
+###############################################################################
 MODE = ['lcc', 'ixue', 'callig', 'grammarium', 'test']
 
 
-################################################################################
-# ALLGRAMMARS defines all available grammars that the system should look for.  #
-# AVAILABLE_GRAMMARS is a subset of ALLGRAMMARS organized by language, if they #
-# are found compiled under appName/delphin/*                                   #
-################################################################################
+###############################################################################
+# ALLGRAMMARS defines all available grammars that the system should look for. #
+# AVAILABLE_GRAMMARS is a subset of ALLGRAMMARS organized by language, if they#
+# are found compiled under appName/delphin/*                                  #
+###############################################################################
 AVAILABLE_GRAMMARS = dd(lambda: list())
 ALLGRAMMARS = [
     ('erg2018.dat', 'eng'),
@@ -89,7 +93,6 @@ app.config.update(
 )
 
 
- 
 mail = Mail(app)
 
 ################################################################################
@@ -184,21 +187,22 @@ def lccReport():
 
     The feedback_set sets which group of errors and which feedback
     messages to show students. Originally, this was set to 'lcc'.
-    But with the current addition of new sets of errors and new error 
+    But with the current addition of new sets of errors and new error
     messages, this is now a mandatory option for check_docx.
     """
 
     filename = request.args.get('fn', None)
 
     # feedback_set = 'lcc'  # original error-set and messages
-    feedback_set = 'lcc2' 
-    
+    feedback_set = 'lcc2'
     docx_html = lcc.docx2html(filename)
-    (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename) 
+    (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename)
 
-    (htmlElem, report) = lcc.check_docx_html(docid, htmlElem, report, feedback_set)
-    
-    
+    (htmlElem, report) = lcc.check_docx_html(docid,
+                                             htmlElem,
+                                             report,
+                                             feedback_set)
+
     # lxml.html.tostring returns type=bytes, must decode here
     structured_html = lxml.html.tostring(htmlElem).decode('utf-8')
     return jsonify(result=structured_html)
@@ -214,25 +218,30 @@ def index():
     return render_template('welcome.html',
                            MODE=MODE)
 
+
 @app.route('/team', methods=['GET', 'POST'])
 def team():
     return render_template('team.html',
                            MODE=MODE)
+
 
 @app.route('/callig', methods=['GET', 'POST'])
 def callig_intro():
     return render_template('callig_intro.html',
                            MODE=MODE)
 
+
 @app.route('/lcc', methods=['GET', 'POST'])
 def lcc_intro():
     return render_template('lcc_intro.html',
                            MODE=MODE)
 
+
 @app.route('/ixue', methods=['GET', 'POST'])
 def ixue_intro():
     return render_template('ixue_intro.html',
                            MODE=MODE)
+
 
 @app.route('/introduction', methods=['GET', 'POST'])
 def itell_intro():
@@ -240,9 +249,9 @@ def itell_intro():
                            MODE=MODE)
 
 
-################################################################################
+###############################################################################
 # ADMIN VIEWS
-################################################################################
+###############################################################################
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -250,7 +259,7 @@ def register():
                            MODE=MODE)
 
 
-@app.route("/useradmin",methods=["GET"])
+@app.route("/useradmin", methods=["GET"])
 @login_required(role=0, group='admin')
 def useradmin():
     users = fetch_allusers()
@@ -259,10 +268,9 @@ def useradmin():
                            MODE=MODE)
 
 
-################################################################################
+###############################################################################
 # GAMES VIEWS
-################################################################################
-
+###############################################################################
 @app.route('/info/sex-with-me', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def sexwithme_info():
@@ -275,7 +283,7 @@ def sexwithme_info():
         r = exs[ex_id]
         prompt = r[0]
         answer = r[1]
-        seconds = str(r[2]) + ' '  + 'seconds'
+        seconds = str(r[2]) + ' ' + 'seconds'
         language = r[3]
         username = r[4]
         timestamp = r[5].split()[0]
@@ -288,12 +296,12 @@ def sexwithme_info():
                                example_list=example_list,
                                MODE=MODE)
 
-    else: # for brand-new dbs, show a system's example
+    else:  # for brand-new dbs, show a system's example
         return render_template('sexwithme-info.html',
                                example_list=base_ex,
                                MODE=MODE)
 
-    
+
 @app.route('/games/sex-with-me', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def sexwithme_game():
@@ -391,7 +399,7 @@ def wickedproverbs_info():
                 "Unknown date",
                 "0 seconds")]
 
-    
+
     example_list = []
     exs = fetch_wickedproverbs_30()
     for i, ex_id in enumerate(exs.keys()):
@@ -400,8 +408,7 @@ def wickedproverbs_info():
         frame = r[0]
         proverb = r[1]
         explanation = r[2]
-        seconds = str(r[3]) + ' '  + 'seconds'
-        language = r[4]
+        seconds = str(r[3]) + ' ' + 'seconds'
         username = r[5]
         timestamp = r[6].split()[0]
 
@@ -480,17 +487,134 @@ def save_wickedproverbs():
 
 
 
+################################################################################
+# CALLIG: FORCED LINKS
+################################################################################
+@app.route('/info/forced-links', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def forcedlinks_info():
 
-### HAIKU ON DEMAND
+    example_list = []
+    exs = fetch_forcedlinks()
+    for i, ex_id in enumerate(exs.keys()):
+        r = exs[ex_id]
 
+        w1 = r[0]
+        w2 = r[1]
+        links_json = r[2]
+        timestamps_json = r[3]
+        seconds = str(r[4]) + ' ' + 'seconds'
+        username = r[6]
+        timestamp = r[7].split()[0]
+
+        example_list.append((i, w1, w2,
+                             json.loads(links_json),
+                             json.loads(timestamps_json),
+                             seconds, username, timestamp))
+
+    if example_list:
+        return render_template('callig_forcedlinks_info.html',
+                               example_list=example_list,
+                               MODE=MODE)
+
+    else:  # for brand-new dbs, show a system's example
+        return render_template('callig_forcedlinks_info.html',
+                               example_list=[[0, 'moustache', 'cotton candy', ['hair', 'fluffy'],
+                                              ['0', '0'], '0', "The CALLIG System", "Unknown date"]],
+                               MODE=MODE)
+
+
+
+@app.route('/games/forced-links', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def forcedlinks_game():
+    """
+    This function generates the prompts for forced-links. This prompt includes
+    2 words and an integer (i.e. the minimum number of words between the 2 
+    words to be linked. And the time to complete it.
+   
+    We currently want only the following pairs: 
+    Noun-Noun (50%), Noun-Adjective (50%).
+
+    FIXME: We should be checking for distance between promts. We don't want
+    words that are too similar. They should be distant.
+    FIXME: Try to keep time spent in each link
+    """
+
+    # min_links = random.randrange(5) + 2 # (0-4)+2 = 2-6 links
+    min_links = 1
+
+    rand = random.random()
+    if rand < 0.5:  # mass from list
+        nouns = wn.x_rand_pos(2, 'n')
+        w1 = nouns[0]
+        w2 = nouns[1]
+
+    else:  # we want to randomize the order of noun-adjective
+
+        if rand < 0.75:
+            w1 = wn.x_rand_pos(1, 'n')[0]
+            w2 = wn.x_rand_pos(1, 'a')[0]
+        else:
+            w1 = wn.x_rand_pos(1, 'a')[0]
+            w2 = wn.x_rand_pos(1, 'n')[0]
+
+    seconds = 45  # the max amount of time to play
+
+    return render_template('callig_forcedlinks_game.html',
+                           seconds=seconds,
+                           w1=w1,
+                           w2=w2,
+                           min_links=min_links,
+                           MODE=MODE)
+
+
+@app.route('/_save_forcedlinks', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def save_forcedlinks():
+    if request.method == 'POST':
+        result = request.form
+
+        w1 = result['w1'].strip()
+        w2 = result['w2'].strip()
+        seconds = result['seconds']
+        username = result['username']
+        links = result.getlist('links')  # list
+        time_stamps = result.getlist('timestamps')  # list
+
+        # Because the way the JS is currently designed, when users submit,
+        # there might be a timestap with an empty string for word.
+        # This happens when people add a word box and don't use it before
+        # submission.
+
+        links_json = json.dumps(links)
+        timestamps_json = json.dumps(time_stamps)
+
+        language = 'eng'
+        timestamp = current_time()
+
+        write_forcedlinks(w1, w2, links_json, timestamps_json,
+                          seconds, language, username, timestamp)
+
+        return forcedlinks_game()
+
+
+###############################################################################
+# CALLIG: HAIKU ON DEMAND
+###############################################################################
 @app.route('/info/haiku-on-demand', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def haikuondemand_info():
 
     base_ex = [(0,
-                "The Heavy Power Drill", "The drill is unplugged", "Like a dead and heavy man", "Cordless and lifeless",
-                "The CALLIG System", "Unknown date", "0 seconds")]
-    
+                "The Heavy Power Drill",
+                "The drill is unplugged",
+                "Like a dead and heavy man",
+                "Cordless and lifeless",
+                "The CALLIG System",
+                "Unknown date",
+                "0 seconds")]
+
     example_list = []
     exs = fetch_haikuondemand_30()
     for i, ex_id in enumerate(exs.keys()):
@@ -969,7 +1093,8 @@ def delphin_run_regression():
     summary["prof1"] = dir1_path
     summary["prof2"] = dir2_path
     
-    summary["num_of_sents"] = len(prof1.keys())
+    summary["num_of_sents_prof1"] = len(prof1.keys())
+    summary["num_of_sents_prof2"] = len(prof2.keys())
     
     summary["sent_length_sum_prof1"] = 0
     summary["sent_length_sum_prof2"] = 0
@@ -993,6 +1118,8 @@ def delphin_run_regression():
         profs[i_id]['i-input'] = prof1[i_id]['i-input']
         profs[i_id]['i-comment'] = prof1[i_id]['i-comment']
         profs[i_id]['i-length'] = prof1 [i_id]['i-length']
+        profs[i_id]['i-origin'] = prof1 [i_id]['i-origin']
+        profs[i_id]['i-translation'] = prof1 [i_id]['i-translation']
 
         summary["sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
         summary["sent_length_sum_prof2"] += int(prof2[i_id]['i-length'])

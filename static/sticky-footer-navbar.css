@@ -88,14 +88,12 @@ img {max-width: 70%;max-height: 250px;}
 /* Colors for Profiles/Regressions  */
 tr.overparse {
         color: red;
-	font-weight: bold;
 }
 tr.lackingcoverage {
         color: #FF7E00;
 }
 tr.lostparses {
         color: red;
-	font-weight: bold;
 }
 tr.gainparses {
         color: green;

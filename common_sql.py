@@ -6,14 +6,16 @@ from flask import Flask, current_app, g
 from collections import defaultdict as dd
 from os import path
 
+
 def qs(ll):
     """return len(l) ?s sepeated by ','  to use in queries"""
-    return ','.join('?' for l  in ll)
+    return ','.join('?' for l in ll)
+
 
 app = Flask(__name__)
 with app.app_context():
 
-    ROOT  = path.dirname(path.realpath(__file__))
+    ROOT = path.dirname(path.realpath(__file__))
     ADMINDB = 'db/admin.db'
     CALLIGDB = 'db/callig.db'
     LCCDB = 'db/lcc.db'
@@ -27,7 +29,7 @@ with app.app_context():
 
     def connect_callig():
         return sqlite3.connect(path.join(ROOT, CALLIGDB))
-    
+
     def connect_lcc():
         return sqlite3.connect(path.join(ROOT, LCCDB))
 
@@ -70,9 +72,9 @@ with app.app_context():
         g.lcc.commit()
         return lastid
 
-    ############################################################################
+    ###########################################################################
     # ADMIN SQL
-    ############################################################################
+    ###########################################################################
 
     def fetch_userid(userID):
         user = None
@@ -85,13 +87,11 @@ with app.app_context():
                         r['access_level'], r['access_group'], r['full_name'])
         return user
 
-
     def fetch_id_from_userid(userID):
         for r in query_admin("""SELECT id 
                                 FROM users
                                 WHERE userID = ?""", [userID]):
             return r['id']
-
 
     def fetch_allusers():
         users = dd()
@@ -100,21 +100,21 @@ with app.app_context():
 
         return users
 
-
-    ############################################################################
+    ###########################################################################
     # CALLIG SQL
-    ############################################################################
+    ###########################################################################
 
+    ###########################################################################
+    # CALLIG: SEX WITH ME
+    ###########################################################################
 
-    ############################################################################
-    # SEX WITH ME
-    ############################################################################
-    def write_sexwithme(prompt, answer, seconds, language, username, timestamp):
+    def write_sexwithme(prompt, answer, seconds,
+                        language, username, timestamp):
         """
         Returns the ID of the recently added entry.
         """
-        return write_callig("""INSERT INTO sex_with_me (prompt, answer, 
-                                                      seconds, language, 
+        return write_callig("""INSERT INTO sex_with_me (prompt, answer,
+                                                      seconds, language,
                                                       username, timestamp)
                                VALUES (?,?,?,?,?,?)""",
                             [prompt, answer, seconds,
@@ -126,27 +126,25 @@ with app.app_context():
         Returns the ID of the recently added entry.
         """
         return write_callig("""INSERT INTO sex_with_me_feedback
-                                           (answer, sex_with_me_id, feedback,
-                                            seconds, language, username, timestamp)
+                                   (answer, sex_with_me_id, feedback,
+                                    seconds, language, username, timestamp)
                                VALUES (?,?,?,?,?,?,?)""",
                             [answer, sex_with_me_id, feedback,
                              seconds, language, username, timestamp])
 
-    
     def fetch_sexwithme_30():
         result = dd()
         for r in query_callig("""SELECT * FROM sex_with_me WHERE answer IS NOT NULL
                                  ORDER BY timestamp DESC LIMIT 30"""):
-            result[r['id']] = [r['prompt'], r['answer'], r['seconds'], r['language'],
+            result[r['id']] = [r['prompt'], r['answer'],
+                               r['seconds'], r['language'],
                                r['username'], r['timestamp']]
         return result
 
+    ###########################################################################
+    # CALLIG: WICKED PROVERBS
+    ###########################################################################
 
-    
-
-    ############################################################################
-    # WICKED PROVERBS
-    ############################################################################
     def write_wickedproverbs(frame, w1, w2, proverb, explanation, seconds,
                              language, username, timestamp):
         """
@@ -159,31 +157,63 @@ with app.app_context():
                             [frame, w1, w2, proverb, explanation, seconds,
                              language, username, timestamp])
 
+    def fetch_wickedproverbs_30(limit=30):
 
-    def fetch_wickedproverbs_30():
+        if (type(limit) != int):
+            limit = 30
+
         result = dd()
         for r in query_callig("""SELECT * FROM wicked_proverbs
                                  WHERE proverb IS NOT NULL
                                  AND explanation IS NOT NULL
                                  ORDER BY timestamp DESC LIMIT 30"""):
-            result[r['id']] = [r['frame'], r['proverb'],r['explanation'],
+            result[r['id']] = [r['frame'], r['proverb'], r['explanation'],
                                r['seconds'], r['language'],
                                r['username'], r['timestamp']]
         return result
 
+    ###########################################################################
+    # CALLIG: FORCED LINKS
+    ###########################################################################
 
-    
-    
-    ############################################################################
-    # HAIKU ON DEMAND
-    ############################################################################
+    def write_forcedlinks(w1, w2, links_json, timestamps_json,
+                          seconds, language, username, timestamp):
+        """
+        Returns the ID of the recently added entry.
+        """
+        return write_callig("""INSERT INTO forced_links
+                                   (w1, w2, links_json, timestamps_json,
+                                    seconds, language, username, timestamp)
+                               VALUES (?,?,?,?,?,?,?,?)""",
+                            [w1, w2, links_json, timestamps_json,
+                             seconds, language, username, timestamp])
+
+    def fetch_forcedlinks(limit=30):
+        if (type(limit) != int):
+            limit = 30
+
+        result = dd()
+        for r in query_callig("""SELECT * FROM forced_links
+                                 WHERE links_json IS NOT NULL
+                                 AND links_json IS NOT NULL
+                                 ORDER BY timestamp DESC LIMIT ?
+                              """, [limit]):
+            result[r['id']] = [r['w1'], r['w2'], r['links_json'],
+                               r['timestamps_json'], r['seconds'],
+                               r['language'], r['username'], r['timestamp']]
+        return result
+
+    ###########################################################################
+    # CALLIG: HAIKU ON DEMAND
+    ###########################################################################
+
     def write_haikuondemand(title, l1, l2, l3,
                             seconds, language, username, timestamp):
         """
         Returns the ID of the recently added entry.
         """
         return write_callig("""
-                            INSERT INTO haiku_on_demand 
+                            INSERT INTO haiku_on_demand
                             (title, l1, l2, l3,
                              seconds, language, username, timestamp)
                             VALUES (?,?,?,?,?,?,?,?)
@@ -203,7 +233,6 @@ with app.app_context():
                             """, [title, feedback, l1, l2, l3, s1, s2, s3,
                                   seconds, language, username, timestamp])
 
-    
     def fetch_haikuondemand_30():
         result = dd()
         for r in query_callig("""
@@ -216,12 +245,10 @@ with app.app_context():
             result[r['id']] = [r['title'], r['l1'], r['l2'], r['l3'],
                                r['username'], r['timestamp'], r['seconds']]
         return result
-    
 
-
-    ############################################################################
+    ###########################################################################
     # LCC SQL
-    ############################################################################
+    ###########################################################################
 
     def fetch_max_doc_id():
         for r in query_lcc("""SELECT MAX(docid) from doc"""):
@@ -250,7 +277,7 @@ with app.app_context():
         for r in query_lcc("""SELECT sid, wid, word, pos, lemma from word
                               WHERE sid >= ? AND sid <= ?
                            """, [sid_min, sid_max]):
-                words[r['sid']][r['wid']]=[r['word'], r['pos'],r['lemma']]
+            words[r['sid']][r['wid']] = [r['word'], r['pos'], r['lemma']]
         return words
 
     def fetch_max_wid(sid):

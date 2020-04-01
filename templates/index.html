@@ -7,12 +7,42 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
 
-  <!-- Bootstrap core CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- JQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
+
+  <!-- ORDER MATTER GREATLY, SINCE WE ARE USING THINGS THAT USE LIBRARIES THAT USE
+       DIFFERENT TOOLTIPS -->
+  
+
+  <!-- DELPH-IN VIZ LIBRARIES -->
+  <!-- This must come before Bootstrap CSS because it is redefining 
+       some basic types such as tooltips -->
+  <!-- Specifically, this is interfering with the MRS output (FIXME)  -->
+  <script src="https://d3js.org/d3.v3.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.3/lodash.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.3.6/svg.min.js"></script>
+  <script src="{{ url_for('static', filename='tree.js') }}" language="javascript"></script>
+  <script src="{{ url_for('static', filename='dmrs.js') }}" language="javascript"></script>
+  <script src="{{ url_for('static', filename='mrs.js') }}" language="javascript"></script>
+  
+  <!-- JQuery UI (Needed for DELPH-IN VIZ, but tooltip has conflicts with Bootstrap's) -->
+  <script src="{{ url_for('static', filename='jquery-ui.js') }}" language="javascript"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery-ui.css') }}"/>
+  <!-- These are fixes proposed by JQuery UI; this imposed some small naming changes in mrs.js -->
+  <script>
+    /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
+    $.widget.bridge('uibutton', $.ui.button);
+    $.widget.bridge('uitooltip', $.ui.tooltip);
+  </script>
+  <!-- DELPH-IN VIZ CSS imposes some changes to  JQuery UI tooltip, so it should come after  -->  
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='delphin-viz.css') }}"/>
+
+
+  
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
   
   <!-- Bootstrap tooltips -->
   <script  src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
@@ -20,6 +50,9 @@
   <!-- Bootstrap core JavaScript -->
   <script  src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
   
+
+
+
   
   <!-- Datatables (https://datatables.net/) -->
   <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -36,18 +69,6 @@
   </script>
   
 
-
-  <!-- DELPH-IN VIZ LIBRARIES -->
-  <script src="https://d3js.org/d3.v3.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.3/lodash.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.3.6/svg.min.js"></script>
-  <script src="{{ url_for('static', filename='tree.js') }}" language="javascript"></script>
-  <script src="{{ url_for('static', filename='dmrs.js') }}" language="javascript"></script>
-  <script src="{{ url_for('static', filename='mrs.js') }}" language="javascript"></script>
-  <script src="{{ url_for('static', filename='jquery-ui.js') }}" language="javascript"></script>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery-ui.css') }}"/>
-  <!-- <script src="{{ url_for('static', filename='svg.js') }}" language="javascript"></script> -->
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='delphin-viz.css') }}"/>
 
 
 
@@ -162,6 +183,15 @@
 
 
 
+
+    <script>
+      // this initializes all Bootstrap HTML tooltips
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
+    </script>
+    
+    
     <!-- Using Following MDB 4.13.0 -->
     <!-- Using suggested versions provided in:  -->
     <!-- https://mdbootstrap.com/md-bootstrap-cdn/ -->

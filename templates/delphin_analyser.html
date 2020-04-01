@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% block welcome %}
 
+<div>
 <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
 <br>
 
@@ -8,26 +9,24 @@
 	  class="col-sm-12 form-control form-control-lg text-center"
 	  placeholder="Type your sentence here..."
 	  required></textarea>
+</div>
 
 <br>
+
 <div class="row">
-
-
-    <select class="col-sm-9 form-control form-control-lg"
-	    id="selected_grammar" name="selected_grammar" required>
-      
-      <option value="">Select Grammar</option>
-      {% for lang in grammars %}      
-	  <option value="" disabled></option>
-	  <option value="" disabled>{{ lang }}</option>
-	  {% for grm in grammars[lang] %}
-	  <option value="{{ grm }}">{{ grm }}</option>
-	  {% endfor %}
-      {% endfor %}
-    </select>
+ 
+  <select class="col-sm-9 form-control form-control-lg"
+	  id="selected_grammar" name="selected_grammar" required>
     
-
-  
+    <option value="">Select Grammar</option>
+    {% for lang in grammars %}      
+    <option value="" disabled></option>
+    <option value="" disabled>{{ lang }}</option>
+      {% for grm in grammars[lang] %}
+        <option value="{{ grm }}">{{ grm }}</option>
+      {% endfor %}
+    {% endfor %}
+  </select> 
   
   <select class="col-sm-3 form-control form-control-lg" id="max_parses" name="max_parses">
     <option value="1"><b>1 Parse</b></option>
@@ -47,9 +46,9 @@
 
 
 
-
-
 {# <!-- PARSE RESULTS OVERLAY --> #}
+{# <!-- The tooltip must be available here to get the positioning right --> #}
+<div id="tooltipDMRS" class="ui-tooltip" style="opacity:0;"></div>
 <div id="myNav" class="overlay">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
   <div id="overlay-content" class="overlay-content">
@@ -58,10 +57,14 @@
   </div>
 </div>
 
+    
+
+
 
 <script>
 function openNav() {
   document.getElementById("myNav").style.width = "100%";
+  document.activeElement.blur();
 }
 
 function closeNav() {
@@ -72,7 +75,6 @@ function closeNav() {
 
 
 
-<!-- parse-button -->
 <script>
 $("#parse-button").click(function() {
   
@@ -127,8 +129,21 @@ $("#parse-button").click(function() {
 	});
     }
 });
-</script>
 
+
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        closeNav(); // <DO YOUR WORK HERE>
+    }
+});
+
+$(document).keyup(function(e) {
+    if (e.key === "Tab") {
+        document.getElementById("parse-button").click();
+    }
+});
+      
+</script>
 
 
 

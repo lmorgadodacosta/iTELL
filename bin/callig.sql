@@ -60,3 +60,16 @@ CREATE TABLE haiku_on_demand_feedback (
        username TEXT,
        timestamp TEXT
 );
+
+
+CREATE TABLE forced_links (
+       id INTEGER PRIMARY KEY,
+       w1 TEXT,
+       w2 TEXT,
+       links_json TEXT,
+       timestamps_json TEXT,
+       seconds REAL, 
+       language TEXT,
+       username TEXT,
+       timestamp TEXT
+);

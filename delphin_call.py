@@ -333,12 +333,14 @@ with app.app_context():
 
         data = dd(lambda: dd())
         
-        for row in tsql.select('i-id i-wf i-input  i-comment i-length', ts):
+        for row in tsql.select('i-id i-wf i-input  i-comment i-length i-origin i-translation', ts):
             i_id = row[0]
             data[i_id]['i-wf'] = row[1]
             data[i_id]['i-input'] = row[2]
             data[i_id]['i-comment'] = row[3]
             data[i_id]['i-length'] = row[4]
+            data[i_id]['i-origin'] = row[5]
+            data[i_id]['i-translation'] = row[6]
 
         ########################################################################
         # If we don't check if the file 'parse' exists, then pydelphin creates
