@@ -1,0 +1,134 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+{#
+<!-- This template is just a placeholder; the results are being served via AJAX; -->
+<!-- selected_grammar, dir1 and dir2 are necessary to fetch AJAX response  -->
+#}
+
+<input type="hidden" id="selected_grammar" name="selected_grammar" value="{{ selected_grammar }}">
+<input type="hidden" id="dir1" name="dir1" value="{{ regression_dir1 }}">
+<input type="hidden" id="dir2" name="dir2" value="{{ regression_dir2 }}">
+
+
+<div class="row">
+  <div class="col-sm-7 text-left"><h3>Regression Results</h3></div>
+  <div class="col-sm-5 text-right"><form action="{{ url_for('delphin_regression_testing') }}" style="display:inline;" method="POST">
+      <button type="submit" class="btn btn-dark btn-lg" style="font-size:20px;"><b>↩ Back</b>
+      </button>
+    </form>
+  </div>
+</div>
+
+
+
+
+<br>
+<div id="report"></div>
+
+
+<div id="summary"></div>
+<br><hr><br>
+<div id="profile"></div>
+<br><br>
+
+
+
+<script>
+$(function() {
+    $(document).ready(function(){
+
+
+	var summary = document.getElementById("summary");
+	var report = document.getElementById("report");
+	report.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var profile = document.getElementById("profile");
+
+	$.getJSON($SCRIPT_ROOT + '/_delphin_run_regression', {
+	    dir1: $('input[name="dir1"]').val(),
+	    dir2: $('input[name="dir2"]').val(),
+	    selected_grammar: $('input[name="selected_grammar"]').val()
+	}, function(data) {
+
+	    if (data.result) {
+		r = String(data.result);
+                html = data.html;
+                summary_html = data.summary;
+		report.innerHTML = r;
+                profile.innerHTML = html;
+                summary.innerHTML = summary_html;
+
+
+
+
+
+
+
+		// DataTable //
+		var table = $('#results').DataTable({
+		    "dom": 'l<"top"i>rpt<"bottom"><"clear">',
+		    "lengthMenu": [[5, 6, 7, 8, 9, 10, 25, -1], [5, 6, 7, 8, 9, 10, 25, "All"]],
+		    "createdRow": function ( row, data, index ) {
+
+
+		    {# <!-- (grammatical) + (prof1 = 0) + (prof2 = 0) -->   #}
+		    if (parseInt(data[1]) == 1 && parseInt(data[2]) == 0 && parseInt(data[3]) == 0 ) {
+			    $(row).addClass('lackingcoverage');
+		    }
+
+		    {# <!-- (grammatical) + (prof1 > 0) + (prof2 = 0) -->   #}
+		    if (parseInt(data[1]) == 1 && parseInt(data[2]) > 0 && parseInt(data[3]) == 0 ) {
+		        $(row).addClass('lostparses');
+		    }
+
+		    {# <!-- (grammatical) + (prof1 = 0) + (prof2 > 0) -->   #}
+		    if (parseInt(data[1]) == 1 && parseInt(data[2]) == 0 && parseInt(data[3]) > 0 ) {
+		        $(row).addClass('gainparses');
+		    }
+
+
+		    }
+		});
+
+		// Apply the search //
+		table.columns().eq( 0 ).each( function ( colIdx ) {
+		    $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
+			table
+			    .column( colIdx )
+			    .search( this.value )
+			    .draw();
+		    } );
+		} );
+
+
+
+
+
+	        // activate Bootstrap HTML tooltips (inside table)
+		// this must be done at the start and every time
+		// the table is redrawn (search, skip page, etc)
+	        $('[data-toggle="tooltip"]').tooltip()
+        	table.on( 'draw', function () {
+	            $('[data-toggle="tooltip"]').tooltip();
+                } );
+
+
+
+
+
+
+
+	    } else {
+		profile.innerHTML = "";
+		report.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+
+	});
+
+    });
+});
+</script>
+
+{% endblock %}

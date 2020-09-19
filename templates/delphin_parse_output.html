@@ -1,0 +1,105 @@
+
+<div>
+<div class="col-sm-12 text-center">
+  <h3> {{ results.keys()|length }}
+    Parse Result{% if results.keys()|length > 1 %}s{% endif %}</h3>
+</div>
+<br>
+
+
+<div class="col-sm-12 text-center">
+<p>
+  <i class="fa fa-quote-left"></i>&nbsp;&nbsp;
+  <span class="h5">{{ sent }}</span>&nbsp;&nbsp;
+  <i class="fa fa-quote-right"></i>
+</p>
+
+<hr>
+
+
+{# <!-- If there are results for the parse --> #}
+{% if results %}
+
+  {# <!-- for each available parse --> #}
+  {% for i, r in results.items() %}
+<div class="row" >
+  <span class="col-sm-1" style="font-size:40px;">{{ i + 1 }}</span>
+  <span class="col-sm-10"></span>
+  <span class="col-sm-1"><a href="javascript:void(0)" onclick="closeNav()" style="font-size:40px;">&times;</a></span>
+</div>
+
+
+<script>
+  $( document ).ready(function() {
+  elem = document.getElementById('viztree{{i}}');
+  deriv_json_string = {{ r["deriv_json"]|tojson|safe }};
+  deriv_json = JSON.parse(deriv_json_string);
+  drawTree(elem, deriv_json);
+  });
+</script>
+<span id="viztree{{i}}"><br></span><br>
+
+
+{% if r["dmrs_json"]  %}
+<script>
+  $( document ).ready(function() {
+  elem = document.getElementById('dmrs{{i}}');
+  dmrs_json_string =  {{ r["dmrs_json"]|tojson|safe }};
+  dmrs_json = JSON.parse(dmrs_json_string);
+  DMRS(elem, dmrs_json);
+  });
+</script>
+<span id="dmrs{{i}}"></span><br>
+{% else %}
+<br><b>The MRS is not well formed. A DMR could not be created.</b><br>
+{% endif %}
+
+
+
+<script>
+  $( document ).ready(function() {
+  elem = document.getElementById('mrs{{i}}');
+  mrs_json_string =  {{ r["mrs_json"]|tojson|safe }};
+  mrs_json = JSON.parse(mrs_json_string);
+  MRS(elem, mrs_json);
+  });
+</script>
+<div id="mrs{{i}}"><br>
+    <div id="text-input"></div><br>
+</div><br>
+
+
+
+<br>
+
+{# <!-- If the derivation tree has any mal/rbst rules, show then here --> #}
+{% if r['errors'] %}
+  <b>Errors were found in this sentence:</b><br>
+  {% for mal_labels in r['errors'] %}
+    {{ mal_labels }}<br>
+  {% endfor %}
+{% else %}
+<b>No errors were found in this sentence.</b>
+{% endif %}
+
+
+
+
+{% for mal_labels in r['errors'] %}
+  <style>.{{ mal_labels[0] }} { fill: red; }</style>
+{% endfor %}
+
+<hr>
+
+{% endfor %}
+
+
+
+{% else %}
+
+No parses were found.
+
+{% endif %}
+
+</div>
+

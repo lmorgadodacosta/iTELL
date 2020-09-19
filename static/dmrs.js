@@ -241,7 +241,8 @@ function DMRS(parentElement, dmrs) {
                 for (var key in d.sortinfo) {
                   vps.push("<td>" + key + "</td><td>=</td><td>" + d.sortinfo[key] + "</td>");
                 }
-                d.tooltipText = "<table><tr>" + vps.join("</tr><tr>") + "</tr></table>";
+                  d.tooltipText = "<table><tr>" + vps.join("</tr><tr>") + "</tr></table>";
+		  
               });
           nodes.append("svg:text")
               .attr("class", "nodeText")
@@ -276,9 +277,9 @@ function DMRS(parentElement, dmrs) {
                   tip.html(d.tooltipText)
                     .style("opacity", 0.8);
               })
-              .on("mousemove", function(d) {
-                  tip.style("left", (d3.event.pageX - 10) + "px")
-                    .style("top", (d3.event.pageY + 15) + "px");
+              .on("mousemove", function(d) {		  
+		  tip.style("left", (d3.event.pageX - 10) + "px")
+                      .style("top", (d3.event.pageY + 15) + "px");
               })
               .on("mouseout", function(d) {
                   if (!d.sticky) { d3.select(this).classed("selected", false); }

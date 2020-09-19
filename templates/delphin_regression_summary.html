@@ -1,0 +1,72 @@
+{#
+<!-- This piece of HTML is being served via AJAX as results for profile comparison (regression) -->
+<!-- It presents the summary of comparing two profiles -->
+#}
+
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Old Profile</th>
+      <th scope="col">New Profile</th>
+      <th scope="col">Δ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Profile Path</th>
+      <td>{{ summary["prof1"] }}</td>
+      <td>{{ summary["prof2"] }}</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th scope="row">Number of Sentences</th>
+      <td>{{ summary["num_of_sents_prof1"] }}</td>
+      <td>{{ summary["num_of_sents_prof2"] }}</td>
+      <td>{{ summary["num_of_sents_prof2"] - summary["num_of_sents_prof2"] }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Number of Parsed Sentences</th>
+      <td>{{ summary["num_of_sents_parsed_prof1"] }}</td>
+      <td>{{ summary["num_of_sents_parsed_prof2"] }}</td>
+      <td>{{ summary["num_of_sents_parsed_prof2"] - summary["num_of_sents_parsed_prof1"] }}</td>
+    </tr>
+    <tr>
+      <th scope="row">% of Parsed Sentences</th>
+      <td>{{ '%0.2f' % (summary["num_of_sents_parsed_prof1"]/summary["num_of_sents_prof1"]*100) }}%</td>
+      <td>{{ '%0.2f' % (summary["num_of_sents_parsed_prof2"]/summary["num_of_sents_prof2"]*100) }}%</td>
+      <td>{{ '%0.2f' % (summary["num_of_sents_parsed_prof2"]/summary["num_of_sents_prof2"]*100 -
+ 	                summary["num_of_sents_parsed_prof1"]/summary["num_of_sents_prof1"]*100) }}%</td>
+    </tr>
+    <tr>
+      <th scope="row">Avg. Parsed Sentence Ambiguity</th>
+      <td>{% if summary["num_of_sents_parsed_prof1"] == 0 %}-
+	{% else %} {{ '%0.2f' % (summary["total_num_parses_prof1"]/summary["num_of_sents_parsed_prof1"]) }}
+	{% endif %}</td>
+      <td>{% if summary["num_of_sents_parsed_prof2"] == 0 %}-
+	{% else %} {{ '%0.2f' % (summary["total_num_parses_prof2"]/summary["num_of_sents_parsed_prof2"]) }}
+	{% endif %}</td>
+      <td>{% if ((summary["num_of_sents_parsed_prof1"] !=0 ) and
+	         (summary["num_of_sents_parsed_prof2"] !=0)) %}
+	{{ '%0.2f' %  (summary["total_num_parses_prof2"]/summary["num_of_sents_parsed_prof2"] -
+ 	               summary["total_num_parses_prof1"]/summary["num_of_sents_parsed_prof1"]) }}
+	{% else %} - {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Avg. Sentence Length (all)</th>
+      <td>{{ '%0.2f' % (summary["sent_length_sum_prof1"]/summary["num_of_sents_prof1"]) }}</td>
+      <td>{{ '%0.2f' % (summary["sent_length_sum_prof2"]/summary["num_of_sents_prof2"]) }}</td>
+      <td>{{ '%0.2f' % (summary["sent_length_sum_prof2"]/summary["num_of_sents_prof2"] -
+	                summary["sent_length_sum_prof1"]/summary["num_of_sents_prof1"]) }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Avg. Parsed Sentence Length</th>
+      <td>{{ '%0.2f' % (summary["parsed_sent_length_sum_prof1"]/summary["num_of_sents_prof1"]) }}</td>
+      <td>{{ '%0.2f' % (summary["parsed_sent_length_sum_prof2"]/summary["num_of_sents_prof2"]) }}</td>
+      <td>{{ '%0.2f' % (summary["parsed_sent_length_sum_prof2"]/summary["num_of_sents_prof2"] -
+	                summary["parsed_sent_length_sum_prof1"]/summary["num_of_sents_prof1"]) }}</td>
+    </tr>
+  </tbody>
+</table>

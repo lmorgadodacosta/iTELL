@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+
+<form id="forcedlinks_form" name="forcedlinks"  action="{{ url_for('save_forcedlinks') }}"
+      style="display:inline;" method="POST" autocomplete="off">
+  <input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+  <input type="hidden" id="w1" name="w1" value="{{ w1[0] }}">
+  <input type="hidden" id="w2" name="w2" value="{{ w2[0] }}">
+  <br>
+  
+  <div class="container">
+    <div class="row">
+      <div class="col-sm"></div>
+      <div id=""  class="btn-toolbar col-sm text-center" role="toolbar">
+	
+	<div>
+	  
+	  <div class="text-center">
+	    <span class="h4 text-centre" data-toggle="tooltip" data-placement="bottom"
+		  data-html="true" title="<em>{{ w1[1] }}</em>"><u>{{ w1[0] }}</u>
+	    </span><br><i class='fas fa-long-arrow-alt-down'></i><br>
+	  </div>
+	  
+	  
+	  <div id="game-input">
+	    
+	    <span id="links_container">
+	      {% for i in range(min_links) %}
+	      <input name="links" type="textarea" class="form-control form-control-lg"
+		     required/>
+	      {% endfor %}
+	    </span>
+	    
+	    <button id="add_word" type="button" class="form-control form-control-lg btn btn-outline-dark"
+		    data-toggle="tooltip" data-placement="right" data-html="true" title="You must add word before adding new box.">Add Word</button>
+	    <br><i class='fas fa-long-arrow-alt-down'></i><br>
+	  </div>
+	  
+	  
+	  <br>
+	  <div class="text-center">
+	    <span class="h4 text-centre" data-toggle="tooltip" data-placement="bottom"
+		  data-html="true" title="<em>{{ w2[1] }}</em>"><u>{{ w2[0] }}</u>
+	    </span><br><br>
+	  </div>
+	  
+	  
+	  <span id="countdown"></span>
+	  <span id="submit_button"><button id="sub_button" type="button" class="form-control form-control-lg btn btn-dark">Submit</button></span>
+	  
+	</div>
+	
+      </div>
+      <div class="col-sm"></div>
+    </div>
+  </div>
+  
+  
+  <input type="hidden" id="seconds" name="seconds" value="0">
+  <span id="countup"></span>
+</form>
+
+
+
+
+
+
+
+
+<script src="{{ url_for('static', filename='callig-forcedlinks.js') }}" language="javascript"></script>
+
+<script>
+// COUNT-DOWN
+countdown({{ seconds }}, 0, "countdown");
+// COUNT-SECONDS
+countseconds(0,0,"seconds");
+
+</script>
+
+
+
+{% endblock %}

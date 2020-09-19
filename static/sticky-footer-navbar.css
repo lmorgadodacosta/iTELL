@@ -61,3 +61,98 @@ img {max-width: 70%;max-height: 250px;}
 
 /*     max-width: 70%;  Breaks the alignment of the tooltip       */
 .tooltip-inner { max-width: 1000px; font-size: 16px; text-align: left;}
+
+
+.btn-outline-success { color: seagreen !important;
+		       border-color: seagreen !important;
+		       outline-color: seagreen !important;
+		     }
+.btn-outline-success:hover { background-color: seagreen !important;
+			     color: white !important;
+			     border-color: seagreen !important;
+			   }
+
+.btn-success { color: white !important;
+	       background-color: seagreen !important;
+	       border-color: seagreen !important;
+	       outline-color: seagreen !important;
+	     }
+.btn-success:hover { background-color: #21653f !important;
+		     color: white !important;
+		     border-color: seagreen !important;
+		   }
+
+
+
+
+/* Colors for Profiles/Regressions  */
+tr.overparse {
+        color: red;
+}
+tr.lackingcoverage {
+        color: #FF7E00;
+}
+tr.lostparses {
+        color: red;
+}
+tr.gainparses {
+        color: green;
+}
+
+
+
+
+
+
+/* Overlay (Parsing Results) */
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(255,255,255);
+  background-color: rgba(255,255,255, 0.95);
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.overlay-content {
+  position: relative;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+  overflow: auto;
+}
+
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.overlay a:hover, .overlay a:focus {
+  //color: #f1f1f1;
+  color: black;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 80px;
+}
+
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay .closebtn {
+  font-size: 40px;
+  top: 15px;
+  right: 35px;
+  }
+}

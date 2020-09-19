@@ -80,8 +80,11 @@ def check_lemma(lemma):
 
 def x_rand_pos(x,pos):
     """
-    This function returns X random words with a specified POS from 
-    the PWN's dump.
+    This function returns X random words with a specified POS.
+    For nouns, there is a chance it will be selected from various curated lists.
+
+    It returns a list of (word, definition, article) triplets. 
+    Articles for non-nouns are empty strings.
     """
     results = []
 

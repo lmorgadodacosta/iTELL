@@ -74,12 +74,16 @@ function render_tree(svg, tree) {
 	var n = text(svg, node_str);
     n.setAttributeNS(null, "title", tree.entity);
 
-    // LMC I ADDED THIS TO SEE IF I CAN ADD LTDB LINKS (FIXME) 
-    n.classList.add("ltdb");
+    //#########################################################
+    // LMC I ADDED THIS TO SEE IF I CAN ADD LTDB LINKS (FIXME)
+    n.classList.add("ltdb", tree.entity);
+    //#########################################################
 
+    
     // add a title element for node tooltips
     var title = svgelement('title');
     title.innerHTML = tree.entity;
+    
     n.appendChild(title);
 
 	g.appendChild(n);

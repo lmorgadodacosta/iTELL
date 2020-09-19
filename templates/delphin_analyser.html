@@ -1,0 +1,150 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+<div>
+<input type="hidden" id="username" name="username" value="{{ current_user.name }}">
+<br>
+
+<textarea id="sentence" name="sentence" type="textarea"  rows="2" 
+	  class="col-sm-12 form-control form-control-lg text-center"
+	  placeholder="Type your sentence here..."
+	  required></textarea>
+</div>
+
+<br>
+
+<div class="row">
+ 
+  <select class="col-sm-9 form-control form-control-lg"
+	  id="selected_grammar" name="selected_grammar" required>
+    
+    <option value="">Select Grammar</option>
+    {% for lang in grammars %}      
+    <option value="" disabled></option>
+    <option value="" disabled>{{ lang }}</option>
+      {% for grm in grammars[lang] %}
+        <option value="{{ grm }}">{{ grm }}</option>
+      {% endfor %}
+    {% endfor %}
+  </select> 
+  
+  <select class="col-sm-3 form-control form-control-lg" id="max_parses" name="max_parses">
+    <option value="1"><b>1 Parse</b></option>
+    <option value="2"><b>2 Parses</b></option>
+    <option value="3"><b>3 Parses</b></option>
+    <option value="4"><b>4 Parses</b></option>
+    <option value="5"><b>5 Parses</b></option>
+    <option value="10"><b>10 Parses</b></option>
+    <option value="20"><b>20 Parses</b></option>
+    <option value="all"><b>All Parses</b></option>
+  </select>
+  
+  <button id="parse-button" name="parse-button" class="btn btn-dark btn-block"
+	  style="font-size:20px;"><b>Parse Sentence</b></button>
+  
+</div>
+
+
+
+{# <!-- PARSE RESULTS OVERLAY --> #}
+{# <!-- The tooltip must be available here to get the positioning right --> #}
+<div id="tooltipDMRS" class="ui-tooltip" style="opacity:0;"></div>
+<div id="myNav" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div id="overlay-content" class="overlay-content">
+    <h2><span id="overlay-header"></span></h2>
+    <div id="parse-results"></div>
+  </div>
+</div>
+
+    
+
+
+
+<script>
+function openNav() {
+  document.getElementById("myNav").style.width = "100%";
+  document.activeElement.blur();
+}
+
+function closeNav() {
+  document.getElementById("myNav").style.width = "0%";
+}
+</script>
+
+
+
+
+<script>
+$("#parse-button").click(function() {
+  
+    var sent = document.getElementById("sentence").value;
+    var grammar_sel = document.getElementById("selected_grammar").value;
+    var max_p = document.getElementById("max_parses").value;
+    var header = document.getElementById("overlay-header");
+    var results = document.getElementById("parse-results");
+
+
+    if (grammar_sel) {
+
+	openNav();  // open the overlay
+	results.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+
+	$.getJSON($SCRIPT_ROOT + '/_delphin_parse_output', {
+	    sentence: sent,
+	    selected_grammar: grammar_sel,
+            max_parses: max_p
+
+        }, function(data) {
+
+	    if (data.html) {
+
+		results.innerHTML = data.html;
+
+                var parse_results = data.results;
+                for (i in parse_results) {
+                    deriv_elem = document.getElementById('viztree'+i);
+                    deriv_json_string = parse_results[i]["deriv_json"];
+                    deriv_json = JSON.parse(deriv_json_string);
+                    try { drawTree(deriv_elem, deriv_json); } catch(err) {}
+
+                    //alert(parse_results[i]["deriv_json"]);
+                    mrs_elem = document.getElementById('mrs'+i);
+                    mrs_json_string = parse_results[i]["mrs_json"];
+                    mrs_json = JSON.parse(mrs_json_string);
+                    try { MRS(mrs_elem, mrs_json); } catch(err) {}
+
+                    dmrs_elem = document.getElementById('dmrs'+i);
+                    dmrs_json_string =  parse_results[i]["dmrs_json"];
+                    dmrs_json = JSON.parse(dmrs_json_string);
+                    try { DMRS(dmrs_elem, dmrs_json); } catch(err) {}
+
+                }
+
+	    } else {
+		msg.innerHTML = "We were not able to produce a parse! Please Report.";
+	    }
+
+	});
+    }
+});
+
+
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        closeNav(); // <DO YOUR WORK HERE>
+    }
+});
+
+$(document).keyup(function(e) {
+    if (e.key === "Tab") {
+        document.getElementById("parse-button").click();
+    }
+});
+      
+</script>
+
+
+
+{% endblock %}
