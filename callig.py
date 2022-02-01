@@ -1305,7 +1305,7 @@ def delphin_see_profile():
 
 
 @app.route('/delphin_analyser', methods=['GET', 'POST'])
-@login_required(role=0, group='admin')
+# @login_required(role=0, group='admin')  # Make it open
 def delphin_analyser():
     """
     This view generates the main input receiver for grammars.
@@ -1363,7 +1363,7 @@ def delphin_analyser():
 
 
 @app.route('/_delphin_parse_output', methods=['GET', 'POST'])
-@login_required(role=0, group='open')
+# @login_required(role=0, group='open') # Make it open
 def delphin_parse_output():
     """
     This function is returning the data structre required to
@@ -1459,7 +1459,7 @@ def delphin_update_ergTRUNK():
 @app.route('/delphin/_update_zhong', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def delphin_update_zhong():
-    "Update ZHONG's repository and build the grammars with ACE."
+    "Update ZHONG's repository and build the grammar with ACE."
 
     bash_stdout, bash_stderr = delphin_call.update_zhong()
     bash_stdout = utils.stdout2html(bash_stdout)
@@ -1476,6 +1476,25 @@ def delphin_update_itell_zhong():
     bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)        
     return jsonify(result=bash_stdout+bash_stderr)
 
+@app.route('/delphin/_update_jacy', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_jacy():
+    "Update JACY's repository and build the grammar with ACE."
+
+    bash_stdout, bash_stderr = delphin_call.update_jacy()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)
+    return jsonify(result=bash_stdout+bash_stderr)
+
+@app.route('/delphin/_update_indra', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def delphin_update_indra():
+    "Update INDRA's repository and build the grammar with ACE."
+
+    bash_stdout, bash_stderr = delphin_call.update_indra()
+    bash_stdout = utils.stdout2html(bash_stdout)
+    bash_stderr = "<br><br><b>ACE WARNINGS:</b><br>" + utils.stdout2html(bash_stderr)
+    return jsonify(result=bash_stdout+bash_stderr)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', threaded=True)

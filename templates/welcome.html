@@ -10,7 +10,7 @@
 </div>
 
 
-<br>
+<!-- <br> -->
 <hr>
 
 
@@ -43,8 +43,8 @@
 </form>
 {% endif %}
 
-<br>
 {% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<br>
 <form action="{{ url_for('inspect_corpus_db', db='lcc.db') }}" style="display:inline;" method="POST">
   <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
     <b> LCC-DB<br> Sentences</b>
@@ -60,8 +60,8 @@
 </form>
 {% endif %}
 
-<br>
 {% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<br>
 <form action="{{ url_for('inspect_corpus_db', db='ntucleX.db') }}" style="display:inline;" method="POST">
   <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
     <b> NTUCLE-X<br> Sentences</b>
@@ -148,9 +148,22 @@
 
 {% if not current_user.id %}
 <div class="text-center">
-<p>You need to be signed-in in order to use our applications. But, before that, you can learn more about them by clicking below.</p>
+<p>You need to be signed-in in order to use most of the available applications. Public access to apps is currently not supported.</p>
 
-<p>If you have problems signing in, please contact <a href="#">luis.passos.morgado@gmail.com</a>.</p>
+<p>However, you can still use the DELPH-IN's Grammarium Demo to inspect the output of some of DELPH-IN's grammars.<p>
+  <form action="{{ url_for('delphin_analyser') }}" style="display:inline;" method="POST">
+    <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
+      <b>Grammarium<br>Demo<br></b>
+    </button>
+  </form>
+
+
+<!-- <p>If you were provided with credential If you have problems signing in, please contact <a href="#">luis.passos.morgado@gmail.com</a>.</p> -->
+
+
+
+<hr>
+<p>Meanwhile, you can learn more about other applications below.</p>
 
 <p>
 

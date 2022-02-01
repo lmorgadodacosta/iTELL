@@ -21,16 +21,16 @@
 	  style="font-size:20px;"><b>ITELL-ZHONG</b>
   </button>
   <button id="jacy" class="btn btn-outline-dark btn-sq-lg col-sm-3"
-	  style="font-size:20px;"><b>JACY</b><br>(soon)
+	  style="font-size:20px;"><b>JACY</b><br>
   </button>
   <button id="indra" class="btn btn-outline-dark btn-sq-lg col-sm-3"
-	  style="font-size:20px;"><b>INDRA</b><br>(soon)
+	  style="font-size:20px;"><b>INDRA</b><br>
   </button>
 </div>
     
 <hr>
 
-<div id="msg"  class="text-center"> Click to update a grammar (please wait till it finishes)</div>
+<div id="msg"  class="text-center"> Click to update a grammar. Please don't click twice (just wait until it finishes).</div>
 <div id="bash_stdout"></div>
 
 <hr>
@@ -164,7 +164,57 @@ $(function() {
 	});
     });
 });
-	
+
+
+$(function() {
+    $("#jacy").bind("click", function() {
+
+	var report_div = document.getElementById("bash_stdout");
+	report_div.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var msg = document.getElementById("msg");
+        msg.innerHTML = "We are currently updating the grammar<hr>";
+
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_jacy', {
+        }, function(data) {
+	    if (data.result) {
+		r = String(data.result);
+		msg.innerHTML = "It has finished. See results below. <hr>";
+		report_div.innerHTML = r;
+	    } else {
+		msg.innerHTML = "";
+		report_div.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+	});
+    });
+});
+
+
+$(function() {
+    $("#indra").bind("click", function() {
+
+	var report_div = document.getElementById("bash_stdout");
+	report_div.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	var msg = document.getElementById("msg");
+        msg.innerHTML = "We are currently updating the grammar<hr>";
+
+        $.getJSON($SCRIPT_ROOT + '/delphin/_update_indra', {
+        }, function(data) {
+	    if (data.result) {
+		r = String(data.result);
+		msg.innerHTML = "It has finished. See results below. <hr>";
+		report_div.innerHTML = r;
+	    } else {
+		msg.innerHTML = "";
+		report_div.innerHTML = "";
+		alert("Something bad happened! Please Report.");
+	    }
+	});
+    });
+});
+
 </script>
 
 

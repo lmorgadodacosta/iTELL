@@ -391,6 +391,20 @@ with app.app_context():
 
         return stdout.decode('utf-8'), stderr.decode('utf-8')
 
+    def update_jacy():
+        cmd = path.join(ROOT, 'delphin/pull_update_jacy.bash')
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = p.communicate()
+
+        return stdout.decode('utf-8'), stderr.decode('utf-8')
+
+    def update_indra():
+        cmd = path.join(ROOT, 'delphin/pull_update_indra.bash')
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = p.communicate()
+
+        return stdout.decode('utf-8'), stderr.decode('utf-8')
+
     def new_regression(dir1, selected_grammar):
 
         date = current_time().replace(' ', '_')
