@@ -15,32 +15,81 @@
 
 
 
-{% if 'lcc' in MODE %}
 
-{% if current_user.id %}
+{% if (current_user.id) and ('lcc' in MODE) %}
 <div id="LCC-UserPanel">
   <h5>LCC-APP: Improve your English Skills!</h5>
 </div>
+{% endif %}
 
 
 
+{% if (current_user.id) and ('lcc' in MODE) %}
 <form action="{{ url_for('upload') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Assignment <br> Checker</b></button>
 </form>
+{% endif %}
 
+{% if (current_user.id) and ('lcc' in MODE) %}
 <form action="{{ url_for('lcc_sentence') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;">
     <b>Sentence <br>Checker</b></button>
 </form>
+{% endif %}
 
+{% if (current_user.id) and ('lcc' in MODE) %}
 <form action="{{ url_for('lcc_intro') }}" style="display:inline;">
   <button type="submit" class="btn btn-dark btn-sq-lg" style="font-size:20px;"><b>Learn <br> More...</b></button>
 </form>
+{% endif %}
+
+<br>
+{% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<form action="{{ url_for('inspect_corpus_db', db='lcc.db') }}" style="display:inline;" method="POST">
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b> LCC-DB<br> Sentences</b>
+  </button>
+</form>
+{% endif %}
+
+{% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<form action="{{ url_for('lcc_inspect_docs', db='lcc.db') }}" style="display:inline;" method="POST">
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b> LCC-DB <br> Documents</b>
+  </button>
+</form>
+{% endif %}
+
+<br>
+{% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<form action="{{ url_for('inspect_corpus_db', db='ntucleX.db') }}" style="display:inline;" method="POST">
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b> NTUCLE-X<br> Sentences</b>
+  </button>
+</form>
+{% endif %}
+
+{% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<form action="{{ url_for('lcc_inspect_docs', db='ntucleX.db') }}" style="display:inline;" method="POST">
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b> NTUCLE-X <br> Documents</b>
+  </button>
+</form>
+{% endif %}
+
+{% if (current_user.group == 'admin') and ('lcc' in MODE) %}
+<form action="{{ url_for('lcc_load_ntucleX') }}" style="display:inline;" method="POST">
+  <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+    <b>Upload <br> NTUCLE-X</b>
+  </button>
+</form>
+{% endif %}
 
 
+{% if (current_user.id) and ('lcc' in MODE) %}
 <hr>
 {% endif %}
-{% endif %}
+
 
 
 
@@ -167,24 +216,20 @@
 
 <div id="AdminPanel">
   <h5>Admin User Panel</h5>
-
+  
   <form action="{{ url_for('send_mail') }}" style="display:inline;">
-    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>Test Email <br> Settings</b></button>
-  </form>
-
-  <form action="{{ url_for('useradmin') }}" style="display:inline;">
-    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;"><b>User<br>Manager</b></button>
-  </form>
-
-
-  <form action="{{ url_for('inspect_lcc_db') }}" style="display:inline;" method="POST">
     <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
-      <b>Inspect <br> LCC-DB</b>
+      <b>Test Email <br> Settings</b>
+    </button>
+  </form>
+  
+  <form action="{{ url_for('useradmin') }}" style="display:inline;">
+    <button type="submit" class="btn btn-outline-dark btn-sq-lg" style="font-size:20px;">
+      <b>User<br>Manager</b>
     </button>
   </form>
   
   
-
 </div>
 <hr>
 
