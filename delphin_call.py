@@ -262,8 +262,8 @@ with app.app_context():
                            '--max-unpack-megabytes=3000']
         else:
             # Just make sure shenanigans can happen with HTML/JS source
-            if max_parses > 50:
-                max_parses = 50
+            if int(max_parses) > 50:
+                max_parses = "50"
             ace_cmdargs = ['-n',
                            max_parses,
                            '--timeout=20',
