@@ -1372,7 +1372,7 @@ def delphin_parse_output():
 
     sent = request.args.get('sentence', None)
     selected_grammar = request.args.get('selected_grammar', None)
-    max_parses = request.args.get('max_parses', 'all')
+    max_parses = request.args.get('max_parses', 'max')
 
     results = delphin_call.full_parse(sent, selected_grammar, max_parses)
 

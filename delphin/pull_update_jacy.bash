@@ -17,7 +17,7 @@ else
     echo "<b>COULD NOT FIND the folder delphin/jacy</b>"
     echo "<b>CREATING folder delphin/jacy</b>"
     echo "<b>PERFORMING GIT CLONE for JACY</b>"
-    git clone git@github.com:delph-in/jacy.git $DIRECTORY/jacy
+    git clone https://github.com/delph-in/jacy.git $DIRECTORY/jacy
 fi
 
 echo

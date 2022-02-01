@@ -252,13 +252,18 @@ with app.app_context():
         #######################################################################
         # ACE cmdargs (currently only for the number of parses)
         #######################################################################
-        if max_parses == 'all':
-            ace_cmdargs = ['--timeout=20',
+        if max_parses == 'max':
+            ace_cmdargs = ['-n',
+                           "50",
+                           '--timeout=20',
                            '--rooted-derivations',
                            '--udx',
                            '--max-chart-megabytes=3000',
                            '--max-unpack-megabytes=3000']
         else:
+            # Just make sure shenanigans can happen with HTML/JS source
+            if max_parses > 50:
+                max_parses = 50
             ace_cmdargs = ['-n',
                            max_parses,
                            '--timeout=20',

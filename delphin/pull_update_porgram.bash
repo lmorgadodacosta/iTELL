@@ -17,7 +17,7 @@ else
     echo "<b>COULD NOT FIND the folder delphin/porgram</b>"
     echo "<b>CREATING folder delphin/porgram</b>"
     echo "<b>PERFORMING GIT CLONE for PorGram</b>"
-    git clone git@github.com:LR-POR/PorGram.git $DIRECTORY/porgram
+    git clone https://github.com/LR-POR/PorGram.git $DIRECTORY/porgram
 fi
 
 echo

@@ -17,7 +17,7 @@ else
     echo "<b>COULD NOT FIND the folder delphin/indra</b>"
     echo "<b>CREATING folder delphin/indra</b>"
     echo "<b>PERFORMING GIT CLONE for INDRA</b>"
-    git clone git@github.com:davidmoeljadi/INDRA.git $DIRECTORY/indra
+    git clone https://github.com/davidmoeljadi/INDRA.git $DIRECTORY/indra
 fi
 
 echo
