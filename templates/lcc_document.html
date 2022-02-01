@@ -1,0 +1,118 @@
+{% extends "index.html" %}
+{% block body %}
+
+<h3>Inspect document ({{db}})</h3>
+<br>
+
+
+<select class="col-sm-12 form-control form-control-lg"
+	id="selected_document" name="selected_document">
+  <option value=""><b>Choose Document</b></option>  
+  {% for d in docs|sort(reverse = True)  %} 
+  <option value="{{ d }}"><b>{{ docs[d] }}</b></option>  
+  {% endfor %}
+</select>
+<hr>
+
+
+
+<div id="document-html"></div>
+
+
+{# <!-- PARSE RESULTS OVERLAY --> #}
+{# <!-- The tooltip must be available here to get the positioning right --> #}
+<div id="myNav" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div id="overlay-content" class="overlay-content">
+    <h2><span id="overlay-header"></span></h2>
+    <div id="sentence-details"></div>
+  </div>
+</div>
+
+<script>
+function openNav() {
+  document.getElementById("myNav").style.width = "100%";
+  document.activeElement.blur();
+}
+
+function closeNav() {
+  document.getElementById("myNav").style.width = "0%";
+}
+
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        closeNav(); // <DO YOUR WORK HERE>
+    }
+});
+</script>
+
+
+
+
+<script>
+{# <!-- COMMENT HERE --> #}
+$(function() {
+    $("#selected_document").change(function () {
+
+        var docid = $("#selected_document").val();
+        var results = document.getElementById("document-html");
+        results.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+	$.getJSON($SCRIPT_ROOT + '/_lcc_fetch_doc_html', {
+            id: docid,
+            db: "{{ db }}"
+        }, function(data) {
+	    if (data.html) {
+                results.innerHTML = data.html;
+	    } else {
+		results.innerHTML = "Something bad happened! Please Report.";
+            }
+	});
+
+
+    });
+});
+</script>
+
+
+<script>
+{# <!-- COMMENT HERE --> #}
+$(function () {
+  $('#document-html').on('click', '.sent', function(el){
+        sid = $(this).attr("id");
+        surfaceform = $(this).text();
+        var results = document.getElementById("sentence-details");
+        var overlaytitle = document.getElementById("overlay-header");
+        overlaytitle.innerHTML = surfaceform;
+        openNav();
+
+	$.getJSON($SCRIPT_ROOT + '/_lcc_fetch_sent_html', {
+            id: sid,
+            db: "{{ db }}"
+        }, function(data) {
+	    if (data.html) {
+                results.innerHTML = data.html;
+	    } else {
+		msg.innerHTML = "Something bad happened! Please Report.";
+            }
+	});
+
+
+
+  });
+});
+</script>
+
+
+
+<style>
+#document-html {
+  color: #D3D3D3;
+}
+.sent {
+  color: black;
+}
+</style>
+  
+
+{% endblock %}

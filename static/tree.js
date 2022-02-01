@@ -43,42 +43,55 @@ function drawTree(element, derivation) {
 
 
 function render_tree(svg, tree) {
-	var lexical;
-	var	daughters = [];
-	var wtot = -DAUGHTER_HSPACE;
-	var dtr_label_mean = 0;
-
-	for(var x in tree.daughters) {
-		wtot += DAUGHTER_HSPACE;
-		daughters[x] = render_tree(svg, tree.daughters[x]);
-		dtr_label_mean += wtot + daughters[x].labelcenter;
-		wtot += daughters[x].mywidth;
-	}
-
     var lexical;
-	if(daughters.length) {
-		dtr_label_mean /= daughters.length;
-    } else {
-        lexical = render_yield(svg, tree.form);
-		wtot = lexical.mywidth;
-		dtr_label_mean = wtot / 2;
-	}
+    var	daughters = [];
+    var wtot = -DAUGHTER_HSPACE;
+    var dtr_label_mean = 0;
 
+    for(var x in tree.daughters) {
+	wtot += DAUGHTER_HSPACE;
+	daughters[x] = render_tree(svg, tree.daughters[x]);
+	dtr_label_mean += wtot + daughters[x].labelcenter;
+	wtot += daughters[x].mywidth;
+    }
+
+    if(daughters.length) {
+	dtr_label_mean /= daughters.length;
+    } else {  // if there are not more daugthers, then this is the terminal node
+        lexical = render_yield(svg, tree.entity, tree.form);  /// FIXME changed this from FORM to ENTITY
+	wtot = lexical.mywidth;
+	dtr_label_mean = wtot / 2;
+    }
+
+    // var node_str;
+    // if (tree.hasOwnProperty("label"))
+    //     node_str = tree.label;
+    // else
+    //     node_str = tree.entity;
+
+    // LMC Trying to add LE types to the tree
     var node_str;
     if (tree.hasOwnProperty("label"))
         node_str = tree.label;
+    else if (tree.hasOwnProperty("type"))
+        node_str = tree.type;
     else
         node_str = tree.entity;
     
-	var g = svgelement("g");
-	var n = text(svg, node_str);
+    
+    var g = svgelement("g");
+    var n = text(svg, node_str);
     n.setAttributeNS(null, "title", tree.entity);
 
     //#########################################################
     // LMC I ADDED THIS TO SEE IF I CAN ADD LTDB LINKS (FIXME)
-    n.classList.add("ltdb", tree.entity);
+    if (tree.hasOwnProperty("type"))
+	n.classList.add("ltdb", tree.type);
+    else
+	n.classList.add("ltdb", tree.entity);
     //#########################################################
-
+    // LMC also adding a bit more info to the tooltip! 
+    //#########################################################
     
     // add a title element for node tooltips
     var title = svgelement('title');
@@ -111,21 +124,21 @@ function render_tree(svg, tree) {
 	var ytrans = nh + DAUGHTER_VSPACE;
 
 	if(lexical) {
-        var tvalue = "translate(" + dtr_x + "," + ytrans + ")";
-        var yline = nh + DAUGHTER_VSPACE - 1;
-		lexical.setAttributeNS(null, "transform", tvalue);
-        lexical.setAttributeNS(null, "class", "leaf");
-		g.appendChild(line(labelcenter, nh, wtot/2, yline));
-		g.appendChild(lexical);
-	} else {
-	    for(var i=0; i < daughters.length; i++) {
-            var daughter = daughters[i];
             var tvalue = "translate(" + dtr_x + "," + ytrans + ")";
             var yline = nh + DAUGHTER_VSPACE - 1;
-		    daughter.setAttributeNS(null, "transform", tvalue);
-		    g.appendChild(line(labelcenter, nh, dtr_x + daughter.labelcenter, yline));
-		    g.appendChild(daughter);
-		    dtr_x += daughter.mywidth + DAUGHTER_HSPACE;
+	    lexical.setAttributeNS(null, "transform", tvalue);
+            lexical.setAttributeNS(null, "class", "leaf");
+	    g.appendChild(line(labelcenter, nh, wtot/2, yline));
+	    g.appendChild(lexical);
+	} else {
+	    for(var i=0; i < daughters.length; i++) {
+		var daughter = daughters[i];
+		var tvalue = "translate(" + dtr_x + "," + ytrans + ")";
+		var yline = nh + DAUGHTER_VSPACE - 1;
+		daughter.setAttributeNS(null, "transform", tvalue);
+		g.appendChild(line(labelcenter, nh, dtr_x + daughter.labelcenter, yline));
+		g.appendChild(daughter);
+		dtr_x += daughter.mywidth + DAUGHTER_HSPACE;
 	    }
     }
     
@@ -136,13 +149,20 @@ function render_tree(svg, tree) {
 }
 
 
-function render_yield(svg, str) {
-	var y = text(svg, str);
-	y.setAttributeNS(null, "y", y.bbx.height * 2/3);
-	var g = svgelement("g");
-	g.appendChild(y);
-	g.mywidth = y.bbx.width;
-	return g;
+function render_yield(svg, str, str2) {  // LMC added str2
+    var y = text(svg, str);
+    y.setAttributeNS(null, "y", y.bbx.height * 2/3);
+
+    y.classList.add("ltdb", str);  // LMC added classes for LTDB/style
+     
+    var title = svgelement('title');  // LMC add str2 as a title
+    title.innerHTML = str2;
+    y.appendChild(title);
+    
+    var g = svgelement("g");
+    g.appendChild(y);
+    g.mywidth = y.bbx.width;
+    return g;
 }
 
 

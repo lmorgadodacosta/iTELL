@@ -19,11 +19,12 @@ with app.app_context():
     ADMINDB = 'db/admin.db'
     CALLIGDB = 'db/callig.db'
     LCCDB = 'db/lcc.db'
+    NTUCLEX = 'db/ntucleX.db'
 
-
-    ############################################################################
+    ###########################################################################
     # SET UP CONNECTIONS
-    ############################################################################
+    ###########################################################################
+
     def connect_admin():
         return sqlite3.connect(path.join(ROOT, ADMINDB))
 
@@ -32,6 +33,9 @@ with app.app_context():
 
     def connect_lcc():
         return sqlite3.connect(path.join(ROOT, LCCDB))
+
+    def connect_ntucleX():
+        return sqlite3.connect(path.join(ROOT, NTUCLEX))
 
     def query_admin(query, args=(), one=False):
         cur = g.admin.execute(query, args)
@@ -50,7 +54,13 @@ with app.app_context():
         rv = [dict((cur.description[idx][0], value)
                    for idx, value in enumerate(row)) for row in cur.fetchall()]
         return (rv[0] if rv else None) if one else rv
-    
+
+    def query_ntucleX(query, args=(), one=False):
+        cur = g.ntucleX.execute(query, args)
+        rv = [dict((cur.description[idx][0], value)
+                   for idx, value in enumerate(row)) for row in cur.fetchall()]
+        return (rv[0] if rv else None) if one else rv
+
     def write_admin(query, args=(), one=False):
         cur = g.admin.cursor()
         cur.execute(query, args)
@@ -72,23 +82,30 @@ with app.app_context():
         g.lcc.commit()
         return lastid
 
+    def write_ntucleX(query, args=(), one=False):
+        cur = g.ntucleX.cursor()
+        cur.execute(query, args)
+        lastid = cur.lastrowid
+        g.ntucleX.commit()
+        return lastid
+
     ###########################################################################
     # ADMIN SQL
     ###########################################################################
 
     def fetch_userid(userID):
         user = None
-        for r in query_admin("""SELECT userID, password, 
+        for r in query_admin("""SELECT userID, password,
                                        access_level, access_group, full_name
                                 FROM users
                                 WHERE userID = ?""", [userID]):
             if r['userID']:
-                user = (r['userID'], r['password'], 
+                user = (r['userID'], r['password'],
                         r['access_level'], r['access_group'], r['full_name'])
         return user
 
     def fetch_id_from_userid(userID):
-        for r in query_admin("""SELECT id 
+        for r in query_admin("""SELECT id
                                 FROM users
                                 WHERE userID = ?""", [userID]):
             return r['id']
@@ -249,89 +266,206 @@ with app.app_context():
     ###########################################################################
     # LCC SQL
     ###########################################################################
+    # With the addition of new databases, these SQL functions now need to take
+    # an extra argument pointing to the db to be used. The default database
+    # should be lcc.db, and if added, ntucleX.db should point to the permanent
+    # corpus database.
+    ###########################################################################
 
-    def fetch_max_doc_id():
-        for r in query_lcc("""SELECT MAX(docid) from doc"""):
-            if r['MAX(docid)']:
-                return r['MAX(docid)']
-            else:
-                return 0
+    def fetch_max_doc_id(db="lcc.db"):
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT MAX(docid) from doc"""):
+                if r['MAX(docid)']:
+                    return r['MAX(docid)']
+                else:
+                    return 0
+        else:
+            for r in query_lcc("""SELECT MAX(docid) from doc"""):
+                if r['MAX(docid)']:
+                    return r['MAX(docid)']
+                else:
+                    return 0
 
-    def fetch_max_sid():
-        for r in query_lcc("""SELECT MAX(sid) from sent"""):
-            if r['MAX(sid)']:
-                return r['MAX(sid)']
-            else:
-                return 0
+    def fetch_max_sid(db="lcc.db"):
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT MAX(sid) from sent"""):
+                if r['MAX(sid)']:
+                    return r['MAX(sid)']
+                else:
+                    return 0
+        else:
+            for r in query_lcc("""SELECT MAX(sid) from sent"""):
+                if r['MAX(sid)']:
+                    return r['MAX(sid)']
+                else:
+                    return 0
 
-    def fetch_sents_by_docid(docid):
+    def fetch_sents_by_docid(docid, db="lcc.db"):
         sents = dd()
-        for r in query_lcc("""SELECT sid, sent from sent
-                              WHERE docid = ?
-                           """, [docid]):
-            sents[r['sid']] = r['sent']
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT sid, sent from sent
+                                      WHERE docid = ?
+                                   """, [docid]):
+                sents[r['sid']] = r['sent']
+        else:
+            for r in query_lcc("""SELECT sid, sent from sent
+                                  WHERE docid = ?
+                               """, [docid]):
+                sents[r['sid']] = r['sent']
         return sents
 
-    def fetch_words_by_sid(sid_min, sid_max):
+    def fetch_sent_words_by_sid(sid, db="lcc.db"):
+        sent = ""
+        words = dd()
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT sent, wid, word, pos, lemma
+                                      FROM sent JOIN word
+                                      WHERE sent.sid = word.sid
+                                      AND sent.sid = ?
+                                   """, [sid]):
+                words[r['wid']] = [r['word'], r['pos'], r['lemma']]
+                sent = r['sent']
+        else:
+            for r in query_lcc("""SELECT sent, wid, word, pos, lemma
+                                  FROM sent JOIN word WHERE sent.sid = word.sid
+                                  AND sent.sid = ?
+                               """, [sid]):
+                words[r['wid']] = [r['word'], r['pos'], r['lemma']]
+                sent = r['sent']
+        return sent, words
+
+    def fetch_dochtml_by_docid(docid, db="lcc.db"):
+        dochtml = dd()
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT docid, doc FROM doc
+                                      WHERE docid = ?
+                                   """, [docid]):
+                dochtml = r['doc']
+        else:
+            for r in query_lcc("""SELECT docid, doc FROM doc
+                                  WHERE docid = ?
+                               """, [docid]):
+                dochtml = r['doc']
+        return dochtml
+
+    def fetch_all_doc_titles(db="lcc.db"):
+        docs = dd()
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT docid, title FROM doc
+                                  WHERE title != 'single_sentence' """):
+                docs[r['docid']] = r['title']
+        else:
+            for r in query_lcc("""SELECT docid, title FROM doc
+                                  WHERE title != 'single_sentence' """):
+                docs[r['docid']] = r['title']
+        return docs
+
+    def fetch_words_by_sid(sid_min, sid_max, db="lcc.db"):
         words = dd(lambda: dd())
-        for r in query_lcc("""SELECT sid, wid, word, pos, lemma from word
-                              WHERE sid >= ? AND sid <= ?
-                           """, [sid_min, sid_max]):
-            words[r['sid']][r['wid']] = [r['word'], r['pos'], r['lemma']]
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT sid, wid, word, pos, lemma from word
+                                      WHERE sid >= ? AND sid <= ?
+                                   """, [sid_min, sid_max]):
+                words[r['sid']][r['wid']] = [r['word'], r['pos'], r['lemma']]
+        else:
+            for r in query_lcc("""SELECT sid, wid, word, pos, lemma from word
+                                  WHERE sid >= ? AND sid <= ?
+                               """, [sid_min, sid_max]):
+                words[r['sid']][r['wid']] = [r['word'], r['pos'], r['lemma']]
         return words
 
-    def fetch_max_wid(sid):
-        for r in query_lcc("""SELECT MAX(wid) from word WHERE sid = ?""", [sid]):
+    def fetch_max_wid(sid, db="lcc.db"):
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT MAX(wid) FROM word
+                                      WHERE sid = ?""",
+                                   [sid]):
+                if r['MAX(wid)']:
+                    return r['MAX(wid)']
+                else:
+                    return 0
+        else:
+            for r in query_lcc("""SELECT MAX(wid) from word WHERE sid = ?""",
+                               [sid]):
+                if r['MAX(wid)']:
+                    return r['MAX(wid)']
+                else:
+                    return 0
 
-            if r['MAX(wid)']:
-                return r['MAX(wid)']
-            else:
-                return 0
-
-    def fetch_all_sents():
+    def fetch_all_sents(db="lcc.db"):
         sents = dd()
-        for r in query_lcc("""SELECT sid, docID, sent from sent
-                           """):
-            sents[r['sid']] = [r['sent'], r['docID']]
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT sid, docID, sent from sent"""):
+                sents[r['sid']] = [r['sent'], r['docID']]
+        else:
+            for r in query_lcc("""SELECT sid, docID, sent from sent"""):
+                sents[r['sid']] = [r['sent'], r['docID']]
         return sents
 
-    def fetch_all_errors():
+    def fetch_all_errors(db="lcc.db"):
         errors_by_sent = dd(lambda: list())
         errors_by_label = dd(lambda: list())
-        for r in query_lcc("""SELECT sid, eid, label, comment from error
-                           """):
-            errors_by_sent[r['sid']].append((r['eid'], r['label'], r['comment']))
-            errors_by_label[r['label']].append((r['sid'], r['eid'], r['comment']))
+        if db == "ntucleX.db":
+            for r in query_ntucleX("""SELECT sid, eid, label, comment from error
+                                   """):
+                errors_by_sent[r['sid']].append((r['eid'], r['label'],
+                                                 r['comment']))
+                errors_by_label[r['label']].append((r['sid'], r['eid'],
+                                                    r['comment']))
+        else:
+            for r in query_lcc("""SELECT sid, eid, label, comment from error
+                               """):
+                errors_by_sent[r['sid']].append((r['eid'], r['label'],
+                                                 r['comment']))
+                errors_by_label[r['label']].append((r['sid'], r['eid'],
+                                                    r['comment']))
         return errors_by_sent, errors_by_label
 
+    def insert_into_doc(docid, docname, db="lcc.db"):
+        if db == "ntucleX.db":
+            return write_ntucleX("""INSERT INTO doc (docid, title)
+                                    VALUES (?,?)
+                                 """, [docid, docname])
+        else:
+            return write_lcc("""INSERT INTO doc (docid, title)
+                                VALUES (?,?)
+                             """, [docid, docname])
 
+    def update_html_into_doc(docid, html, db="lcc.db"):
+        if db == "ntucleX.db":
+            return write_ntucleX("""UPDATE doc SET doc = ?
+                                    WHERE docid = ?
+                                 """, [html, docid])
+        else:
+            return write_lcc("""UPDATE doc SET doc = ?
+                                WHERE docid = ?
+                             """, [html, docid])
 
+    def insert_into_sent(sid, docid, pid, sent, db="lcc.db"):
+        if db == "ntucleX.db":
+            return write_ntucleX("""INSERT INTO sent (sid, docID, pid, sent)
+                                    VALUES (?,?,?,?)
+                                 """, [sid, docid, pid, sent])
+        else:
+            return write_lcc("""INSERT INTO sent (sid, docID, pid, sent)
+                                VALUES (?,?,?,?)
+                             """, [sid, docid, pid, sent])
 
+    def insert_into_word(sid, wid, word, pos, lemma, db="lcc.db"):
+        if db == "ntucleX.db":
+            return write_ntucleX("""INSERT INTO word (sid, wid, word, pos, lemma)
+                                    VALUES (?,?,?,?,?)
+                                 """, [sid, wid, word, pos, lemma])
+        else:
+            return write_lcc("""INSERT INTO word (sid, wid, word, pos, lemma)
+                                VALUES (?,?,?,?,?)
+                             """, [sid, wid, word, pos, lemma])
 
-
-            
-    def insert_into_doc(docid, docname):
-        return write_lcc("""INSERT INTO doc (docid, title)
-                               VALUES (?,?)
-                            """, [docid, docname])
-
-    def update_html_into_doc(docid, html):
-        return write_lcc("""UPDATE doc SET doc = ? 
-                               WHERE docid = ?
-                            """, [html, docid])
-
-    def insert_into_sent(sid, docid, pid, sent):
-        return write_lcc("""INSERT INTO sent (sid, docID, pid, sent)
-                               VALUES (?,?,?,?)
-                            """, [sid, docid, pid, sent])
-
-    def insert_into_word(sid, wid, word, pos, lemma):
-        return write_lcc("""INSERT INTO word (sid, wid, word, pos, lemma)
-                               VALUES (?,?,?,?,?)
-                            """, [sid, wid, word, pos, lemma])
-
-    def insert_into_error(sid, eid, label, comment):
-        return write_lcc("""INSERT INTO error (sid, eid, label, comment)
-                               VALUES (?,?,?,?)
-                            """, [sid, eid, label, comment])
-
+    def insert_into_error(sid, eid, label, comment, db="lcc.db"):
+        if db == "ntucleX.db":
+            return write_ntucleX("""INSERT INTO error (sid, eid, label, comment)
+                                    VALUES (?,?,?,?)
+                                 """, [sid, eid, label, comment])
+        else:
+            return write_lcc("""INSERT INTO error (sid, eid, label, comment)
+                                VALUES (?,?,?,?)
+                             """, [sid, eid, label, comment])

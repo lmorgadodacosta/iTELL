@@ -22,7 +22,8 @@ exclude_ss = []
 
 exclude_hypos_of = [
     '01326291-n',     # microorganism
-    '07992450-n'      # taxonomic group
+    '07992450-n',      # taxonomic group
+    '14939445-n'    # fluid (will be mass)
 ]
 
 for synset in exclude_hypos_of:

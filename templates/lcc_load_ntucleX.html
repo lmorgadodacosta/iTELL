@@ -1,0 +1,49 @@
+{% extends "index.html" %}
+{% block welcome %}
+
+
+<br><br>
+<h5><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> &nbsp;&nbsp; Attention</h5>
+<p>
+  We looked for .docx documents under <b>"ntucle_uploads/"</b>. Found: <b>{{ docx_count }}</b>
+  <br>All documents will be matched to the existing NTUCLE-X database (ntucleX.db) by name, and inserted if they don't already exist.
+  <br>Depending on the number of documents, <u>this process might take a long time to complete</u>.
+</p>
+
+
+<div id="button" class="col-sm-12 text-center ">
+  <br><button id="confirm_btn" class="btn btn-dark"><b>Confirm Upload</b></button>
+</div>
+
+<br><br><br>
+<div id="waiting"></div>
+
+  
+
+<script>
+$("#confirm_btn").click(function() {
+
+    var button = document.getElementById("button");
+    var results = document.getElementById("waiting");
+    button.innerHTML = "<br><br>The uploading has started. It might take a while... <br>Even if you close the browser, this should still continue. See you later. ";
+    results.innerHTML = "<div style='text-align:center; font-size: 350%;'><i class='fa fa-spinner fa-pulse fa-4x fa-fw'></i></div>";
+
+
+    $.getJSON($SCRIPT_ROOT + '/_upload-ntucleX', {
+	corpus: "true"
+    }, function(data) {
+	if (data.html) {
+            results.innerHTML = "";
+            button.innerHTML = data.html;
+	} else {
+	    button.innerHTML = "<b>Something went wrong. Please Report.</b>";
+	}
+    });
+
+
+});
+
+</script>
+
+
+{% endblock %}

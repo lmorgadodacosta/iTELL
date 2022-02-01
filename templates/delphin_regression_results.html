@@ -42,7 +42,7 @@
 		<td class="sentence"
 
 		    {% if item["i-translation"] %}
-		    data-toggle="tooltip" title="{{ item["i-translation"] }}"
+		    data-toggle="tooltip" data-html="true" data-placement="left" title="{{ item["i-translation"] }}"
 		    {% endif %}
 		    >{{ item["i-input"] }}</td> <!-- i-input -->
 
@@ -54,7 +54,7 @@
 		<td>
 		  {% if item["i-comment"] or item["i-origin"] %}
 		  <span data-toggle="tooltip" data-html="true"  data-placement="left"
-			title="origin: {{item["i-origin"]}} <br> {{ item["i-comment"] }}">
+			title="<b>origin</b>: {{item["i-origin"]}} <br> <b>comment</b>:{{ item["i-comment"] }}">
 		    <i class="far fa-comment"></i></span>
 		  {% endif %}
 		  

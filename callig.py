@@ -15,10 +15,10 @@ from collections import defaultdict as dd
 from hashlib import md5
 from werkzeug.utils import secure_filename
 
-
 import lxml.html # to manipulate html 
 
 from common_login import *
+import common_sql as csql
 from common_sql import *
 
 import lcc
@@ -62,15 +62,16 @@ ALLGRAMMARS = [
     ('erg2018.dat', 'eng'),
     ('mal-erg2018.dat', 'eng'),
     ('itell-erg2018.dat', 'eng'),
-    ('erg_trunk.dat','eng'),
-    ('mal-erg_trunk.dat','eng'),
-    
-    ('zhong.dat','cmn'),
-    ('itell-zhong.dat','cmn'),
-    
-    ('jacy.dat','jpn'),
-    
-    ('indra.dat','ind')
+    ('erg_trunk.dat', 'eng'),
+    ('mal-erg_trunk.dat', 'eng'),
+
+    ('zhong.dat', 'cmn'),
+    ('itell-zhong.dat', 'cmn'),
+    ('zhong-fzz.dat', 'cmn'),
+
+    ('jacy.dat', 'jpn'),
+
+    ('indra.dat', 'ind')
 ]
 
 for (grm, lang) in ALLGRAMMARS:
@@ -82,31 +83,34 @@ for (grm, lang) in ALLGRAMMARS:
 app.config.update(
     # When using gmail, we need to allow unsafe apps to use the email.
     # check: https://pythonprogramming.net/flask-email-tutorial/
-    
+
     DEBUG=False, 
     #EMAIL SETTINGS
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=465,
     MAIL_USE_SSL=True,
-    MAIL_USERNAME = 'openwns@gmail.com',
-    MAIL_PASSWORD = 'changeme'
+    MAIL_USERNAME='openwns@gmail.com',
+    MAIL_PASSWORD='changeme'
 )
 
 
 mail = Mail(app)
 
-################################################################################
+
+###############################################################################
 # LOGIN
-################################################################################
+###############################################################################
 login_manager.init_app(app)
+
 
 def randomPassword(stringLength=10):
     """
-    Generate a random string of letters and digits. 
+    Generate a random string of letters and digits.
     This is being used to generate random passwords.
     """
     letters_nums = string.ascii_letters + string.digits
     return ''.join(random.choice(letters_nums) for i in range(stringLength))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -142,18 +146,19 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("index"))
-################################################################################
+###############################################################################
 
 
-
-################################################################################
+###############################################################################
 # SET UP CONNECTION WITH DATABASES
-################################################################################
+###############################################################################
 @app.before_request
 def before_request():
-    g.admin = connect_admin()
-    g.callig = connect_callig()
-    g.lcc = connect_lcc()
+    g.admin = csql.connect_admin()
+    g.callig = csql.connect_callig()
+    g.lcc = csql.connect_lcc()
+    g.ntucleX = csql.connect_ntucleX()
+
 
 @app.teardown_request
 def teardown_request(exception):
@@ -161,13 +166,13 @@ def teardown_request(exception):
         g.admin.close()
         g.callig.close()
         g.lcc.close()
-################################################################################
+        g.ntucleX.close()
+###############################################################################
 
 
-
-################################################################################
+###############################################################################
 # GENERAL FUNCTIONS
-################################################################################
+###############################################################################
 def current_time():
     '''   YYYY-MM-DD  HH:MM    '''
     d = datetime.datetime.now()
@@ -178,34 +183,6 @@ def current_time():
 ################################################################################
 # AJAX REQUESTS
 ################################################################################
-
-@app.route('/_lccReport', methods=['GET', 'POST'])
-@login_required(role=0, group='open')
-def lccReport():
-    """
-    This function produces the HTML report for any given document.
-
-    The feedback_set sets which group of errors and which feedback
-    messages to show students. Originally, this was set to 'lcc'.
-    But with the current addition of new sets of errors and new error
-    messages, this is now a mandatory option for check_docx.
-    """
-
-    filename = request.args.get('fn', None)
-
-    # feedback_set = 'lcc'  # original error-set and messages
-    feedback_set = 'lcc2'
-    docx_html = lcc.docx2html(filename)
-    (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename)
-
-    (htmlElem, report) = lcc.check_docx_html(docid,
-                                             htmlElem,
-                                             report,
-                                             feedback_set)
-
-    # lxml.html.tostring returns type=bytes, must decode here
-    structured_html = lxml.html.tostring(htmlElem).decode('utf-8')
-    return jsonify(result=structured_html)
 
 
 
@@ -306,7 +283,6 @@ def sexwithme_info():
 @login_required(role=0, group='open')
 def sexwithme_game():
 
-        
     rand_word = wn.x_rand_pos(1,'n')[0]  # only 1 item on the list
     noun = rand_word[0]
     definition = rand_word[1]
@@ -375,11 +351,11 @@ def save_sexwithme():
         elif answer:
             write_sexwithme(prompt, answer, seconds, language,
                             username, current_time())
-            
+
         else:
             write_sexwithme(prompt, None, seconds, language,
                             username, current_time())
-    
+
     return sexwithme_game()
 
 
@@ -434,8 +410,8 @@ def wickedproverbs_game():
     Definitions should exist come for each word.
     It gets a random frame from game_data.
     """
-    game_option = random.randrange(3)  # 0, 1 or 2 
-    
+    game_option = random.randrange(3)  # 0, 1 or 2
+
     if game_option == 0:
         nouns = wn.x_rand_pos(2,'n')
         w1 = nouns[0]
@@ -450,9 +426,8 @@ def wickedproverbs_game():
         w2 = wn.x_rand_pos(1,'a')[0]
             
             
-    frame = random.choice(game_data.proverb_frames)            
-
-    seconds = 90 # this is the max amount of time to play
+    frame = random.choice(game_data.proverb_frames)
+    seconds = 90  # this is the max amount of time to play
 
     return render_template('wickedproverbs-game.html',
                            seconds=seconds,
@@ -481,9 +456,9 @@ def save_wickedproverbs():
         else:
             write_wickedproverbs(frame, w1, w2, None, None, seconds,
                                  'eng', result['username'], current_time())
-    
+
     return wickedproverbs_game()
-    
+
 
 
 
@@ -757,7 +732,7 @@ def register_mail():
         ########################################################################
 
 
-        
+
         # print(email) #TEST
         # print(name) #TEST
         # print(pw) #TEST
@@ -800,25 +775,110 @@ def register_mail():
 
 
 
-################################################################################
+###############################################################################
 # IXUE VIEWS
-################################################################################
+###############################################################################
 @app.route('/ixue-jumbled', methods=['GET', 'POST'])
 def ixue_jumbled():
     return render_template('ixue_jumbledsents.html',
                            MODE=MODE)
 
 
-
-
-################################################################################
+###############################################################################
 # LCC VIEWS
-################################################################################
+###############################################################################
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def upload():
     return render_template('upload.html',
                            MODE=MODE)
+
+
+@app.route('/_upload-ntucleX', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lcc_upload_ntucleX():
+    docx_count = 0
+    for root, dirs, files in os.walk(os.path.join(ROOT, 'ntucle_uploads')):
+        for fn in sorted(files):
+            if fn.endswith(".docx"):
+                docx_count += 1
+                print(docx_count, fn) #TEST
+
+                docx_html = lcc.docx2html(fn, db="ntucleX.db")
+                (docid, htmlElem, report) = lcc.parse_docx_html(docx_html,
+                                                                fn,
+                                                                "ntucleX.db")
+
+                dochtml = lxml.html.tostring(htmlElem).decode('utf-8')
+                csql.update_html_into_doc(docid,
+                                          dochtml,
+                                          "ntucleX.db")
+
+                feedback_set = 'lcc2'
+                (htmlElem, report) = lcc.check_docx_html(docid,
+                                                         htmlElem,
+                                                         report,
+                                                         feedback_set,
+                                                         "ntucleX.db")
+    return jsonify(html="<b><br><br>Completed.</b>")
+
+
+@app.route('/lcc-load-ntucleX', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lcc_load_ntucleX():
+    # [FIXME] We should check against the DB the existing docs by name
+    # then we should output all docnames into JS to be able to do
+    # batch assynchronous upload of all docs at once.
+    # rename this funciton to "prepare" ntucleX
+    docx_count = 0
+    for root, dirs, files in os.walk(os.path.join(ROOT, 'ntucle_uploads')):
+        for fn in sorted(files):
+            if fn.endswith(".docx"):
+                docx_count += 1
+                print(fn)
+
+    return render_template('lcc_load_ntucleX.html',
+                           docx_count=docx_count,
+                           MODE=MODE)
+
+
+@app.route('/_lccReport', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lccReport():
+    """
+    This function produces the HTML report for any given document.
+
+    The feedback_set sets which group of errors and which feedback
+    messages to show students. Originally, this was set to 'lcc'.
+    But with the current addition of new sets of errors and new error
+    messages, this is now a mandatory option for check_docx.
+    """
+
+    filename = request.args.get('fn', None)
+
+    # feedback_set = 'lcc'  # original error-set and messages
+    feedback_set = 'lcc2'
+    docx_html = lcc.docx2html(filename)
+    (docid, htmlElem, report) = lcc.parse_docx_html(docx_html, filename)
+
+    #######################################################################
+    # Insert DOCUMENT HTML into db   [FIXME]
+    # For now it's not clear whether we want to keep the document with
+    # error highlights or just the structured one that comes from
+    # lcc.parse_docx_html; This could be moved up or down to change this.
+    #######################################################################
+    dochtml = lxml.html.tostring(htmlElem).decode('utf-8')
+    csql.update_html_into_doc(docid, dochtml)
+
+    (htmlElem, report) = lcc.check_docx_html(docid,
+                                             htmlElem,
+                                             report,
+                                             feedback_set)
+
+    # lxml.html.tostring returns type=bytes, must decode here
+    structured_html = lxml.html.tostring(htmlElem).decode('utf-8')
+
+    return jsonify(result=structured_html)
 
 
 @app.route('/single-sentence', methods=['GET', 'POST'])
@@ -832,13 +892,13 @@ def lcc_sentence():
 @login_required(role=0, group='open')
 def report():
     """
-    This function saves the uploaded file and starts the process that will 
-    check the uploaded document. The document check is actually called 
+    This function saves the uploaded file and starts the process that will
+    check the uploaded document. The document check is actually called
     asynchronously via javascript from within the report template.
     """
     passed, filename = lcc.uploadFile(current_user.id)
 
-    if passed == False:
+    if passed is False:
         error = """There was a problem while uploading your your file. """
         error += """Please check that the file type you are using is '.docx'"""
         error += """ and not '.doc', for example."""
@@ -852,6 +912,7 @@ def report():
                                filename=filename,
                                MODE=MODE)
 
+
 @app.route('/_save_singlesentence', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def save_lcc_sentence():
@@ -861,16 +922,16 @@ def save_lcc_sentence():
         sent = result['sentence'].strip()
         username = result['username']
 
-        ########################################################################
+        #######################################################################
         # WRITE SENTENCE IN DATABASE
-        ########################################################################
+        #######################################################################
         docid = csql.fetch_max_doc_id() + 1
         csql.insert_into_doc(docid, 'single_sentence')
 
         sid = docid * 100000
         pid = 0
         csql.insert_into_sent(sid, docid, pid, sent)
-        word_list = lcc.pos_lemma(lcc.sent2words(sent))        
+        word_list = lcc.pos_lemma(lcc.sent2words(sent))
         for w in word_list:
             wid = csql.fetch_max_wid(sid) + 1
             (surface, pos, lemma) = w
@@ -879,24 +940,22 @@ def save_lcc_sentence():
         words = csql.fetch_words_by_sid(sid, sid)[sid]
         app_errors, non_app_errors = lcc.full_check_sent(sent, words, 'lcc2')
 
-        ########################################################################
+        #######################################################################
         # WRITE ERRORS TO CORPUS DB
-        ########################################################################
+        #######################################################################
         all_errors = app_errors | non_app_errors
         for i, (label, loc) in enumerate(all_errors):
             csql.insert_into_error(sid, i, label, loc)
-            
+
         errors = []
-        
+
         for e in app_errors:
             tag = e[0]
             focus = e[1]
             if tag in eng_feedback:
                 if 'lcc2' in eng_feedback[tag]:
-                    #print(eng_feedback[tag])
                     feedback = eng_feedback[tag]['lcc2'][0].format(focus)
                     errors.append(feedback)
-            
 
         return render_template('lcc_feedback.html',
                                sent=sent,
@@ -905,13 +964,56 @@ def save_lcc_sentence():
                                MODE=MODE)
 
 
-
-
-
-
-@app.route('/lcc-db', methods=['GET', 'POST'])
+@app.route('/lcc-document/<db>', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
-def inspect_lcc_db():
+def lcc_inspect_docs(db):
+    docs = csql.fetch_all_doc_titles(db)
+    return render_template('lcc_document.html',
+                           lang='eng',
+                           docs=docs,
+                           db=db,
+                           MODE=MODE)
+
+
+@app.route('/_lcc_fetch_doc_html', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lcc_fetch_doc_html():
+    """
+    """
+    docid = request.args.get('id', None)
+    db = request.args.get('db', None)
+    dochtml = csql.fetch_dochtml_by_docid(docid, db)
+
+    # print(docid, db)
+    # print(dochtml)
+    return jsonify(html=dochtml)
+
+
+@app.route('/_lcc_fetch_sent_html', methods=['GET', 'POST'])
+@login_required(role=0, group='open')
+def lcc_fetch_sent_html():
+    """
+    """
+    sid = request.args.get('id', None)
+    db = request.args.get('db', None)
+    try:
+        sid = int(sid[3:])  # sid123456789
+    except:
+        sid = None
+
+    db_sent, words = csql.fetch_sent_words_by_sid(sid, db)
+
+    html = render_template('lcc_sentence_details.html',
+                           sent=db_sent,
+                           words=words,
+                           MODE=MODE)
+
+    return jsonify(html=html)
+
+
+@app.route('/corpus-db/<db>', methods=['GET', 'POST'])
+@login_required(role=0, group='admin')
+def inspect_corpus_db(db):
 
 # <!-- Things we might want: -->
 
@@ -932,9 +1034,9 @@ def inspect_lcc_db():
 # <!-- More than one error can exist for each sentence, and these appear in multiple lines of this table -->
 # <!-- label is where the LCC error code is stored  -->
 # <!-- comment is where the error focus is stored (currently just the words) -->
-    
-    sents = fetch_all_sents()
-    errors_by_sent, errors_by_label = fetch_all_errors()
+
+    sents = csql.fetch_all_sents(db)
+    errors_by_sent, errors_by_label = csql.fetch_all_errors(db)
 
     db_data = dd(lambda: list())
     for sid in sents.keys():
@@ -944,36 +1046,30 @@ def inspect_lcc_db():
         other_errors = []
         for eid in errors_by_sent[sid]:
             label = eid[1]
-            comment = eid[2] 
+            comment = eid[2]
 
             if label in eng_feedback.keys():
                 if 'lcc2' in eng_feedback[label].keys():
                     lcc_errors.append(label+': '+comment)
 
                 else:
-                    other_errors.append((label,comment))
+                    other_errors.append((label, comment))
             else:
-                other_errors.append((label,comment))
-                    
-            
+                other_errors.append((label, comment))
+
         db_data[sid].append(lcc_errors)
         db_data[sid].append(other_errors)
-    
+
     return render_template('lcc_db.html',
                            lang='eng',
                            grammars=AVAILABLE_GRAMMARS[lang],
                            db_data=db_data,
-                           # sents=sents,
-                           # errors=errors,
                            MODE=MODE)
 
 
-    
-        
-        
-################################################################################
+###############################################################################
 # GRAMMARIUM VIEWS
-################################################################################
+###############################################################################
 
 @app.route('/delphin/select-profile', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
@@ -1039,20 +1135,20 @@ def delphin_regression_output():
             regression_dir1 = result['regression_dir1'].strip()
         else:
             regression_dir1 = ''
-  
+
         if 'regression_dir2' in result.keys():
             regression_dir2 = result['regression_dir2'].strip()
         else:
             regression_dir2 = ''
 
-            
+
         return render_template('delphin_regression_output.html',
                                selected_grammar=selected_grammar,
                                regression_dir1=regression_dir1,
                                regression_dir2=regression_dir2,
                                MODE=MODE)
-        
-        
+
+
 
 
 @app.route('/_delphin_run_regression', methods=['GET', 'POST'])
@@ -1066,14 +1162,14 @@ def delphin_run_regression():
     dir1_path = "delphin/regressions/" + dir1 + '/'
     prof1 = delphin_call.tsdb_min(path.join(ROOT, dir1_path))
 
-    
+
     # if selected_grammar and dir1 exist, then it's a new regression test
     if (selected_grammar and dir1):    
         stdout, stderr, newdir_path = delphin_call.new_regression(dir1, selected_grammar)
 
         prof2 = delphin_call.tsdb_min(path.join(ROOT, newdir_path))
         dir2_path = newdir_path
-        
+
     # if dir1 and dir2 exist, then it's just printing previous results
     elif (dir1 and dir2):
         dir2_path = "delphin/regressions/" + dir2 + '/'
@@ -1083,53 +1179,59 @@ def delphin_run_regression():
     else:
         return "Something went wrong!"
 
-
-    ############################################################################
+    ###########################################################################
     # GATHER SUMMARY STATISTICS
-    #
-    # We can assume both profiles have the same size and i_id keys
-    ############################################################################
+    ###########################################################################
     summary = dd()
     summary["prof1"] = dir1_path
     summary["prof2"] = dir2_path
-    
+
     summary["num_of_sents_prof1"] = len(prof1.keys())
     summary["num_of_sents_prof2"] = len(prof2.keys())
-    
+
     summary["sent_length_sum_prof1"] = 0
     summary["sent_length_sum_prof2"] = 0
-    
+
     summary["parsed_sent_length_sum_prof1"] = 0
     summary["parsed_sent_length_sum_prof2"] = 0
-    
+
     summary["total_num_parses_prof1"] = 0
     summary["total_num_parses_prof2"] = 0
-    
+
     summary["num_of_sents_parsed_prof1"] = 0
     summary["num_of_sents_parsed_prof2"] = 0
 
 
-    ############################################################################
-    # Create new structure from both profiles 
-    ############################################################################
+    ###########################################################################
+    # Create new structure from both profiles
+    # [FIXME] We CANNOT assume both profiles have the same size and i_id keys
+    # For now let's try to show in relation to the second (newest) profile
+    ###########################################################################
     profs = dd(lambda: dd())
-    for i_id in prof1:
-        profs[i_id]['i-wf'] = prof1[i_id]['i-wf']
-        profs[i_id]['i-input'] = prof1[i_id]['i-input']
-        profs[i_id]['i-comment'] = prof1[i_id]['i-comment']
-        profs[i_id]['i-length'] = prof1 [i_id]['i-length']
-        profs[i_id]['i-origin'] = prof1 [i_id]['i-origin']
-        profs[i_id]['i-translation'] = prof1 [i_id]['i-translation']
+    for i_id in prof2:
+        profs[i_id]['i-wf'] = prof2[i_id]['i-wf']
+        profs[i_id]['i-input'] = prof2[i_id]['i-input']
+        profs[i_id]['i-comment'] = prof2[i_id]['i-comment']
+        profs[i_id]['i-length'] = prof2[i_id]['i-length']
+        profs[i_id]['i-origin'] = prof2[i_id]['i-origin']
+        profs[i_id]['i-translation'] = prof2[i_id]['i-translation']
 
-        summary["sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+        try:
+            summary["sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+        except:
+            summary["sent_length_sum_prof1"] += 0
+
         summary["sent_length_sum_prof2"] += int(prof2[i_id]['i-length'])
 
-        if 'readings' in prof1[i_id]:
-            profs[i_id]['old_readings'] = prof1[i_id]['readings']
-            if int(prof1[i_id]['readings'])>0:
-                summary['num_of_sents_parsed_prof1'] += 1
-                summary['total_num_parses_prof1'] += int(prof1[i_id]['readings'])
-                summary["parsed_sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+        if i_id in prof1.keys():   # It's possible new (e.g. from a split sentence)
+            if 'readings' in prof1[i_id]:
+                profs[i_id]['old_readings'] = prof1[i_id]['readings']
+                if int(prof1[i_id]['readings'])>0:
+                    summary['num_of_sents_parsed_prof1'] += 1
+                    summary['total_num_parses_prof1'] += int(prof1[i_id]['readings'])
+                    summary["parsed_sent_length_sum_prof1"] += int(prof1[i_id]['i-length'])
+            else:
+                profs[i_id]['old_readings'] = 0
         else:
             profs[i_id]['old_readings'] = 0
 
@@ -1175,22 +1277,22 @@ def delphin_see_profile():
         profile_type = 'gold'
         # grammars = ["zhong.dat"]
         lang = "cmn"
-        
+
     elif 'zhong_skeleton_prof' in result.keys():
         profile = 'delphin/zhong/cmn/zhs/tsdb/skeletons/' + result['zhong_skeleton_prof'].strip()
         profile_type = 'skeleton'
         # grammars = ["zhong.dat"]
         lang = "cmn"
-        
+
     else:
         profile = None
         profile_type = None
         grammars = []
         lang = None
-        
+
     if profile:
         tsdb_min = delphin_call.tsdb_min(profile)
-    
+
         return render_template('delphin_simple_profile.html',
                                tsdb_min=tsdb_min,
                                grammars=AVAILABLE_GRAMMARS[lang],
@@ -1199,17 +1301,17 @@ def delphin_see_profile():
                                MODE=MODE)
     else:
         return "Some tampering was detected. This should not happen."
-    
+
 
 
 @app.route('/delphin_analyser', methods=['GET', 'POST'])
 @login_required(role=0, group='admin')
 def delphin_analyser():
     """
-    This view generates the main input receiver for grammars. 
-    It is expecting a language, which is used to provide a collection 
-    of available grammars for that language. This can also generate a 
-    small list of examples (especially for some non-english languages). 
+    This view generates the main input receiver for grammars.
+    It is expecting a language, which is used to provide a collection
+    of available grammars for that language. This can also generate a
+    small list of examples (especially for some non-english languages).
     """
     # if request.method == 'POST':
     #     result = request.form
@@ -1225,16 +1327,14 @@ def delphin_analyser():
     #         max_parses = result['max_parses'].strip()
     #     else:
     #         max_parses = None
-        
         # grammars = sorted(AVAILABLE_GRAMMARS[lang])
-        
+
     return render_template('delphin_analyser.html',
                                # lang=lang,
                                grammars=AVAILABLE_GRAMMARS,
                                # selected_grammar=selected_grammar,
                                # max_parses=max_parses,
                                MODE=MODE)
-            
 
 
 
@@ -1266,16 +1366,16 @@ def delphin_analyser():
 @login_required(role=0, group='open')
 def delphin_parse_output():
     """
-    This function is returning the data structre required to 
+    This function is returning the data structre required to
     populate the parsing overlay pane.
     """
 
     sent = request.args.get('sentence', None)
-    selected_grammar = request.args.get('selected_grammar', None)  
+    selected_grammar = request.args.get('selected_grammar', None)
     max_parses = request.args.get('max_parses', 'all')
 
     results = delphin_call.full_parse(sent, selected_grammar, max_parses)
-    
+
     return jsonify(html=render_template('delphin_parse_output.html',
                                         sent=sent,
                                         results=results,
@@ -1285,8 +1385,7 @@ def delphin_parse_output():
                    results=results)
 
 
-    
-        
+
 @app.route('/_delphin-parse', methods=['GET', 'POST'])
 @login_required(role=0, group='open')
 def delphin_parse():
@@ -1300,10 +1399,10 @@ def delphin_parse():
     print(selected_grammar)
     print(max_parses)
 
-    
+
     if sent and selected_grammar and max_parses:
 
-        
+
         results = delphin_call.full_parse(sent, selected_grammar, max_parses)
 
         # values = 0 must be returned as string "0", otherwise it will 
@@ -1312,8 +1411,8 @@ def delphin_parse():
 
     else:
         return jsonify(result='!')
-        
-        
+
+
 
 
 

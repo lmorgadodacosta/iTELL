@@ -1,46 +1,73 @@
 from collections import defaultdict as dd
 
-exclude_sents_containing = [
+masked_tags = ['###MASKED-AUTHOR###',
+               '###MASKED-GROUP###',
+               '###MASKED-LECTURER###']
+
+exclude_elems_containing = [
     "http://bit.ly/1PMaL42",
-    "University’s honour code and pledge"
-]
+    "University’s honour code and pledge",
+    "consent for our assignment to be used",
+    "assignment will not be marked unless"
+] + masked_tags
 
 exclude_sents_swith = [
     "name:",
+    "name :",
     "names:",
     "name of student:",
+    "name of student :",
     "student’s (official) name",
     "student’s name",
     "author:",
     "team members:",
     "group members:",
     "group member:",
+    "members:",
+    "group:",
+    "group –",
+    "group number:",
+    "group no.:",
+    "group no:",
     "by:",
     "done by:",
     "submitted by:",
     "prepared by:",
     "proposal submitted by:",
+    "proposal by:",
 
+    "matriculation number:",
+    "matriculation number :",
     "matriculation no.",
-    
+    "matric no.",
+    "matric no.:",
+    "matric:",
+    "matric :",
+    "matric number:",
+    "matric number :",
+
 
     "tutorial group number",
     "tutorial day",
     "tutorial group",
     "class code:",
+    "class :",
+    "class:",
 
     "tutor:",
+    "faculty name:",
     "tutor name:",
     "tutor’s name",
     "for:",
     "submitted to:",
-    
+    "lecturer-in-charge:",
+
     "title:",
     "title of proposal:",
     "proposal title:",
     "assignment title",
     "assignment 2",
-    
+
     "school name:",
     "school:",
     "school of",
@@ -48,26 +75,56 @@ exclude_sents_swith = [
     "university:",
     "faculty:",
 
+    "date submitted:",
+    "date submitted :",
     "date of submission:",
+    "date of submission :",
+    "data of submission :",
+    "data of submission:",
+    "date of sumission:",
+    "date of sumission :",
+    "data of sumission :",
+    "data of sumission:",
+    "date of submision:",
+    "date of submision :",
+    "data of submision :",
+    "data of submision:",
     "date:",
+    "due:",
 
     "engineering communication",
     "hw0188 engineering communication",
     "hw0188: engineering communication",
     "hw0188 (engineering communication)",
     "hw0188 - engineering communication",
+    "course code:",
+    "course:",
+    "module code:",
+    "module:",
+    "code:",
 
+    "cover page",
 
     "word count:",
-    
+
+    "source:",
+
+    "diagrams:",
+    "design:",
+
+    "available at:",
+
     "plagiarism declaration form",
     "penalties will be imposed for late submissions",
     "i/we have read and understood the guidelines on academic dishonesty",
+    "we have read and understood the guidelines on academic dishonesty",
+    "i have read and understood the guidelines on academic dishonesty",
     "student’s signature:",
     "penalties will be imposed for late submission and plagiarism",
     "please refer to the general instructions for details",
     "note: the assignment will not be marked unless this form is completed and signed",
     "note: the assignment will not be marked unless",
+
 
     "figure a:", "figure a.", "figure a -", "fig a:", "fig a.", "fig a -",
     "figure b:", "figure b.", "figure b -", "fig b:", "fig b.", "fig b -",
@@ -93,18 +150,22 @@ exclude_sents_swith = [
 ]
 
 
-punctuation  = """!"“”#$%&\'*+,./:;<=>?@\\^_`{|}~‘’"""
+punctuation = """!"“”#$%&\'*+,./:;<=>?@\\^_`{|}~‘’"""
 
-refs_section = ['reference', 'references', 'bibliography', 'source', 'sources', 'works cited',
-                'references:', 'reference:', 'bibliography:', 'source:', 'sources:',
-                'works cited:', 'references (apa):', 'references (ieee):',
-                'citations (use apa)', 'citations', 'citations:']
+refs_section = ['reference', 'references', 'bibliography', 'source', 'sources',
+                'works cited', 'references:', 'reference:', 'bibliography:',
+                'source:', 'sources:', 'works cited:', 'references (apa):',
+                'references (ieee):', 'citations (use apa)', 'citations',
+                'citations:', 'referencing', 'refeences']
 
 exclude_sents = [
     "costs/budget:",
     "cost/budget:",
     "cost:",
     "costs:",
+    "the estimated cost per unit (SGD):",
+    "the estimated cost per unit:",
+    "basic cost:",
     "cost of implementation:",
     "conclusion:",
     "implementation:",

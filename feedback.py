@@ -442,7 +442,7 @@ eng_feedback['such_a_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('such a'): {}<
 
 eng_feedback['such_an_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('such an'): {}</strong><br><ul> <li>You have used 'such' immediately before a singular noun (one item of something which can be counted, e.g. 'error') in this sentence when there should be an article, 'an', between them (e.g. 'such an error').<li>Please read your sentence carefully, and insert 'an' after 'such' (e.g. 'such an error') OR change the singular noun to a plural noun (e.g. 'such errors') if necessary.</ul>''',1) #
 
-eng_feedback['that_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('that' vs. 'those'): {}</strong><br><ul> <li>You may have used the determiner ‘that’ instead of ‘those’ before a plural countable noun (more than one item of something that can be counted and has a plural form, e.g. devices’) in your sentence.<li>Please check your sentence for the use of ‘that’ before a plural noun, and change it to ‘those’ OR change the plural noun to a singular noun (e.g. ‘that device’).</ul>''',1) #
+eng_feedback['that_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('that' vs. 'those'): {}</strong><br><ul> <li>You may have used the determiner 'that' instead of 'those' before a plural countable noun (more than one item of something that can be counted and has a plural form, e.g. 'devices') in your sentence.<li>Please check your sentence for the use of ‘that’ before a plural noun, and change it to ‘those’ OR change the plural noun to a singular noun (e.g. ‘that device’).</ul>''',1) #
 
 eng_feedback['the_2_rbst']['lcc2'] = ('''<strong>ARTICLE ('the' + 'a'): {}</strong><br><ul> <li>You may have used ‘the’ (a definite article) before ‘a’ (an indefinite article) in front of a noun (a thing or entity).<li>Please check your sentence for the use of ‘the a’, and remove either ‘the’ or ‘a’.</ul>''',1) #
 
@@ -460,7 +460,7 @@ eng_feedback['the_stutter_1']['lcc2'] = ('''<strong>ARTICLE (repeated, hyphen):{
 
 eng_feedback['the_stutter_2']['lcc2'] = ('''<strong>ARTICLE (repeated, comma):{}</strong><br><ul> <li>You may have used 'the, the' (with a comma in between) in this sentence.<li>Please check your sentence carefully, and change 'the, the' to 'the'.</ul>''',1) #
 
-eng_feedback['this_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('this' vs. 'these'): {}</strong><br><ul> <li>You may have used the determiner ‘this’ instead of ‘these’ before a plural countable noun (more than one item of something that can be counted and has a plural form, e.g. devices’) in your sentence.<li>Please check your sentence for the use of ‘this’ before a plural noun, and change it to ‘these’ OR change the plural noun to a singular noun (e.g. ‘that device’).</ul>''',1) #
+eng_feedback['this_det_rbst']['lcc2'] = ('''<strong>DETERMINER ('this' vs. 'these'): {}</strong><br><ul> <li>You may have used the determiner 'this' instead of 'these' before a plural countable noun (more than one item of something that can be counted and has a plural form, e.g. 'devices') in your sentence.<li>Please check your sentence for the use of 'this' before a plural noun, and change it to 'these' OR change the plural noun to a singular noun (e.g. 'that device').</ul>''',1) #
 
 eng_feedback['afternoon_nospr_n1_rbst']['lcc2'] = ('''<strong>ARTICLE ('the afternoon'): {}</strong><br><ul> <li>You may be using 'afternoon' on its own instead of 'the afternoon' in the sentence.<li>Please check your sentence, and add 'the' before 'afternoon' if necessary.</ul>''',1) # 
 
@@ -657,6 +657,6 @@ eng_feedback['VeryLongSentence']['lcc3'] = ('''<strong>V LONG SENTENCE: {}</stro
 
 eng_feedback['w_comma-sdwch_plr_rbst']['lcc3'] = ('''<strong>COMMA (missing space): {}</strong><br><ul> <li>This sentence has a comma without any space after it (e.g. 'The device is cheap,portable and user-friendly.'). <li>Please add a space after the comma (e.g. 'The device is cheap, portable and user-friendly.') if necessary.</ul>''',0.5) #
 
-eng_feedback['w_hasinitcap_dlr']['lcc3'] = ('''<strong>ARTICLE ('the evening'): {}</strong><br><ul> <li>You may be starting your sentence without a capital letter (e.g. 'the problem is …').<li>Please start the first word with a capital letter if necessary (e.g. 'The problem is …').</ul>''',0.5) 
+# eng_feedback['w_hasinitcap_dlr']['lcc3'] = ('''<strong>ARTICLE ('the evening'): {}</strong><br><ul> <li>You may be starting your sentence without a capital letter (e.g. 'the problem is …').<li>Please start the first word with a capital letter if necessary (e.g. 'The problem is …').</ul>''',0.5) 
 
 eng_feedback['WordCase']['lcc3'] = ('''<strong>WORD CASE (capitals): {}</strong><br><ul> <li>You may be using lower case (small letters) instead of capital letters (upper case) for a word or words (e.g. 'singapore') in this sentence.<li>Please change the lower case letters to upper case only if you feel it is necessary (e.g. 'Singapore').</ul>''',0.5)

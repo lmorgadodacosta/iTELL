@@ -14,9 +14,8 @@ from itsdangerous import URLSafeTimedSerializer # for safe session cookies
 from werkzeug.utils import secure_filename
 import datetime
 
-
-import mammoth # to parse the docx into html
-import lxml.html # to manipulate the html 
+import mammoth  # to parse the docx into html
+import lxml.html  # to manipulate the html
 
 import nltk
 from nltk import tokenize
@@ -30,11 +29,17 @@ from feedback import eng_feedback
 import lcc_data
 import common_sql as csql
 
-
-################################################################################
-# Spelling checker (pip install pyspellchecker)
-################################################################################
 from spellchecker import SpellChecker
+from collections import defaultdict as dd
+
+
+def inf_dd():
+    return dd(inf_dd)
+
+
+###############################################################################
+# Spelling checker (pip install pyspellchecker)
+###############################################################################
 spell = SpellChecker()
 # To make sure some words are not flagged as misspelled
 
@@ -42,37 +47,53 @@ new_words = []
 for c in " '":
     for w in lcc_data.contractions | lcc_data.wordcase:
         new_words = new_words + w.split(c)
-        
+
 spell.word_frequency.load_words(new_words)
-
-################################################################################
-
-from collections import defaultdict as dd
-def inf_dd():
-    return dd(inf_dd)
+###############################################################################
 
 
 UPLOAD_FOLDER = 'lcc_uploads'
 ALLOWED_EXTENSIONS = set(['docx'])
-ROOT  = path.dirname(path.realpath(__file__))    
+ROOT = path.dirname(path.realpath(__file__))
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+DRYRUN = False  # if DRYRUN == True: do everything except error checking
 
-
-################################################################################
+###############################################################################
 # This helps achieve better sentence segmentation
-################################################################################
-extra_abbreviations = ['dr', 'vs', 'mr', 'mrs', 'prof', 'inc', 'i.e', 'e.g',
-                       'pte', 'et', 'al', 'et. al', 'fig', 'mfg']
+###############################################################################
+extra_abbreviations = ['dr',
+                       'vs',
+                       'mr',
+                       'n.o',
+                       'mrs',
+                       'pp',
+                       'prof',
+                       'no',
+                       'eds',
+                       'inc',
+                       'i.e',
+                       'e.g',
+                       'ie',
+                       'approx',
+                       'eg',
+                       'n.d',
+                       'pte',
+                       'et',
+                       'etc',
+                       'al',
+                       'et. al',
+                       'fig',
+                       'mfg']
 sentence_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 sentence_tokenizer._params.abbrev_types.update(extra_abbreviations)
-################################################################################
+###############################################################################
 
 def remove_nested_parens(input_str):
     """
-    Returns a copy of 'input_str' with any parenthesized (..) [..] text removed.
+    Returns a copy of string with any parenthesized (..) [..] text removed.
     Nested parentheses are handled. It also returns a Boolean asserting if
     the parenthesis were well balanced (True) or not (False).
     """
@@ -95,20 +116,48 @@ def remove_nested_parens(input_str):
         elif not paren_level2:
             result2 += ch
 
-    if (paren_level==0) and (paren_level2==0):
+    if (paren_level == 0) and (paren_level2 == 0):
         balanced = True
     else:
         balanced = False
+
     return (balanced, result2)
+
+
+def remove_parenthetical_punct(input_str, rev=False):
+
+    if rev is False:
+        output_str = ''
+        paren_level = 0
+        for ch in input_str:
+            if ch == '(':
+                output_str += ch
+                paren_level += 1
+            elif (ch == ')') and paren_level:
+                output_str += ch
+                paren_level -= 1
+            elif (ch == '.') and paren_level:
+                output_str += '|||punct=period|||'
+            elif (ch == '!') and paren_level:
+                output_str += '|||punct=exclamationpoint|||'
+            elif (ch == '?') and paren_level:
+                output_str += '|||punct=questionmark|||'
+            else:
+                output_str += ch
+    else:
+        output_str = input_str
+        output_str = output_str.replace('|||punct=period|||', '.')
+        output_str = output_str.replace('|||punct=exclamationpoint|||', '!')
+        output_str = output_str.replace('|||punct=questionmark|||', '?')
+
+    return output_str
 
 
 with app.app_context():
 
-    
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
     def uploadFile(current_user):
 
@@ -122,23 +171,23 @@ with app.app_context():
             file = None
             lic = None
 
-
         if file and lic and allowed_file(file.filename):
 
             if lic == '1':
                 lic_txt = 'CC0'
             else:
                 lic_txt = 'PRIVATE'
-            
-            ####################################################################
+
+            ###################################################################
             # While trying to simplify anonymization, we don't keep the file
             # name. Instead, we keep a normalized username reference that can
             # be anonymized easily.
-            ####################################################################            
-            f_ext = '.' + file.filename.rsplit('.', 1)[1] # .docx
-            filename = lic_txt + '_' + now + '_' +str(current_user) + f_ext 
+            ###################################################################
+            f_ext = '.' + file.filename.rsplit('.', 1)[1]  # .docx
+            filename = lic_txt + '_' + now + '_' + str(current_user) + f_ext
             filename = secure_filename(filename)
-            file.save(os.path.join(ROOT, app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(ROOT, app.config['UPLOAD_FOLDER'],
+                                   filename))
             file_uploaded = True
 
         else:
@@ -147,62 +196,105 @@ with app.app_context():
 
         return file_uploaded, filename
 
-
-
-
-    def docx2html(docname):
+    def docx2html(docname, db="lcc.db"):
         """
-        This function reads the uploaded file using mammoth and converts it to HTML.
+        This function reads the uploaded file and converts it to HTML.
         An artificial documentRoot is added to make it XML compatible.
+        Nothing is added to any database at this point.
+        An HTML string is returned.
         """
-        with open(os.path.join(ROOT,
-                               app.config['UPLOAD_FOLDER'],
-                               docname), 'rb') as docx_file:
+        if db == "ntucleX.db":
+            f_path = os.path.join(ROOT,
+                                  'ntucle_uploads',
+                                  docname)
+        else:
+            f_path = os.path.join(ROOT,
+                                  app.config['UPLOAD_FOLDER'],
+                                  docname)
 
+        with open(f_path, 'rb') as docx_file:
 
             result = mammoth.convert_to_html(docx_file)
             docx_html = result.value
-            docx_html = docx_html.replace(u'\xa0', ' ') # replacing non-breaking with a space
+            # replacing non-breaking with a space:
+            docx_html = docx_html.replace(u'\xa0', ' ')
             docx_html = docx_html.replace("\'", "’")
             docx_html = docx_html.replace('\t', "<tab/> ")
             docx_html = "<documentRoot>" + docx_html + "</documentRoot>"
 
             return(docx_html)
 
-    def parse_docx_html(html, filename):
+    def parse_docx_html(html, filename, db="lcc.db"):
         """
-        This function gives some structure to the HTML, including <span> tags for 
-        each sentence that will be checked and writes them to the database.
+        This function gives some structure to the HTML, including <span> tags
+        for each sentence that will be checked and writes them to the database.
         There is also a heavy selection of what sentences should be checked.
         E.g. Sentences after a section named "References" will not be checked.
-        """
 
-        ########################################################################
-        # Insert DOCUMENT, with html into db.  
-        ########################################################################
-        docid = csql.fetch_max_doc_id() + 1
-        csql.insert_into_doc(docid, filename)
-        csql.update_html_into_doc(docid, html)
-        
-        ########################################################################
+        We have two corpus databases: lcc.db (for submissions) and ntucleX.db
+        which should only have data students have agreed to share. Because of
+        this, we now need to allow the selection of different databases.
+        """
+        #######################################################################
+        # Insert DOCUMENT into db.
+        #######################################################################
+        docid = csql.fetch_max_doc_id(db) + 1
+        csql.insert_into_doc(docid, filename, db)
+
+        #######################################################################
         # In order to allow multiple documents to be uploaded at the same time,
         # sids are limited to 100,000 per document, and the sids are given in
         # relation to the docid.  #FIXME: this must be ensured elsewhere
-        ########################################################################
+        #######################################################################
         sid = docid * 100000
         max_sid = sid + 99999
-        
-        
+
         report = inf_dd()
         REFERENCES = False
-        root = lxml.html.fromstring(html)
+
+
+
+        # There are some document processing tools that leave <br />
+        # which both make document parsing extremly slow (idk why)
+        # but also inflict sentence tokenization problems
+        # this replace("<br />", "</p><p>") is a quick fix, not sure
+        # if it's completely robust, as some element might not be
+        # paragraphs... [FIXME]
+        root = lxml.html.fromstring(html.replace("<br />", "</p><p>"))
+        for element in root:
+
+            # print(lxml.html.tostring(element))  # TEST
+            ###################################################################
+            # Remove the first <tab></tab> element in the element.
+            # Many documents use <tab> to indent their paragraphs, and this
+            # is later preventing them from being read as paragraphs since
+            # we block elements with <tab> elements later (i.e. they are
+            # usually cost tables, etc.); This removes only the first <tab>
+            # in each paragraph, which enables a lot more text to be retrieved
+            # and checked.
+            ###################################################################
+            for i, subelem in enumerate(element):
+                if i == 0 and str(subelem.tag) == "tab":
+                    subelem.drop_tag()
+
+                # Remove text from within <sub> and <sup> tags
+                if (str(subelem.tag) == "sub") or (str(subelem.tag) == "sup"):
+                    subelem.text = ""
+
+            # print(lxml.html.tostring(element))  # TEST
+
+        # The first pass was to fix some weirdness in the XML
+        # generating a new root from the fixes
+        root = lxml.html.fromstring(lxml.html.tostring(root))
         for element in root:
 
             EXCLUDE = False
-            
-            element_type = element.tag # p, ol, li, table, etc.
+
+            element_type = element.tag  # p, ol, li, table, etc.
             element_text = element.text_content().strip()
             # element_text also includes the text of every children
+
+
 
             # print("\n\n") #TEST
             # print(element_type) #TEST
@@ -210,42 +302,39 @@ with app.app_context():
             # for subElement in element.getchildren(): #TEST
             #     print(subElement.tag) #TEST
 
-            
-
-            ####################################################################
+            ###################################################################
             # Recuperate bolded paragraphs (likely section titles)
-            ####################################################################
+            ###################################################################
             BOLD = False
-            if (element.text == None) and (len(element.getchildren())==1):
+            if (element.text is None) and (len(element.getchildren()) == 1):
                 if (element[0].tag == "strong"):
                     # We assume the whole element is bold
                     BOLD = True
 
-
-            ####################################################################
+            ###################################################################
             # Check for very specific keywords to exclude element.
-            # There should not be many of these!  
-            ####################################################################
-            for s in lcc_data.exclude_sents_containing:
+            # There should not be many of these!
+            ###################################################################
+            for s in lcc_data.exclude_elems_containing:
                 if s in element_text:
                     EXCLUDE = True
-                    
-            ####################################################################
+
+            ###################################################################
             # Check for sections (i.e. no punctuation, few words)
             # Includes special case for 'References' in numbered sections
             # All sentneces after 'References' are ignored.
-            ####################################################################
+            ###################################################################
             if (element_text) and\
                (element_text[-1] not in lcc_data.punctuation) and\
-               (len(element_text.split())<5):
+               (len(element_text.split()) < 5):
                 EXCLUDE = True
 
                 # References
                 for w in lcc_data.refs_section:
                     if w in element_text.lower() and\
-                       (not element_text[-1].isdigit()): # for TOCs
+                       (not element_text[-1].isdigit()):  # for TOCs
                         REFERENCES = True
-                
+
             elif (element_text.lower() in lcc_data.exclude_sents):
                 EXCLUDE = True
 
@@ -253,40 +342,39 @@ with app.app_context():
                     # this is necessary for the cases where punctuation
                     # is used at the end of the section (e.g. ':')
                     REFERENCES = True
-                    
 
-            ####################################################################
+            ###################################################################
             # Check for tabs (\t), i.e. "quasi-tables"
-            # - this excludes tabs at the beggining of a line (happens often) 
-            ####################################################################
+            # - there is an exception for one tab at the beggining of a line
+            ###################################################################
             if (element_text):
                 for subElement in element.getchildren():
-                    if subElement.tag == "tab": 
+                    if subElement.tag == "tab":
                         EXCLUDE = True
-                
-            ####################################################################
-            # Check for special sentence starts (e.g. from mandatory cover page)
-            ####################################################################
+
+            ###################################################################
+            # Check for special sent starts (e.g. from mandatory cover page)
+            ###################################################################
             if (element_text) and\
                element_text.lower().startswith(
                    tuple(lcc_data.exclude_sents_swith)):
                 EXCLUDE = True
 
-            ####################################################################
-            # Check for some titles and names 
-            # - camel-case or ALLCAPS with no punctuation 
-            ####################################################################
+            ###################################################################
+            # Check for some titles and names
+            # - camel-case or ALLCAPS with no punctuation
+            ###################################################################
             if (element_text) and\
                (element_text[-1] not in lcc_data.punctuation):
-                
+
                 if element_text.title() == element_text:
                     EXCLUDE = True
                 if element_text.upper() == element_text:
-                    EXCLUDE = True                    
-                    
-            ####################################################################
+                    EXCLUDE = True
+
+            ###################################################################
             # Check for figure/table legends (e.g. "Fig" with no punctuation)
-            ####################################################################
+            ###################################################################
             if (element_text) and\
                (element_text[-1] not in lcc_data.punctuation) and\
                element_text.lower().startswith(
@@ -295,131 +383,141 @@ with app.app_context():
                     'table', 'tab.')):
                 EXCLUDE = True
 
-                #FIXME, this is currently not catching, e.g., "Fig1:"                
+                # FIXME, this is currently not catching, e.g., "Fig1:"
 
-            ####################################################################
+            ###################################################################
             # Check if lines are just aesthetic ===== ----- ...... _____
-            ####################################################################
+            ###################################################################
             line_separators = '.=-_'
             if (element_text):
                 for c in line_separators:
                     if element_text.strip().strip(c) == '':
                         EXCLUDE = True
 
-            ####################################################################
+            ###################################################################
             # Check if lines should be a table:
             # X = 80;  X - 120$;  X : 1000USD
-            ####################################################################
+            ###################################################################
             semi_table_separators = '=-:–$'
             if (element_text) and\
-               (len(element_text.split())<15) and\
+               (len(element_text.split()) < 15) and\
                (element_text[-1] not in lcc_data.punctuation):
                 for c in semi_table_separators:
                     if c in element_text:
                         EXCLUDE = True
-                        
-            
-                
-                
-            ####################################################################
-            # Split each paragraph into sentences
-            ####################################################################
-            sents = []
-            if (element_type not in ['table','ol','ul']) and\
-               (REFERENCES == False) and\
-               (EXCLUDE == False):
-                
-                for sent in tokenize.sent_tokenize(element_text):
-                    sents.append(sent)
 
+            ###################################################################
+            # Split each paragraph into sentences
+            ###################################################################
+
+            ###################################################################
+            # Some DOCX conversion leaves <br> where it should have been
+            # split into further paragraphs. This causes problems with sentence
+            # tokenization since "element_text" loses these <br>.
+            ###################################################################
+
+            sents = []
+            if (element_type not in ['table', 'ol', 'ul']) and\
+               (REFERENCES is False) and\
+               (EXCLUDE is False):
+
+                # Before we tokenize sentences, we need to ensure punctuation
+                # inside parenthesis will not cause errors
+                if ('(' in element_text) and (')' in element_text):
+                    clean_text = remove_parenthetical_punct(element_text)
+                else:
+                    clean_text = element_text
+
+                for sent in tokenize.sent_tokenize(clean_text):
+                    sent = remove_parenthetical_punct(sent, rev=True)
+                    sents.append(sent)
 
             if sents:
 
-                ################################################################
-                # We want to clean the element (from text and sub-elements) as #
-                # we will reconstruct it from the sentences.                   #
-                # This could be improved, to maintain some of the styles, but  #
-                # it currently optimises for practicallity.                    #
-                ################################################################
-                element.text = None                                            #
-                for subelement in element:                                     #
-                    element.remove(subelement)                                 #
-                ################################################################
+                ###############################################################
+                # We want to clean the elem (from text and sub-elements) as   #
+                # we will reconstruct it from the sentences.                  #
+                # This could be improved, to maintain some of the styles, but #
+                # it currently optimises for practicallity.                   #
+                ###############################################################
+                element.text = None                                           #
+                for subelement in element:                                    #
+                    element.remove(subelement)                                #
+                ###############################################################
 
-                
                 for sent in sents:
                     sent = sent.strip()
                     sid += 1
-                    
+
                     if BOLD:
-                        metaSection = lxml.html.etree.SubElement(element, "strong")
+                        meta = lxml.html.etree.SubElement(element, "strong")
                     else:
-                        metaSection = element
-                        
-                    
+                        meta = element
+
                     if sent:
-                        sentSpan = lxml.html.etree.SubElement(metaSection, "span")
+                        sentSpan = lxml.html.etree.SubElement(meta, "span")
                         sentSpan.set('id', 'sid{}'.format(sid))
-                        # sentSpan.set('class', 'sid{} doccheck'.format(sid)) #TEST
-                        
+                        sentSpan.set('class', 'sid{} sent'.format(sid))
+                        # sentSpan.set('class',
+                        #              'sid{} sent doccheck'.format(sid)) #TEST
+
                         # sentSpan.set('data-toggle', 'tooltip')
                         # sentSpan.set('data-placement', 'bottom')
                         # sentSpan.set('data-html', 'true')
-                        # sentSpan.set('title', """<em>Lorem ipsum dolor sit amet.</em>""")
-                        sentSpan.text = sent
+                        # sentSpan.set('title', """<em>test.</em>""")
+                        sentSpan.text = sent + ' '  # Need to leave a space
 
-                        
+
                         #TEST Sentence Boundaries
-                        # sentSpan = lxml.html.etree.SubElement(metaSection, "br") #TEST
-                        # sentSpan = lxml.html.etree.SubElement(metaSection, "br") #TEST
+                        # sentSpan = lxml.html.etree.SubElement(meta, "br") #TEST
+                        # sentSpan = lxml.html.etree.SubElement(meta, "br") #TEST
                     else:
-                        sentSpan = lxml.html.etree.SubElement(metaSection, "br")
-                        
+                        sentSpan = lxml.html.etree.SubElement(meta, "br")
 
-
-                    ############################################################
+                    ###########################################################
                     # Preprocess sentences before writing them to the db.
                     # We don't want to include certain kinds of sentences, that
-                    # are not worth checking; we also want to remore parenthetic 
-                    # remarks (because they are usually references) and just
-                    # break ERG.
-                    ############################################################
+                    # are not worth checking; we also want to remore all
+                    # parenthetic remarks (because they are usually references)
+                    # and just break ERG.
+                    ###########################################################
                     if ('(' in sent) or ('[' in sent):
 
-                        ########################################################
-                        # FIXME: There is a known problem in cases where the 
+                        #######################################################
+                        # FIXME: There is a known problem in cases where the
                         # IEEE references are used as part of the text, e.g.:
                         # As can be seen in [3], this is a problem.
-                        ########################################################
+                        #######################################################
                         (balanced, noparen_sent) = remove_nested_parens(sent)
                         noparen_sent = noparen_sent.strip()
 
                         if (',,' in noparen_sent) and (',,' not in sent):
                             while (',,' in noparen_sent):
-                                noparen_sent = noparen_sent.replace(',,',',')
+                                noparen_sent = noparen_sent.replace(',,', ',')
 
                         if (', ,' in noparen_sent) and (', ,' not in sent):
                             while (', ,' in noparen_sent):
-                                noparen_sent = noparen_sent.replace(', ,',',')
+                                noparen_sent = noparen_sent.replace(', ,', ',')
 
                         if (',.' in noparen_sent) and (',.' not in sent):
                             while (',.' in noparen_sent):
-                                noparen_sent = noparen_sent.replace(',.','.')
+                                noparen_sent = noparen_sent.replace(',.', '.')
 
                         if (' .' in noparen_sent) and (' .' not in sent):
                             while (' .' in noparen_sent):
-                                noparen_sent = noparen_sent.replace(' .','.')
+                                noparen_sent = noparen_sent.replace(' .', '.')
 
                         if (' ,' in noparen_sent) and (' ,' not in sent):
                             while (' ,' in noparen_sent):
-                                noparen_sent = noparen_sent.replace(' ,',',')
+                                noparen_sent = noparen_sent.replace(' ,', ',')
 
                         if ('  ' in noparen_sent) and ('  ' not in sent):
                             while ('  ' in noparen_sent):
-                                noparen_sent = noparen_sent.replace('  ',' ')
+                                noparen_sent = noparen_sent.replace('  ', ' ')
 
-                        noparen_sent = noparen_sent.strip('. ')
-                        
+                        noparen_sent = noparen_sent.strip()
+                        if noparen_sent == '.':
+                            noparen_sent = ''
 
                         if balanced:
                             sent = noparen_sent
@@ -433,10 +531,10 @@ with app.app_context():
                     # without spaces.
                     ############################################################
 
-                            
+
                     ############################################################
                     # This strips the beginning of sentences that are
-                    # being enumerated. This is often not well handled by ERG   
+                    # being enumerated. This is often not well handled by ERG
                     ############################################################
                     enumeration_starters = [
                         '1.','2.','3.','4.','5.','6.','7.','8.',
@@ -446,7 +544,7 @@ with app.app_context():
                         '1)','2)','3)','4)','5)','6)','7)','8)',
                         '9)','10)','11)','12)','13)','14)','15)',
                         '16)','17)','18)','19)','20)',
-                        
+
                         'A.','B.','C.','D.','E.','F.','G.','H.',
                         'I.','J.','K.','M.','N.','O.','P.','Q.',
                         'R.','S.','T.','U.','V.','W.','X.','Y.','Z.',
@@ -466,36 +564,34 @@ with app.app_context():
                     # of sent is not empty, then insert it into the db.
                     ############################################################
                     if sent and (sid < max_sid):
-                        pid = 0 # we are ignoring paragraph IDs
+                        pid = 0  # we are ignoring paragraph IDs
                         # print(sid, docid, pid, sent) #TEST
-                        csql.insert_into_sent(sid, docid, pid, sent)
+                        csql.insert_into_sent(sid, docid, pid, sent, db)
 
                         # INSERT INTO WORD TABLE
                         word_list = pos_lemma(sent2words(sent))
                         # e.g. [('He', 'PRP', 'he'), ('runs', 'VB', 'run')]
 
                         for w in word_list:
-                            wid = csql.fetch_max_wid(sid) + 1
+                            wid = csql.fetch_max_wid(sid, db) + 1
                             (surface, pos, lemma) = w
-                            csql.insert_into_word(sid, wid, surface, pos, lemma)
+                            csql.insert_into_word(sid, wid, surface, pos,
+                                                  lemma, db)
 
-                        
         return(docid, root, report)
 
-    
     def sent2words(sent):
         """Given a sentence string, get a list of (word,pos) elements."""
         return pos_tag(word_tokenize(sent))
 
-
     def pos_converter(lemma, pos):
         """
-        This converts POS tags into wordnet tags, to be used in lemmatization step.
-        FIXME I'm not sure why we are using the this lemmatizer.
+        This converts POS tags into wordnet tags, to be used in lemmatization
+        step.  FIXME I'm not sure why we are using the this lemmatizer.
         """
-        if pos in ['CD', 'NN', 'NNS', 'NNP', 'NNPS', 'WP', 'PRP']: 
-                # include proper nouns and pronouns
-                ## fixme flag for proper nouns
+        if pos in ['CD', 'NN', 'NNS', 'NNP', 'NNPS', 'WP', 'PRP']:
+            # include proper nouns and pronouns
+            # fixme flag for proper nouns
             return 'n'
         elif pos.startswith('V'):
             return('v')
@@ -512,7 +608,6 @@ with app.app_context():
         wnl = WordNetLemmatizer()
         lemmatize = wnl.lemmatize
 
-        
         record_list = []
         wid = 0
         for word, pos in tagged_sent:
@@ -526,34 +621,41 @@ with app.app_context():
             record_list.append((word, pos, lemma))
         return record_list
 
-
-
-    def check_docx_html(docid, htmlRoot, report, feedback_set):
+    def check_docx_html(docid, htmlRoot, report, feedback_set, db="lcc.db"):
         """
         This function receives the docID,  HTML element, and Report dictionary
         and checks each sentences with the ERG and other NLP checks.
         It then adds these errors and feedback messages directly on the HTML.
-        The sentences stored in the DB have been edited (e.g. removed 
-        parenthetic comments, references, etc.) but the sids will match the 
+        The sentences stored in the DB have been edited (e.g. removed
+        parenthetic comments, references, etc.) but the sids will match the
         HTML span IDs.
         """
 
-        ########################################################################
+        #######################################################################
         # Fetch sents and words from the database
-        ########################################################################
-        sents = csql.fetch_sents_by_docid(docid)
-        sid_min = min(sents.keys())
-        sid_max = max(sents.keys())
-        words = csql.fetch_words_by_sid(sid_min, sid_max)
+        #######################################################################
+        sents = csql.fetch_sents_by_docid(docid, db)
 
+        # There is a small change a document does not have any text that was
+        # able to be converted to sentences. This could be caught earlier.
+        # [FIXME]
+        if sents.keys():
+            sid_min = min(sents.keys())
+            sid_max = max(sents.keys())
+            words = csql.fetch_words_by_sid(sid_min, sid_max, db)
 
         for sid in sents:
 
             sent_text = sents[sid]
             sent_words = words[sid]
-            (app_errors, non_app_errors) = full_check_sent(sent_text,
-                                                           sent_words,
-                                                           feedback_set)
+
+            if not DRYRUN:
+                (app_errors, non_app_errors) = full_check_sent(sent_text,
+                                                               sent_words,
+                                                               feedback_set)
+            else:
+                app_errors = set()
+                non_app_errors = set()
 
 
             # print(sents[sid]) #TEST
@@ -563,11 +665,9 @@ with app.app_context():
             # print(non_app_errors) #TEST
             # print('\n\n') #TEST
 
-
-
-            ####################################################################
+            ###################################################################
             # ADD ERRORS TO HTML
-            ####################################################################
+            ###################################################################
             sentSpan = htmlRoot.get_element_by_id('sid'+str(sid))
 
             if app_errors:
@@ -579,17 +679,19 @@ with app.app_context():
 
                     if conf > feedback_conf:
                         feedback_conf = conf
-                        
+
                     if i > 0:
-                        feedback_msg +='<br><br>'
+                        feedback_msg += '<br><br>'
 
                     feedback_msg += msg.format(loc)
 
                 if feedback_conf > 0.51:
-                    sentSpan.set('class', 'seriouserror'.format(sid))
+                    sentSpan.set('class', 'sid{} sent seriouserror'.format(sid))
+                    # sentSpan.set('class', 'seriouserror'.format(sid))
                 else:
-                    sentSpan.set('class', 'milderror'.format(sid))
-                    
+                    sentSpan.set('class', 'sid{} sent milderror'.format(sid))
+                    # sentSpan.set('class', 'milderror'.format(sid))
+
                 sentSpan.set('data-toggle', 'tooltip')
                 sentSpan.set('data-placement', 'bottom')
                 sentSpan.set('data-trigger', 'click')
@@ -597,50 +699,48 @@ with app.app_context():
                 sentSpan.set('container', 'validation_div')
                 sentSpan.set('title', feedback_msg)
 
-
-            ####################################################################
+            ###################################################################
             # WRITE ERRORS TO CORPUS DB
-            ####################################################################
+            ###################################################################
             all_errors = app_errors | non_app_errors
             for i, (label, loc) in enumerate(all_errors):
-                csql.insert_into_error(sid, i, label, loc)
-            
-            
+                csql.insert_into_error(sid, i, label, loc, db)
+
         return(htmlRoot, report)
 
 
 
     def NLP_checks_sent(sent, words):
         """
-        Given a list of sentences, it checks each of them for multiple problems. 
+        Given a list of sentences, it checks each of them for multiple
+        problems.
         """
-        errors = [] # take the form (ErrorLabel, StringSurroundingError)
-        ########################################################################
+        errors = []  # take the form (ErrorLabel, StringSurroundingError)
+        #######################################################################
         # Check Sentence Length
-        ########################################################################
+        #######################################################################
         seriousthreshold = 50
-        mildthreshold = 40            
+        mildthreshold = 40
         sentlen = len(list(words.keys()))
         if sentlen >= seriousthreshold:
-            errors.append(("VeryLongSentence", '')) 
+            errors.append(("VeryLongSentence", ''))
         elif sentlen >= mildthreshold:
             errors.append(("LongSentence", ''))
 
-            
-        ########################################################################
+        #######################################################################
         # Check Contractions
-        ########################################################################
+        #######################################################################
         for c in lcc_data.contractions:
             if re.search(r'\b{}\b'.format(c), sent, re.IGNORECASE):
                 errors.append(("Contraction", c))
 
 
-        ########################################################################
+        #######################################################################
         # Check Wordcase
-        ########################################################################
+        #######################################################################
         for exp in lcc_data.wordcase:
             # we were getting lots of url matches with word boundary;
-            # check for space before and beginning of sentence 
+            # check for space before and beginning of sentence
             if re.search(r' {}\b'.format(exp), sent, re.IGNORECASE) and\
                (re.search(r'\b{}\b'.format(exp), sent, re.IGNORECASE).group() != exp):
                 errors.append(("WordCase", exp))
@@ -649,72 +749,64 @@ with app.app_context():
                (re.search(r'\b{}\b'.format(exp), sent, re.IGNORECASE).group() != exp):
                 errors.append(("WordCase", exp))
 
-            #FIXME, Ntu at the beginning of a sentence is not being picked up
-                
+            # FIXME, Ntu at the beginning of a sentence is not being picked up
 
-        ########################################################################
+        #######################################################################
         # Check Phrase Choice
-        ########################################################################
+        #######################################################################
         for exp in lcc_data.wordchoice:
             if re.search(r'\b{}\b'.format(exp), sent, re.IGNORECASE):
                 errors.append(("WordChoice", exp))
             if re.search(r'${}\b'.format(exp), sent, re.IGNORECASE):
                 errors.append(("WordChoice", exp))
 
-
-
-        ########################################################################
+        #######################################################################
         # Check Spelling
-        ########################################################################
+        #######################################################################
         for c in lcc_data.punctuation:
-            sent = sent.replace(c," ")
+            sent = sent.replace(c, " ")
 
         for word in sent.split():
             # ignore uppercased words or numerical (e.g. 130kg)
-            if (not word[0].isupper()) and (not word[0].isnumeric()): 
+            if (not word[0].isupper()) and (not word[0].isnumeric()):
                 misspelled = spell.unknown([word])
                 if misspelled:
                     suggestion = spell.correction(word)
                     errors.append(("Spelling", word+'|'+suggestion))
 
-                
-
-        ########################################################################
+        #######################################################################
         # WORD LEVEL CHECKS
-        ########################################################################
+        #######################################################################
         for wid in words.keys():
 
-            lemma = words[wid][2].lower()            
+            lemma = words[wid][2].lower()
             word_truecase = words[wid][0]
             word = words[wid][0].lower()
 
-            ####################################################################
-            # Check Repeated Words 
-            ####################################################################
+            ###################################################################
+            # Check Repeated Words
+            ###################################################################
             if (wid+1 in words) and (words[wid+1][0].lower() == word):
                 exp = word_truecase + ' ' + word_truecase
                 errors.append(("RepeatedWord", exp))
 
-            ####################################################################
+            ###################################################################
             # Check Word Style (e.g. Formal, Pronouns, etc.)
-            ####################################################################
+            ###################################################################
             for error_label in lcc_data.wordcheck:
                 if lemma in lcc_data.wordcheck[error_label]:
                     errors.append((error_label, word_truecase))
 
-                    
         return errors
-
-
 
     def full_check_sent(sent, words, feedback_set):
         """
-        Feedback set refers to which set of errors and error messages are 
-        being taken by the app. 'lcc' was the original error set and 
-        feedback messages. But 'callig' is another possible value; 
-        We're currently working on 'lcc2'; 
+        Feedback set refers to which set of errors and error messages are
+        being taken by the app. 'lcc' was the original error set and
+        feedback messages. But 'callig' is another possible value;
+        We're currently working on 'lcc2';
         """
-        
+
         nlp_errors = NLP_checks_sent(sent, words)
 
         LongSentenceSkip = False
@@ -722,7 +814,7 @@ with app.app_context():
             error_label = e[0]
             string_location = e[1]
 
-            if error_label in ["LongSentence","VeryLongSentence"]:
+            if error_label in ["LongSentence", "VeryLongSentence"]:
                 LongSentenceSkip = True
 
         if not LongSentenceSkip: # Don't parse long sentences

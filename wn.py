@@ -101,7 +101,7 @@ def x_rand_pos(x,pos):
                 if check_lemma(noun):
                     results.append((noun, definition, article))
 
-                
+
             elif rand < 0.5: # countable from list
                 all_with_article = game_data.occupations + game_data.freq_countable_noms
                 noun = random.choice(all_with_article)
@@ -110,7 +110,7 @@ def x_rand_pos(x,pos):
                 if noun.lower().startswith(('a','e','i','o','u')):
                     article = 'an'
                 else:
-                    article ='a'
+                    article = 'a'
 
                 if check_lemma(noun):
                     results.append((noun, definition, article))
@@ -123,15 +123,15 @@ def x_rand_pos(x,pos):
                 ss_def = ss.definition()
                 noun = random.choice(ss.lemma_names('eng'))
                 noun = noun.replace("_", " ")
-        
+
                 if noun.lower().startswith(('a','e','i','o','u')):
                     article = 'an'
                 else:
-                    article ='a'
+                    article = 'a'
 
                 if check_lemma(noun):
                     results.append((noun, ss_def, article))
-        
+
 
         else: # if it's not a noun
 
