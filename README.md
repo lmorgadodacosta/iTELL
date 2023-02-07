@@ -10,7 +10,7 @@ Includes:
 ### 
 
 I highly reccomend to create a Python environment using virtualenv to install such versions
-You must install all libraries in [`requriements.txt`](requirements.txt)
+You must install all libraries in [`requirements.txt`](requirements.txt)
 
 
 Make sure ACE and ART are on path to the WSGI.  Both binaries need to be in a place where WSGI can see it. In your own bin it will not work. I chose to put it in `/usr/bin/ace`  and it works fine.
